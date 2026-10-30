@@ -1672,7 +1672,7 @@ $('bResume').onclick=()=>setPause(false);$('bHow').onclick=()=>showTut(G.mode===
 $('bTutNext').onclick=()=>{if(!TUTON)return;if(TUTON.i<TUT[TUTON.key].length-1){TUTON.i++;renderTut()}else closeTut()};$('bTutSkip').onclick=()=>closeTut();
 // 운영용 코드: 맞으면 1000코인 (코드는 글자 그대로 넣지 않고 해시로만 비교해요)
 const fnv=t=>{let h=0x811c9dc5;for(const b of new TextEncoder().encode(t)){h^=b;h=Math.imul(h,0x01000193)>>>0}return h>>>0};
-function redeem(){const v=($('codeBox').value||'').trim().toUpperCase();if(!v){SFX.deny();return}if(fnv(v)===4160573093){SAVE.coins+=1000;saveGame();syncCoins();renderShop();SFX.win();$('codeBox').value='';$('shopSel').textContent='1000코인을 받았어요!';$('shopCode').hidden=true}else{SFX.deny();$('shopSel').textContent='맞지 않는 코드예요'}}
+function redeem(){const v=($('codeBox').value||'').trim().toUpperCase();if(!v){SFX.deny();return}if(fnv(v)===876029058){SAVE.coins+=1000;saveGame();syncCoins();renderShop();SFX.win();$('codeBox').value='';$('shopSel').textContent='1000코인을 받았어요!';$('shopCode').hidden=true}else{SFX.deny();$('shopSel').textContent='맞지 않는 코드예요'}}
 $('bCode').onclick=()=>{const c=$('shopCode');c.hidden=!c.hidden;if(!c.hidden)setTimeout(()=>$('codeBox').focus(),50)};$('bCodeGo').onclick=redeem;$('codeBox').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')redeem()});
 $('bShop').onclick=async()=>{await initAudio();openShop()};$('bShopX').onclick=()=>closeShop();$('bBuy').onclick=()=>shopBuy();
 for(const b of $('shopTabs').children)b.onclick=()=>{SHOPV.tab=b.dataset.t;SHOPV.sel=null;renderShop();shopStage();$('shopList').scrollTop=0};
