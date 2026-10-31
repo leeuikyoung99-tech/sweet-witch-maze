@@ -1,6 +1,6 @@
 /* 과자 마녀의 미로 — 한 번 받은 파일은 휴대폰에 저장해 두고 인터넷 없이도 열어요.
    게임 화면·아이콘·이름표는 인터넷에서 새것을 먼저 받아요 (업데이트가 바로 보이게). 큰 파일만 저장본을 먼저 써요. */
-const C='sweet-witch-v56';
+const C='sweet-witch-v57';
 const FILES=["apple-touch-icon.png", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "index.html", "manifest.webmanifest", "models/anim.glb", "models/b_barb.glb", "models/b_knight.glb", "models/b_mage.glb", "models/b_skel.glb", "models/hero.glb", "music/design.mp3", "music/game.mp3", "music/title.mp3", "vendor/GLTFLoader.js", "vendor/peerjs.min.js", "vendor/three.min.js"];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(C).then(c=>Promise.all(['./',...FILES].map(f=>c.add(new Request(f,{cache:'reload'})).catch(()=>{})))))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
