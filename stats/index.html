@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>마녀 미로 통계</title>
+<meta name="description" content="과자 마녀의 미로 패치별 승률 통계">
+<meta name="theme-color" content="#5a3220">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+/* 레이아웃: 폰 세로 화면 앱. 위 앱바 + 거르기, 가운데 스크롤, 아래 탭바 */
+:root{
+  --bg:#fbf4ec; --panel:#ffffff; --ink:#3b2418; --muted:#8a6f60; --line:#ecdccd;
+  --thief:#2f9e6e; --witch:#8a4fd8; --accent:#e8508a; --good:#2f9e6e; --bad:#d9433b; --track:#f1e4d7;
+  --bar:#5a3220; --barInk:#fff6ee;
+  --f-ui:"Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#1c1410; --panel:#271c16; --ink:#f6e9dd; --muted:#b39a8a; --line:#3a2a21;
+  --thief:#4cc28e; --witch:#b083ff; --accent:#ff7aa8; --good:#4cc28e; --bad:#ff6b62; --track:#3a2a21;
+  --bar:#120c09; --barInk:#f6e9dd; color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 var(--f-ui);-webkit-tap-highlight-color:transparent}
+button,select{font:inherit;color:inherit}
+.app{display:flex;flex-direction:column;min-height:100%}
+.top{position:sticky;top:0;z-index:5;background:var(--bar);color:var(--barInk);padding:calc(10px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));display:grid;gap:8px}
+.top h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+.top h1 small{font-weight:400;font-size:12px;opacity:.75;margin-left:auto}
+.icon-btn{border:0;background:#ffffff1f;color:var(--barInk);border-radius:10px;width:36px;height:36px;display:grid;place-items:center;cursor:pointer}
+.icon-btn:focus-visible,.seg button:focus-visible,.tab:focus-visible,.sortb:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.icon-btn svg{width:18px;height:18px}
+.icon-btn.spin svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.filters{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:center}
+.filters select{background:#ffffff1f;border:1px solid #ffffff33;color:var(--barInk);border-radius:10px;padding:6px 8px;min-width:0}
+.filters select option{color:#3b2418}
+.seg{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+.seg::-webkit-scrollbar{display:none}
+.seg button{border:1px solid #ffffff33;background:transparent;color:var(--barInk);border-radius:999px;padding:5px 11px;white-space:nowrap;cursor:pointer;font-size:13px}
+.seg button[aria-pressed="true"]{background:var(--barInk);color:var(--bar);border-color:var(--barInk)}
+main{flex:1;padding:14px max(16px,env(safe-area-inset-right,0px)) calc(86px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:grid;gap:14px;align-content:start;max-width:760px;width:100%;margin:0 auto}
+.take{margin:0;color:var(--muted);font-size:14px}
+.take b{color:var(--ink)}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:grid;gap:2px;min-width:0}
+.tile span{font-size:12px;color:var(--muted)}
+.tile b{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.tile.wide{grid-column:1/-1}
+.vs{display:grid;gap:6px}
+.vs .row{display:flex;justify-content:space-between;font-size:13px;font-variant-numeric:tabular-nums}
+.vs .row b{font-size:20px}
+.vs .t{color:var(--thief)} .vs .w{color:var(--witch)}
+.split{height:10px;border-radius:999px;background:var(--witch);overflow:hidden;position:relative}
+.split i{position:absolute;inset:0 auto 0 0;background:var(--thief);border-radius:999px 0 0 999px}
+.split .mid{position:absolute;left:50%;top:-3px;bottom:-3px;width:2px;background:var(--panel)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:grid;gap:8px;min-width:0}
+.card h2{margin:0;font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+.card h2 .sortb{margin-left:auto}
+.card p.note{margin:0;font-size:12px;color:var(--muted)}
+.sortb{border:1px solid var(--line);background:transparent;border-radius:999px;font-size:12px;padding:3px 10px;color:var(--muted);cursor:pointer}
+.list{display:grid}
+.item{display:grid;grid-template-columns:minmax(0,1fr) 112px;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.item:first-child{border-top:0}
+.item .nm{min-width:0}
+.item .nm b{font-weight:600;font-size:14px;display:block;overflow-wrap:anywhere}
+.item .nm small{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.item.few{opacity:.5}
+.chip{display:inline-block;font-size:11px;padding:0 6px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin-left:4px;font-weight:400;vertical-align:1px}
+.chip.s{color:#7c8aa8}.chip.g{color:#c08a10}.chip.p{color:#c0509a}
+.rate{display:grid;grid-template-columns:1fr 48px;gap:6px;align-items:center}
+.rate .track{height:8px;border-radius:999px;background:var(--track);position:relative;overflow:hidden}
+.rate .track i{position:absolute;inset:0 auto 0 0;border-radius:999px}
+.rate .track .mid{position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--panel)}
+.rate span{text-align:right;font-variant-numeric:tabular-nums;font-size:13px;font-weight:600}
+.empty{margin:0;padding:14px 0;text-align:center;color:var(--muted);font-size:13px}
+.bars{display:flex;align-items:flex-end;gap:3px;height:120px;padding-top:6px}
+.bars div{flex:1;min-width:3px;background:var(--accent);border-radius:4px 4px 0 0;position:relative}
+.bars-axis{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.subseg{display:flex;gap:6px;flex-wrap:wrap}
+.subseg button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:4px 11px;font-size:13px;cursor:pointer;color:var(--muted)}
+.subseg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--panel);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+.tab{border:0;background:transparent;display:grid;justify-items:center;gap:2px;padding:6px 0;font-size:12px;color:var(--muted);cursor:pointer}
+.tab svg{width:22px;height:22px}
+.tab[aria-selected="true"]{color:var(--accent);font-weight:700}
+.err{background:color-mix(in srgb,var(--bad) 12%,var(--panel));border:1px solid color-mix(in srgb,var(--bad) 40%,var(--line));color:var(--ink);border-radius:12px;padding:10px 12px;font-size:13px}
+.foot{font-size:12px;color:var(--muted);text-align:center}
+@media (min-width:640px){.tiles{grid-template-columns:repeat(4,minmax(0,1fr))}.tile.wide{grid-column:span 2}}
+@media (prefers-reduced-motion:reduce){.icon-btn.spin svg{animation:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <h1>마녀 미로 통계 <small id="upd">불러오는 중</small>
+      <button class="icon-btn" id="refresh" aria-label="새로 고침"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button>
+    </h1>
+    <div class="filters">
+      <select id="ver" aria-label="패치"><option value="">모든 패치</option></select>
+      <div class="seg" id="mode" role="group" aria-label="모드">
+        <button data-v="all" aria-pressed="true">전체</button>
+        <button data-v="human" aria-pressed="false">사람끼리</button>
+        <button data-v="rank" aria-pressed="false">랭크</button>
+        <button data-v="friend" aria-pressed="false">친구</button>
+        <button data-v="ai" aria-pressed="false">AI</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <p class="take" id="take">기록을 불러오는 중이에요</p>
+    <div id="error" class="err" hidden></div>
+
+    <section class="tiles" aria-label="요약">
+      <div class="tile wide vs">
+        <div class="row"><span class="t">도둑 <b id="tr">—</b></span><span class="w"><b id="wr">—</b> 마녀</span></div>
+        <div class="split" aria-hidden="true"><i id="split" style="width:50%"></i><span class="mid"></span></div>
+      </div>
+      <div class="tile"><span>판 수</span><b id="games">—</b></div>
+      <div class="tile"><span>평균 탈출 시간</span><b id="esc">—</b></div>
+      <div class="tile"><span>플레이어</span><b id="players">—</b></div>
+      <div class="tile"><span>3판 대결</span><b id="series">—</b></div>
+    </section>
+
+    <section data-page="thief">
+      <div class="card"><h2>도둑 스킬 <button class="sortb" data-list="tskill">판 수 순</button></h2><p class="note">스킬을 든 판에서 도둑이 탈출한 비율이에요.</p><div class="list" id="l-tskill"></div></div>
+      <div class="card" style="margin-top:12px"><h2>도둑 증강체 <button class="sortb" data-list="taug">판 수 순</button></h2><p class="note">증강체를 가진 판에서 도둑이 탈출한 비율이에요.</p><div class="list" id="l-taug"></div></div>
+    </section>
+    <section data-page="witch" hidden>
+      <div class="card"><h2>마녀 카드 <button class="sortb" data-list="wcard">판 수 순</button></h2><p class="note">덱에 넣은 판에서 마녀가 막아낸 비율이에요.</p><div class="list" id="l-wcard"></div></div>
+      <div class="card" style="margin-top:12px"><h2>마녀 증강체 <button class="sortb" data-list="waug">판 수 순</button></h2><p class="note">증강체를 가진 판에서 마녀가 막아낸 비율이에요.</p><div class="list" id="l-waug"></div></div>
+    </section>
+    <section data-page="combo" hidden>
+      <div class="card"><h2>두 개 조합</h2>
+        <div class="subseg" id="pairkind"><button data-v="tskill" aria-pressed="true">도둑 스킬</button><button data-v="taug" aria-pressed="false">도둑 증강체</button><button data-v="waug" aria-pressed="false">마녀 증강체</button></div>
+        <p class="note">같이 쓴 판이 많은 순서예요. 승률은 그 조합을 쓴 쪽 기준이고, 5판 미만은 흐리게 보여요.</p>
+        <div class="list" id="l-pairs"></div></div>
+    </section>
+    <section data-page="maps" hidden>
+      <div class="card"><h2>날짜별 판 수</h2><p class="note">최근 30일, 한국 시간</p><div class="bars" id="bars"></div><div class="bars-axis"><span id="d0"></span><span id="d1"></span></div></div>
+      <div class="card" style="margin-top:12px"><h2>맵</h2><p class="note">맵마다 도둑이 탈출한 비율이에요.</p><div class="list" id="l-map"></div></div>
+      <div class="card" style="margin-top:12px"><h2>증강체를 고른 판</h2><p class="note">1판에 고르면 3판 동안, 3판에 고르면 한 판만 써요.</p><div class="list" id="l-rounds"></div></div>
+    </section>
+    <p class="foot">판 수 20판 미만은 흐리게 보여요 · 개발자 모드 판은 빼요 · 온라인 판은 한 번만 세요</p>
+  </main>
+
+  <nav class="tabs" role="tablist" aria-label="보기">
+    <button class="tab" role="tab" data-tab="thief" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M8 7.5h8"/><path d="M5 21c1-4 4-6 7-6s6 2 7 6"/></svg>도둑</button>
+    <button class="tab" role="tab" data-tab="witch" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l4 9H8z"/><path d="M4 13h16"/><path d="M7 21c0-4 2-6 5-6s5 2 5 6"/></svg>마녀</button>
+    <button class="tab" role="tab" data-tab="combo" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="12" r="5"/><circle cx="16" cy="12" r="5"/></svg>조합</button>
+    <button class="tab" role="tab" data-tab="maps" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg>맵 · 판</button>
+  </nav>
+</div>
+
+<script>
+const API='https://djtbilcgsjuwwfulciwa.supabase.co/rest/v1/rpc/', KEY='sb_publishable_cpaRNZVgYSgCQIMl6-g5vw_hgtqz5c_';
+const $=id=>document.getElementById(id);
+const st={ver:'',mode:'all',tab:'thief',sort:{tskill:'games',taug:'games',wcard:'games',waug:'games'},pair:'tskill',data:null};
+try{const s=JSON.parse(localStorage.getItem('swstat_ui')||'{}');Object.assign(st,{ver:s.ver??'',mode:s.mode||'all',tab:s.tab||'thief',pair:s.pair||'tskill'})}catch(e){}
+const saveUi=()=>{try{localStorage.setItem('swstat_ui',JSON.stringify({ver:st.ver,mode:st.mode,tab:st.tab,pair:st.pair}))}catch(e){}};
+const nf=new Intl.NumberFormat('ko-KR');
+const pct=v=>v==null||isNaN(v)?'—':(+v).toFixed(1)+'%';
+const TIER={s:'실버',g:'골드',p:'프리즘'};
+async function rpc(fn,args){const r=await fetch(API+fn,{method:'POST',headers:{'Content-Type':'application/json',apikey:KEY},body:JSON.stringify(args||{})});if(!r.ok)throw new Error(fn+' '+r.status);return r.json()}
+
+function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e}
+function rateEl(rate,games,few){const w=el('div','rate'),t=el('div','track'),i=el('i'),m=el('span','mid');const r=Math.max(0,Math.min(100,+rate||0));i.style.width=r+'%';
+  i.style.background=games<few?'var(--muted)':(r>=55?'var(--good)':r<=45?'var(--bad)':'var(--accent)');t.append(i,m);w.append(t,el('span',null,pct(rate)));return w}
+function emptyEl(box,msg){box.replaceChildren(el('p','empty',msg))}
+function itemList(kind){const box=$('l-'+kind);if(!box)return;const d=st.data;if(!d){emptyEl(box,'불러오는 중이에요');return}
+  let rows=d.items.filter(r=>r.kind===kind);const key=st.sort[kind]||'games';rows=rows.slice().sort((a,b)=>(b[key]-a[key])||(b.games-a.games));
+  if(!rows.length){emptyEl(box,'아직 기록이 없어요');return}
+  box.replaceChildren(...rows.map(r=>{const it=el('div','item'+(r.games<20?' few':''));const nm=el('div','nm');const b=el('b',null,r.name);if(r.tier){const c=el('span','chip '+r.tier,TIER[r.tier]||r.tier);b.append(c)}
+    const sub=[nf.format(r.games)+'판','픽률 '+pct(r.pick_rate)];if(r.cost!=null)sub.unshift((kind==='wcard'?'소다 ':'사탕 ')+r.cost);nm.append(b,el('small',null,sub.join(' · ')));it.append(nm,rateEl(r.win_rate,r.games,20));return it}))}
+function pairList(){const box=$('l-pairs');const d=st.data;if(!d){emptyEl(box,'불러오는 중이에요');return}
+  const rows=d.pairs.filter(r=>r.kind===st.pair);if(!rows.length){emptyEl(box,'아직 기록이 없어요');return}
+  box.replaceChildren(...rows.map(r=>{const it=el('div','item'+(r.games<5?' few':''));const nm=el('div','nm');nm.append(el('b',null,r.a_name+' + '+r.b_name),el('small',null,nf.format(r.games)+'판'));it.append(nm,rateEl(r.win_rate,r.games,5));return it}))}
+function roundList(){const box=$('l-rounds');const d=st.data;if(!d){emptyEl(box,'불러오는 중이에요');return}
+  if(!d.rounds.length){emptyEl(box,'아직 기록이 없어요');return}
+  box.replaceChildren(...d.rounds.map(r=>{const it=el('div','item'+(r.games<20?' few':''));const nm=el('div','nm');const b=el('b',null,r.name);b.append(el('span','chip',r.side==='t'?'도둑':'마녀'));
+    nm.append(b,el('small',null,r.pick_round+'판에 고름 · '+nf.format(r.games)+'판'));it.append(nm,rateEl(r.win_rate,r.games,20));return it}))}
+function daily(){const box=$('bars');const d=st.data;box.replaceChildren();$('d0').textContent='';$('d1').textContent='';
+  if(!d||!d.daily.length){box.append(el('p','empty','최근 30일에 기록된 판이 없어요'));return}
+  const max=Math.max(...d.daily.map(r=>r.games),1);const md=s=>{const[,m,dd]=s.split('-');return(+m)+'월 '+(+dd)+'일'};
+  for(const r of d.daily){const b=el('div');b.style.height=Math.max(3,r.games/max*100)+'%';b.title=md(r.day)+' · '+nf.format(r.games)+'판 · 도둑 승률 '+pct(r.thief_rate);b.setAttribute('aria-label',b.title);box.append(b)}
+  $('d0').textContent=md(d.daily[0].day);$('d1').textContent=md(d.daily[d.daily.length-1].day)}
+const MODE={all:'전체 모드',human:'사람끼리 판',rank:'랭크 판',friend:'친구 판',ai:'AI 판'};
+function summary(){const d=st.data;const s=d&&d.summary[0];const scope=(st.ver?st.ver.replace('p','패치 '):'모든 패치')+' · '+MODE[st.mode];
+  if(!s){['tr','wr','games','esc','players','series'].forEach(i=>$(i).textContent='—');$('take').textContent=scope;return}
+  const n=s.games||0,tr=n?s.thief_rate:null;$('tr').textContent=n?pct(tr):'—';$('wr').textContent=n?pct(100-tr):'—';$('split').style.width=(n?tr:50)+'%';
+  $('games').textContent=nf.format(n);$('esc').textContent=s.avg_escape_secs!=null?(+s.avg_escape_secs).toFixed(1)+'초':'—';$('players').textContent=nf.format(s.players||0);$('series').textContent=nf.format(s.series||0);
+  if(!n){$('take').textContent=scope+' · 아직 기록된 판이 없어요. 판이 끝날 때마다 여기에 쌓여요.';return}
+  const lean=tr>=55?'도둑이 유리해요':tr<=45?'마녀가 유리해요':'도둑과 마녀가 비슷해요';
+  $('take').replaceChildren(document.createTextNode(scope+' · '),el('b',null,nf.format(n)+'판'),document.createTextNode(' 기준, '+lean+(n<100?' (아직 판이 적어요)':'')))}
+function drawAll(){summary();['tskill','taug','wcard','waug','map'].forEach(itemList);pairList();roundList();daily();
+  document.querySelectorAll('.sortb').forEach(b=>b.textContent=st.sort[b.dataset.list]==='win_rate'?'승률 순':'판 수 순')}
+
+let loading=false;
+async function load(){if(loading)return;loading=true;$('refresh').classList.add('spin');$('error').hidden=true;
+  const a={p_ver:st.ver,p_mode:st.mode};
+  try{const [patches,summary,items,pairs,rounds,daily]=await Promise.all([rpc('app_patches'),rpc('app_summary',a),rpc('app_items',a),rpc('app_pairs',a),rpc('app_aug_rounds',a),rpc('app_daily',a)]);
+    st.data={summary,items,pairs,rounds,daily};fillPatches(patches);
+    const t=new Date();$('upd').textContent=t.getHours()+':'+String(t.getMinutes()).padStart(2,'0')+' 기준';
+    try{localStorage.setItem('swstat_cache:'+st.ver+':'+st.mode,JSON.stringify({at:t.toISOString(),patches,data:st.data}))}catch(e){}}
+  catch(e){let c=null;try{c=JSON.parse(localStorage.getItem('swstat_cache:'+st.ver+':'+st.mode)||'null')}catch(_){}
+    if(c){st.data=c.data;fillPatches(c.patches);const t=new Date(c.at);$('upd').textContent=(t.getMonth()+1)+'/'+t.getDate()+' '+t.getHours()+':'+String(t.getMinutes()).padStart(2,'0')+' 저장본'}
+    else st.data=null;
+    $('error').textContent='인터넷에 연결할 수 없어서 새 기록을 못 가져왔어요.'+(c?' 마지막으로 받은 기록을 보여 줘요.':'')+' 연결되면 새로 고침을 눌러 주세요.';$('error').hidden=false}
+  loading=false;$('refresh').classList.remove('spin');drawAll()}
+function fillPatches(rows){const sel=$('ver');const cur=st.ver;sel.replaceChildren(new Option('모든 패치',''),...(rows||[]).map(r=>new Option(r.ver.replace('p','패치 ')+' · '+nf.format(r.games)+'판',r.ver)));
+  if(cur&&!(rows||[]).some(r=>r.ver===cur))sel.append(new Option(cur.replace('p','패치 '),cur));sel.value=cur}
+
+function showTab(name){st.tab=name;document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',String(t.dataset.tab===name)));document.querySelectorAll('[data-page]').forEach(p=>p.hidden=p.dataset.page!==name);saveUi();window.scrollTo({top:0})}
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>showTab(t.dataset.tab)));
+document.querySelectorAll('#mode button').forEach(b=>b.addEventListener('click',()=>{st.mode=b.dataset.v;document.querySelectorAll('#mode button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));saveUi();load()}));
+document.querySelectorAll('#pairkind button').forEach(b=>b.addEventListener('click',()=>{st.pair=b.dataset.v;document.querySelectorAll('#pairkind button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));saveUi();pairList()}));
+document.querySelectorAll('.sortb').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.list;st.sort[k]=st.sort[k]==='games'?'win_rate':'games';itemList(k);b.textContent=st.sort[k]==='win_rate'?'승률 순':'판 수 순'}));
+$('ver').addEventListener('change',e=>{st.ver=e.target.value;saveUi();load()});
+$('refresh').addEventListener('click',load);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)load()});
+document.querySelectorAll('#mode button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v===st.mode)));
+document.querySelectorAll('#pairkind button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v===st.pair)));
+showTab(st.tab);drawAll();load();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js',{scope:'./'}).catch(()=>{});
+</script>
+</body>
+</html>
