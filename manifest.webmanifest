@@ -1,0 +1,40 @@
+{
+ "name": "쿠쿠드",
+ "short_name": "쿠쿠드",
+ "description": "과자 세상의 두 크루, 쿠키 도둑단과 과자 마녀단! 미로를 짓고 탈출하는 마녀의 미로, 푸딩 절벽 위 전략 대결 달콤 공방전.",
+ "lang": "ko",
+ "id": "./",
+ "start_url": "./",
+ "scope": "./",
+ "display": "fullscreen",
+ "display_override": [
+  "fullscreen",
+  "standalone"
+ ],
+ "orientation": "landscape",
+ "background_color": "#ffd9e8",
+ "theme_color": "#ff5f9e",
+ "categories": [
+  "games"
+ ],
+ "icons": [
+  {
+   "src": "icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "icon-maskable-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ]
+}
