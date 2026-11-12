@@ -88,7 +88,7 @@ const FATE=[['사탕 +1',{mana:1}],['이동 속도 +8%',{sp:1.08}],['최대 체�
   // 마녀
   if(D&&!G.mirror){if(A.wn_piggy){const n=stk('wn_piggy');if(n){D.pt=Math.min(ptMax(),D.pt+n);SS()['wn_piggy']=0}}
     if(A.roul===1){D.pt=Math.min(ptMax(),D.pt+4);if(D.deck.length)D.hand.push(D.deck.shift());try{buildHand()}catch(e){}}if(A.roul===0)D.pt=Math.min(ptMax(),D.pt+2);
-    D.firstFree=!!A.wn_first;D.bankAcc=0;D.intT=0}
+    D.firstFree=A.wn_first?3:0;D.bankAcc=0;D.intT=0}
   skCostSync();
   // 알림
   setTimeout(()=>{if(!isPlaying())return;const msg=[];const meT=G.mode==='hero',meW=G.mode==='devil';
@@ -129,7 +129,7 @@ function skCostSync(){const A=G.aug||{};const morn=A.tn_morning&&isPlaying()&&G.
 {const ac9=applyCard;applyCard=function(k,x,z,extra){const D=G.devil,A=G.aug||{};const cost=CARDS[k]?CARDS[k].cost:0,pt0=D?D.pt:0,n0=G.ents.length;const r=ac9(k,x,z,extra);
   if(r==='ok'&&D&&!G.mirror){const paid=pt0-D.pt>0;
     if(A.wn_craft)stkAdd('wn_craft',1,40);
-    if(D.firstFree&&paid){D.firstFree=false;D.pt=Math.min(ptMax(),D.pt+cost);if(G.mode==='devil')say('첫 수: 공짜!',false,1)}
+    if(D.firstFree>0&&paid){D.firstFree--;D.pt=Math.min(ptMax(),D.pt+cost);if(G.mode==='devil')say('첫 수: 공짜!',false,1)}
     else if(A.wn_fate){const t=Math.random();if(t<.1&&paid){D.pt=Math.min(ptMax(),D.pt+cost);if(G.mode==='devil')say('운명의 카드: 공짜!',false,1)}
       else if(t<.35){const i=D.hand.indexOf(k);// 한 번 더: 몬스터·포탑은 하나 더, 그 밖의 카드는 손에 다시
         const e=G.ents[G.ents.length-1];if(G.ents.length>n0&&e&&(isMon(e)||e.type==='tower')){try{const ox=x+(Math.random()<.5?-1:1)*C*.6,oz=z;if(e.type==='tower')spawnTower(ox,oz,e.tk);else if(e.type==='skel')spawnSkel(ox,oz);else spawnMon(e.type,ox,oz)}catch(_){}}

@@ -283,7 +283,7 @@ function augHud(){const A=G.aug||{},h=G.hero,D=G.devil;const hb=$('augBtnH'),db=
   let H='';if(A.eatwall&&h.eats>0)H+=`<button data-a="eat">😋 벽 냠냠 ${h.eats}</button>`;if(A.sky&&!h.skyUsed)H+=`<button data-a="sky">☁️ 하늘 보기</button>`;
   if(A.pouch&&h.pouch>0)H+=`<span class="ab-i">👝 ${h.pouch}</span>`;
   if(hb.dataset.k!==H){hb.dataset.k=H;hb.innerHTML=H}hb.hidden=!H||G.mode!=='hero';
-  let W='';if(A.redraw&&!D.redrawUsed)W+=`<button data-a="redraw">🔄 새 패</button>`;if(A.morph&&!D.morphUsed)W+=`<button data-a="morph">🧙 출동</button>`;if(A.bank&&D.bank>0)W+=`<span class="ab-i">🐷 ${D.bank}</span>`;
+  let W='';if(A.fakeexit&&D.fcReady)W+=`<button data-a="fcandy">슈퍼 가짜 사탕</button>`;if(A.redraw&&!D.redrawUsed)W+=`<button data-a="redraw">🔄 새 패</button>`;if(A.morph&&!D.morphUsed)W+=`<button data-a="morph">🧙 출동</button>`;if(A.bank&&D.bank>0)W+=`<span class="ab-i">🐷 ${D.bank}</span>`;
   if(db.dataset.k!==W){db.dataset.k=W;db.innerHTML=W}db.hidden=!W||G.mode!=='devil'}
 for(const id of['augBtnH','augBtnD'])$(id).addEventListener('pointerdown',e=>{const b=e.target.closest('button');if(!b)return;e.preventDefault();e.stopPropagation();augAct(b.dataset.a)});
 function augAct(a){const h=G.hero,D=G.devil,A=G.aug||{};if(G.over)return;
