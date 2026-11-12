@@ -20,10 +20,11 @@ const LBG={main:{n:'마녀의 미로',d:'도둑 대 마녀 · 미로 탈출 대�
   mini:{n:'거대 마녀',d:'1인칭 미니게임 · 3분 한 판',roles:[['hero','쿠키 도둑','mint'],['devil','거대 마녀','grape']]}};
 const LBCTX={ai:'혼자 하기',rand:'아무나와 하기',friend:'친구랑 하기'};
 function lbEnsure(){if($('lbWrap'))return;const pane=$('role').querySelector('.uni-pane');const w=document.createElement('div');w.id='lbWrap';pane.appendChild(w);
-  const bk=document.createElement('button');bk.id='lbBack';bk.className='lb-back';bk.setAttribute('aria-label','게임 고르기로');bk.innerHTML=LBI.back;pane.querySelector('.pane-top').prepend(bk);
-  bk.onclick=()=>{SFX.click();LOBBY.view='games';lbDraw()};
-  w.addEventListener('click',e=>{const g=e.target.closest('[data-g]');if(g){if(g.classList.contains('off')){SFX.deny();tMsg('미니게임은 곧 온라인으로 열려요');return}SFX.card();LOBBY.game=g.dataset.g;LOBBY.view='set';LOBBY.role=lbDefRole();lbDraw();return}
-    const a=e.target.closest('.lb-arw');if(a){lbStep(+a.dataset.d);return}
+  // 메인 게임이 기본, 거대 마녀는 위쪽 작은 탭 (롤의 칼바람처럼 곁가지 모드)
+  const tb=document.createElement('div');tb.id='lbTabs';tb.className='lb-tabs';tb.innerHTML=`<button data-g="main" aria-label="마녀의 미로">${MGI_MAZE}<b>마녀의 미로</b></button><button data-g="mini" aria-label="거대 마녀 미니게임">${MGI_MON}<b>거대 마녀</b><em>미니</em></button>`;
+  const top=pane.querySelector('.pane-top');top.insertBefore(tb,top.querySelector('.uni-x')||null);
+  tb.addEventListener('click',e=>{const g=e.target.closest('[data-g]');if(!g||LOBBY.game===g.dataset.g)return;SFX.card();LOBBY.game=g.dataset.g;LOBBY.role=lbDefRole();lbDraw()});
+  w.addEventListener('click',e=>{const a=e.target.closest('.lb-arw');if(a){lbStep(+a.dataset.d);return}
     const r=e.target.closest('[data-r]');if(r){SFX.card();LOBBY.role=r.dataset.r;lbDraw();return}
     const l=e.target.closest('[data-l]');if(l){SAVE.ail=+l.dataset.l;AIL=SAVE.ail;saveGame();SFX.card();lbDraw();return}
     if(e.target.closest('#lbGo'))lbGo()});
@@ -37,13 +38,10 @@ function lbNote(){const c=ROLECTX,mini=LOBBY.game==='mini';
   if(c==='rand'){let t='';try{t=` · 도둑 ${rankTxtP(SAVE.rankT.p)} · 마녀 ${rankTxtP(SAVE.rankW.p)}`}catch(e){}return'고른 역할로 3판 · 맵은 두 사람이 고른 맵 중 무작위'+t}
   if(c==='friend')return'3판 · 판마다 증강체가 쌓여요 · 맵은 방장이 고른 맵 · 랭크는 바뀌지 않아요';
   return'3판 모두 이 맵에서 · 판마다 증강체가 쌓여요 (이기면 다음 판 2장)'}
-function lbDraw(){lbEnsure();const w=$('lbWrap'),R=$('role');R.classList.add('lb');R.classList.toggle('lb-s',LOBBY.view==='set');
-  const ctx=LBCTX[ROLECTX]||'혼자 하기',t=R.querySelector('.uni-t');
-  if(LOBBY.view==='games'){if(t)t.textContent=ctx;
-    const off=g=>g==='mini'&&ROLECTX!=='ai'&&!window.MGNET_OK;
-    w.innerHTML=`<div class="lb-games">${['main','mini'].map(g=>`<button class="lb-g ${g}${off(g)?' off':''}" data-g="${g}" aria-label="${LBG[g].n}"><i style="background-image:url(${LBIMG[g]})"></i><span><b>${LBG[g].n}</b><small>${LBG[g].d}</small></span>${off(g)?'<em>곧 열려요</em>':''}</button>`).join('')}</div>`;return}
+function lbDraw(){lbEnsure();const w=$('lbWrap'),R=$('role');R.classList.add('lb');R.classList.toggle('lb-mini',LOBBY.game==='mini');
+  const ctx=LBCTX[ROLECTX]||'혼자 하기',t=R.querySelector('.uni-t');for(const b of $('lbTabs').children)b.classList.toggle('on',b.dataset.g===LOBBY.game);
   // 설정 화면
-  if(t)t.textContent=LBG[LOBBY.game].n;const L=lbMapsAll();if(LOBBY.i>=L.length)LOBBY.i=0;const k=L[LOBBY.i],own=lbOwn(k),G=LBG[LOBBY.game];
+  if(t)t.textContent=ctx;const L=lbMapsAll();if(LOBBY.i>=L.length)LOBBY.i=0;const k=L[LOBBY.i],own=lbOwn(k),G=LBG[LOBBY.game];
   const art=r=>r==='hero'?MGI.thief:MGI.witch;
   const ail=SAVE.ail==null?1:SAVE.ail;
   w.innerHTML=`<div class="lb-set"><div class="lb-left"><div class="lb-map"><button class="lb-arw" data-d="-1" aria-label="이전 맵">${LBI.prev}</button>
@@ -65,9 +63,10 @@ function lbApplyMap(k){k=k||LOBBY.agreed||LOBBY.map||SAVE.lastMap;if(!k||!THEMES
 
 // 예전 역할 화면 대신 새 화면
 {const sr=showRole;showRole=function(){const r=sr.apply(this,arguments);try{lbDraw()}catch(e){console.warn(e)}return r}}
-{const ts=titleScreen;titleScreen=function(){LOBBY.view='games';LOBBY.map=null;LOBBY.agreed=null;return ts.apply(this,arguments)}}
+{const ts=titleScreen;titleScreen=function(){LOBBY.fresh=true;LOBBY.map=null;LOBBY.agreed=null;return ts.apply(this,arguments)}}
+LOBBY.fresh=true;
 // 고른 맵 시작 시 위치: 지난번 맵
-{const sr=showRole;showRole=function(){if(LOBBY.view==='games'){const L=lbMapsAll(),j=L.indexOf(SAVE.lastMap||SAVE.eq.theme);LOBBY.i=j<0?0:j}return sr.apply(this,arguments)}}
+{const sr=showRole;showRole=function(){if(LOBBY.fresh){LOBBY.fresh=false;LOBBY.game='main';LOBBY.role=lbDefRole();const L=lbMapsAll(),j=L.indexOf(SAVE.lastMap||SAVE.eq.theme);LOBBY.i=j<0?0:j}return sr.apply(this,arguments)}}
 // 메인 게임: 판마다 맵 고르기 대신 여기서 고른 맵으로
 {const mp=mapPick;mapPick=function(go,who){const S=curSer();const k=NET.on?(LOBBY.agreed||null):LOBBY.map;if(S&&S.on&&!S.map&&k&&THEMES[k])S.map=k;return mp.apply(this,arguments)}}
 // 온라인: 들어온 사람이 고른 맵을 'ready' 에 실어 보내고, 방장이 'start' 에 정한 맵을 실어요
@@ -89,7 +88,13 @@ function lbApplyMap(k){k=k||LOBBY.agreed||LOBBY.map||SAVE.lastMap;if(!k||!THEMES
 #lbWrap{flex:1;min-height:0;width:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;align-items:stretch;padding:4px 6px 6px}
 .lb-games,.lb-set{width:100%;box-sizing:border-box}
 .lb-back{display:none;width:40px;height:40px;flex:0 0 auto;border-radius:50%;border:2.5px solid var(--choco);background:#fff8ee;box-shadow:0 3px 0 var(--choco);padding:7px;margin-right:8px;cursor:pointer}.lb-back svg{width:100%;height:100%;display:block}
-#role.lb-s .lb-back{display:block}#role.lb .pane-top{display:flex;align-items:center}#role.lb .pane-top .uni-t{flex:1;min-width:0}
+#lbTabs{display:flex;gap:4px;margin:0 8px;flex:0 0 auto;background:#4a2a1a14;border-radius:14px;padding:3px}
+#lbTabs button{display:flex;align-items:center;gap:4px;padding:3px 9px 3px 5px;border-radius:11px;border:2px solid transparent;background:none;font-family:var(--f-display);color:#4a2a1a99;cursor:pointer;white-space:nowrap}
+#lbTabs button svg{width:20px;height:20px;flex:0 0 auto;opacity:.7}#lbTabs button b{font-size:13px}
+#lbTabs button em{font-style:normal;font-size:10px;background:#b98cff;color:#fff;border-radius:7px;padding:0 5px;margin-left:1px}
+#lbTabs button.on{background:#fff8ee;border-color:var(--choco);color:var(--choco);box-shadow:0 2px 0 var(--choco)}#lbTabs button.on svg{opacity:1}
+#role.lb-mini .uni-pane{background:linear-gradient(#f4ecff,#e9dcff)!important}#role.lb-mini #lbTabs button[data-g=mini].on{background:#d9c2ff}
+#role.lb-mini .lb-go{background:#9b6bff}#role.lb-mini .lb-pic{border-color:#5a2db0}#role.lb .pane-top{display:flex;align-items:center}#lbBack{display:none!important}#role.lb .pane-top .uni-t{flex:1;min-width:0}
 .lb-games{display:grid;grid-template-columns:1fr 1fr;gap:min(3vw,22px);height:100%;max-height:min(72vh,420px);align-items:stretch}
 .lb-g{position:relative;display:flex;flex-direction:column;min-height:0;padding:0;border-radius:20px;border:3px solid var(--choco);background:#fff8ee;box-shadow:0 5px 0 var(--choco);overflow:hidden;cursor:pointer;font-family:var(--f-display);color:var(--choco);text-align:left}
 .lb-g:active{transform:translateY(3px);box-shadow:0 2px 0 var(--choco)}
