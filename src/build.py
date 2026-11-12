@@ -1,5 +1,5 @@
 # 빌드: python3 src/build.py  →  저장소 맨 위 index.html, sw.js 를 새로 만들어요
-# src/app.txt = maze | rg | sn,  src/patch.txt = 패치 번호 (올릴 때마다 +1)
+# src/app.txt = maze,  src/patch.txt = 패치 번호 (올릴 때마다 +1)
 import os,sys,subprocess,re,json,base64
 H=os.path.dirname(os.path.abspath(__file__));R=os.path.dirname(H);os.chdir(H)
 APP=open('app.txt').read().strip();PATCH=open('patch.txt').read().strip()
@@ -8,8 +8,8 @@ from fontembed import embed
 s=open('mz/v28.html').read()
 open('mz/v28e.html','w').write(embed(s))   # 미리보기·테스트용 한 파일 (tests/probe4.js 가 씀)
 i=s.rfind('<script>');j=s.rfind('</script>');open('last.js','w').write(s[i+8:j]);subprocess.check_call(['node','--check','last.js']);print('SYNTAX_OK')
-NAME={'maze':'쿠쿠드','rg':'달콤 공방전','sn':'달콤 저격전'}[APP]
-PFX={'maze':'sweet-witch-v','rg':'sw-gongbang-v','sn':'sw-sniper-v'}[APP]
+assert APP=='maze',APP   # 공방전·저격전은 각자 저장소에서 빌드해요
+NAME='쿠쿠드';PFX='sweet-witch-v'
 vend='<script src="vendor/three.min.js"></script>\n<script src="vendor/GLTFLoader.js"></script>';assert vend in s
 b64=lambda f:base64.b64encode(open(os.path.join(R,f),'rb').read()).decode()
 LINKS='<link rel="apple-touch-icon" href="data:image/png;base64,'+b64('apple-touch-icon.png')+'">\n<link rel="icon" type="image/png" href="data:image/png;base64,'+b64('icon-192.png')+'">\n<meta name="theme-color" content="#ff5f9e">\n'

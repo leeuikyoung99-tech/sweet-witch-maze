@@ -9,7 +9,7 @@ function audioWake(){const first=!A.ctx;const p=initAudio();try{A.ctx&&A.ctx.sta
   if(A.ctx&&A.ctx.state==='running'&&!first)for(const ev of AW_EV)document.removeEventListener(ev,audioWake,true)}
 const AW_EV=['touchend','pointerup','click','keydown'];
 for(const ev of AW_EV)document.addEventListener(ev,audioWake,true);
-const menuScr=()=>!['play','design','pause','result','lobby','rg'].includes(screen)&&!(typeof RG!=='undefined'&&RG.on);
+const menuScr=()=>!['play','design','pause','result','lobby'].includes(screen);
 function audioMenuMusic(){if(menuScr()&&A.ctx&&A.buf&&A.buf.title&&!A.tracks.title&&!Object.keys(A.tracks).some(n=>n.startsWith('m_')))try{musicTitle()}catch(e){}}
 // 제목 음악을 다 받았을 때 메뉴 화면(스토리·상점·카드 등)에 있어도 바로 틀어요
 setInterval(audioMenuMusic,700);

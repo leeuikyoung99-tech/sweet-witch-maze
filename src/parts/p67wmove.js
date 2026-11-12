@@ -16,3 +16,6 @@ function wcAuto(w,q){const D=G.devil;if(!D||D.sel==null||D.hand[D.sel]!=='move'|
 $('wcLab').addEventListener('pointerdown',e=>{const s=e.target.closest&&e.target.closest('span[data-i]');if(!s)return;e.preventDefault();e.stopPropagation();const it=WC.list[+s.dataset.i];if(it&&it[2])wcAuto(it[0],it[2])});
 {const wu=wcUpdate;wcUpdate=function(){const r=wu.apply(this,arguments);try{const D=G.devil,dh=$('dhint');if(D&&D.sel!=null&&D.hand[D.sel]==='move'&&dh){const a=dh.textContent;if(a===tr('민트빛 벽을 밀 방향으로 쓸기')||a==='민트빛 벽을 밀 방향으로 쓸기')dh.textContent=tr('숫자를 누르면 그 벽이 알아서 움직여요')}}catch(e){}return r}}
 {const st=document.createElement('style');st.textContent='#wcLab span[data-i]{pointer-events:auto;cursor:pointer;padding:4px 8px;font-size:14px}#wcLab span.top{font-size:17px}#wcChB{display:none!important}';document.head.appendChild(st)}
+// 카드·스킬 화면: 고를 벽 스킬이 하나뿐이라 '벽 스킬 후보' 칸을 없애요
+{const rd=renderDeck;renderDeck=function(){const r=rd.apply(this,arguments);try{for(const g of document.querySelectorAll('#deckPool .wgrp46'))if(!g.querySelector('.dk'))g.remove();
+  const s=$('deckSel');if(s&&/벽 스킬 후보/.test(s.textContent))s.textContent='카드를 누르면 설명이 나와요'}catch(e){}return r}}

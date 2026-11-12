@@ -116,14 +116,7 @@ R("(c.fake||h.mana<HERO.manaMax)","(c.fake||h.mana<HERO.manaMax||(G.aug&&G.aug.t
 R("gingerNear(c.x,c.z)}else{h.mana++;h.manaGot++;","gingerNear(c.x,c.z)}else{h.mana=Math.min(HERO.manaMax,h.mana+1);h.manaGot++;")
 R("분홍 선이 정답 길","굵은 선이 정답 길",2)
 exec(open('patch29.py').read())
-APP=os.environ.get('APP','all')
-RGP=['p49rg.js','p61rg.js','p63rgt.js','p64rgai.js','p65rgbal.js']
-SKIP={'maze':RGP+['p68sn.js'],'rg':['p68sn.js'],'sn':RGP}.get(APP,[])
-JS=''.join(open('parts/'+f).read()+'\n' for f in ['p28a.js','p28b.js','p28c.js','p28d.js','p28e.js','p28f.js','p28g.js','p29a.js','p29b.js','p29c.js','p29d.js','p29e.js','p29f.js','p29g.js','p29h.js','p29i.js','p29k_img.js','p29j.js','p30a.js','p30b.js','p30c.js','p30d.js','p30e.js','p30f.js','p30g.js','p30h.js','p30i.js','p30j.js','p30k.js','p30l.js','p30m.js','p30n.js','p30o.js','p30p.js','p30r.js','p30s.js','p30t.js','p30u.js','p30v.js','p30w.js','p30x.js','p30y.js','p30z.js','p31a.js','p31b.js','p31c.js','p31d.js','p32a.js','p32b.js','p32c.js','p32d.js','p32e.js','p32f.js','p33a.js','p33b.js','p33c.js','p34a.js','p34b.js','p34c.js','p35a.js','p36a.js','p37a.js','p38a.js','p39a.js','p40a.js','p41a.js','p42a.js','p43a.js','p44a.js','p45a.js','p46a.js','p47a.js','p48a.js','p49pic.js','p49rg.js','p50a.js','p51fix.js','p52icons.js','p53pass.js','p54note.js','p55rw.js','p56look.js','p57tuaug.js','p58soda.js','p59nick.js','p60augseen.js','p61rg.js','p62.js','p63rgt.js','p64rgai.js','p65rgbal.js','p66wcch.js','p68sn.js'] if os.path.exists('parts/'+f) and f not in SKIP)
-if 'p49rg.js' in SKIP:
-  for a in ['{const rr=rgResult;','{const tp=rgTap;']:
-    assert JS.count(a)==1,a;JS=JS.replace(a,"if(typeof RG!=='undefined')"+a)
-if APP in('rg','sn'):JS+=open('parts/app_'+APP+'.js').read()+'\n'
+JS=''.join(open('parts/'+f).read()+'\n' for f in ['p28a.js','p28b.js','p28c.js','p28d.js','p28e.js','p28f.js','p28g.js','p29a.js','p29b.js','p29c.js','p29d.js','p29e.js','p29f.js','p29g.js','p29h.js','p29i.js','p29k_img.js','p29j.js','p30a.js','p30b.js','p30c.js','p30d.js','p30e.js','p30f.js','p30g.js','p30h.js','p30i.js','p30j.js','p30k.js','p30l.js','p30m.js','p30n.js','p30o.js','p30p.js','p30r.js','p30s.js','p30t.js','p30u.js','p30v.js','p30w.js','p30x.js','p30y.js','p30z.js','p31a.js','p31b.js','p31c.js','p31d.js','p32a.js','p32b.js','p32c.js','p32d.js','p32e.js','p32f.js','p33a.js','p33b.js','p33c.js','p34a.js','p34b.js','p34c.js','p35a.js','p36a.js','p37a.js','p38a.js','p39a.js','p40a.js','p41a.js','p42a.js','p43a.js','p44a.js','p45a.js','p46a.js','p47a.js','p48a.js','p50a.js','p51fix.js','p52icons.js','p53pass.js','p54note.js','p55rw.js','p56look.js','p57tuaug.js','p58soda.js','p59nick.js','p60augseen.js','p62.js','p66wcch.js','p67wmove.js','p69nosub.js'])
 JS=JS.replace("ver:'__PATCH__'","ver:'p"+open('patch.txt').read().strip()+"'")
 R("/* 전체화면 */","\n"+JS+"\n/* 전체화면 */")
 R("const w=wallPick(e.clientX,e.clientY);if(w){SWIPE={w,x:e.clientX,y:e.clientY};markWall(w,true);tapStart=null;return}}","let w=wallPick(e.clientX,e.clientY);if(w&&!wallShifts(w).length)w=null;w=w||movPick(e.clientX,e.clientY);if(w){SWIPE={w,x:e.clientX,y:e.clientY};markWall(w,true);tapStart=null;return}tapStart=null;return}")
@@ -158,11 +151,4 @@ R("시작 15초가 지나면 부를 수 있어요","시작 5초가 지나면 부
 s=s.replace('메인 게임','마녀의 미로').replace('"Main game','"Witch’s Maze').replace('main game','Witch’s Maze')
 # 게임 제목: 쿠쿠드 (Cookood)
 s=s.replace('과자 마녀의 <em>미로</em>','쿠쿠드').replace('SWEET WITCH MAZE','COOKOOD').replace('과자 마녀의 미로','쿠쿠드').replace('Sweet Witch Maze','Cookood')
-if APP in ('rg','sn'):
-  NM={'rg':('달콤 공방전','Sweet Siege'),'sn':('달콤 저격전','Sweet Sniper')}[APP]
-  if APP=='rg':
-    assert '미로 랭크 · 공방전 랭크' in s;s=s.replace('"미로 랭크 · 공방전 랭크":"Maze rank · Siege rank",','').replace('미로 랭크 · 공방전 랭크','공방전 랭크').replace('<b>증강체</b>','<b>달콤 비법</b>')
-  s=s.replace('쿠쿠드',NM[0]).replace('Cookood',NM[1]).replace('COOKOOD',NM[1].upper())
-  for k in ["'swm-save'","'swm_stats_q'"]:
-    assert k in s,k;s=s.replace(k,k[:-1]+'-'+APP+"'")
 open('mz/v28.html','w').write(s);print('ok',len(s))

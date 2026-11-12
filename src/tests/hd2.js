@@ -1,1 +1,0 @@
-(async()=>{const w=ms=>new Promise(r=>setTimeout(r,ms));snStart({ail:1});await w(2600);document.querySelectorAll('#ntBox .nt').forEach(n=>n.remove());$('snMsg').classList.remove('show');if(1){SN.t=.01;await w(2500);SN.scope=1;snSync();await w(300);$('snMsg').classList.remove('show')}await w(300);return 1})()
