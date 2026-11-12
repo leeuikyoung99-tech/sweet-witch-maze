@@ -259,7 +259,7 @@ function mgBtnDown(e,b){const a=b.dataset.a;e.preventDefault();e.stopPropagation
   MGDR.a=a;MGDR.id=e.pointerId;MGDR.b=b;MGDR.x0=MGDR.cx=e.clientX;MGDR.y0=MGDR.cy=e.clientY;MGDR.moved=false;MGDR.cancel=false;b.classList.add('prs');try{b.setPointerCapture(e.pointerId)}catch(_){}}
 function mgBtnMove(e){const d=MGDR;if(!d.a||e.pointerId!==d.id)return;d.cx=e.clientX;d.cy=e.clientY;const L=Math.hypot(d.cx-d.x0,d.cy-d.y0);
   if(!d.moved&&L>14){d.moved=true;mgPrevMake();$('mgHud').classList.add('aiming')}
-  if(d.moved){const r=d.b.getBoundingClientRect();d.cancel=d.cx>r.left-6&&d.cx<r.right+6&&d.cy>r.top-6&&d.cy<r.bottom+6;d.b.classList.toggle('cx',d.cancel);mgPrevSync()}}
+  if(d.moved){d.cancel=false;d.b.classList.remove('cx');mgPrevSync()}/* 취소는 오직 X 버튼 위에서만 */}
 function mgBtnUp(e){const d=MGDR;if(!d.a||(e&&e.pointerId!==d.id))return;const a=d.a,b=d.b;b.classList.remove('prs','cx');$('mgHud').classList.remove('aiming');
   if(d.moved&&!d.cancel&&MG.on&&!MG.over&&!MG.pause){mgPrevSync();mgActAim(a,d.P)}else if(!d.moved)mgAct(a);
   d.a=null;mgPrevDrop()}
