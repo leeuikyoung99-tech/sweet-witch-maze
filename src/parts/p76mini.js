@@ -236,7 +236,7 @@ function mgAim(){const mo=MG.mo;const fx=-Math.sin(mo.yaw),fz=-Math.cos(mo.yaw);
   let d=sp<-.03?MGP.eyeMo/(-sp)*cp:40;return{x:mo.x+fx*d,z:mo.z+fz*d,d}}
 function mgClampPt(p,max){const mo=MG.mo;const dx=p.x-mo.x,dz=p.z-mo.z,L=Math.hypot(dx,dz);if(max&&L>max){p.x=mo.x+dx/L*max;p.z=mo.z+dz/L*max}const W=MGW();p.x=clamp(p.x,1.5,W-1.5);p.z=clamp(p.z,1.5,W-1.5);return p}
 function mgScatter(p,r,n){const out=[{x:p.x,z:p.z}];for(let i=1;i<n;i++){const a=i/(n-1)*Math.PI*2+Math.random()*.6,rr=r*(.45+Math.random()*.55);const q={x:p.x+Math.cos(a)*rr,z:p.z+Math.sin(a)*rr};mgClampPt(q,0);out.push(q)}return out}
-function mgCast(k,aim){const mo=MG.mo,S=MGWS[k];if(!S||mo.cd[k]>0||mo.lockT>0||mo.jump||mo.charge||mo.eatT>0||MG.over)return false;
+function mgCast(k,aim){const mo=MG.mo,S=MGWS[k];if(!S||mo.cd[k]>0||MG.over)return false; // 쿨타임만 아니면 언제든 (점프·돌진·먹는 중에도)
   let f=Math.atan2(-Math.cos(mo.yaw),-Math.sin(mo.yaw));let P=aim?{x:aim.x,z:aim.z}:mgAim();if(aim&&aim.drag&&(k==='bat'||k==='bear'))f=Math.atan2(P.z-mo.z,P.x-mo.x);const ux=Math.cos(f),uz=Math.sin(f);mgClampPt(P,S.range||40);
   mo.cd[k]=S.cd;mo.lockT=.45;mo.m.atkT=.6;MG.stat.atk[k]=(MG.stat.atk[k]||0)+1;
   if(typeof MGCAST!=='undefined'&&MGCAST[k]){MGCAST[k]({P,f,ux,uz,mo,S,aim});return true}

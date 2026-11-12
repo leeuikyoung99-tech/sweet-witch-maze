@@ -144,7 +144,9 @@ mgBtnLayout=function(){const box=$('mgBtns');if(!box||!MG.on)return;const big=bo
   const W=innerWidth,H=innerHeight;const Bs=Math.round(Math.max(70,Math.min(98,H*.25))),s=Math.round(Bs*.76),pad=Math.round(Math.max(8,Math.min(14,H*.03)));let sr=0;try{sr=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sar'))||0}catch(e){}
   const cx=W-Math.max(pad,sr)-Bs/2,cy=H-pad-Bs/2;const put=(b,x,y,z)=>{b.style.position='fixed';b.style.left=(x-z/2)+'px';b.style.top=(y-z/2)+'px';b.style.width=b.style.height=z+'px';b.style.margin='0'};
   put(big,cx,cy,Bs);const R=Bs/2+s/2+Math.round(Bs*.09);const ang=sk.length<=1?[205]:sk.length===2?[180,232]:[180,228,276];
-  sk.forEach((b,i)=>{const a=ang[i]*Math.PI/180;put(b,cx+R*Math.cos(a),cy+R*Math.sin(a),s)})};
+  sk.forEach((b,i)=>{const a=ang[i]*Math.PI/180;put(b,cx+R*Math.cos(a),cy+R*Math.sin(a),s)});
+  // 취소 칸: 스킬 바로 바깥(왼쪽 위)에 동그랗게, 끄는 동안만 보여요
+  const c=$('mgCancel');if(c){const z=Math.round(s*.8),r=R+s*.92+6,a=225*Math.PI/180;c.style.left=(cx+r*Math.cos(a)-z/2)+'px';c.style.top=(cy+r*Math.sin(a)-z/2)+'px';c.style.width=c.style.height=z+'px'}};
 {const st=document.createElement('style');st.textContent=`
 #mgHud .mg-btns.arc .mg-ab{border:3px solid var(--choco)!important;border-radius:50%!important;padding:0!important;display:grid;place-items:center;color:#fff;
   background:linear-gradient(color-mix(in srgb,var(--c) 55%,#fff),var(--c))!important;box-shadow:0 4px 0 var(--choco),inset 0 -5px 0 #0002,inset 0 4px 0 #fff7!important}
@@ -177,3 +179,7 @@ function mgGuardTick(dt){const c=MG.cand,mo=MG.mo;if(!c){MG.guard=0;return}const
   if(on){MG.guard=0;const g=$('mgGuard');if(g)g.classList.remove('on')}return r}}
 {const st=document.createElement('style');st.textContent=`#mgGuard{display:none;align-items:center;gap:4px;background:#4a2a1ad0;border-radius:10px;padding:2px 8px 2px 4px}#mgGuard.on{display:flex}#mgHud.guard .mg-msg{top:100px}
 #mgGuard span{width:18px;height:18px;display:block}#mgGuard span svg{width:100%;height:100%}#mgGuard b{display:block;width:64px;height:7px;border-radius:4px;background:#ffffff40;overflow:hidden}#mgGuard i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffd23a,#ff5f5f)}`;document.head.appendChild(st)}
+{const st=document.createElement('style');st.textContent=`
+#mgHud #mgCancel{transform:none!important;flex-direction:column;justify-content:center;gap:0;padding:0;border-radius:50%;background:#fff8ee;box-shadow:0 3px 0 var(--choco);font-size:11px;line-height:1}
+#mgHud #mgCancel i{width:52%;height:52%;border:0;background:none;padding:0}#mgHud #mgCancel i svg path:first-child{stroke:#ff5f5f}
+#mgHud #mgCancel.hot{background:#ff6b6b;color:#fff;transform:scale(1.15)!important}#mgHud #mgCancel.hot i svg path:first-child{stroke:#fff}`;document.head.appendChild(st)}
