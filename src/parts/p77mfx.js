@@ -154,7 +154,33 @@ function mgFlashW(){const f=$('mgFlash');if(!f)return;f.classList.add('w');f.sty
 {const hu=mgHurt;mgHurt=function(src,why,dmg){const r=hu.call(this,src,why,dmg);if(r){const th=MG.th;mgSpark(th.x,1.6,th.z,['#ffd23a','#ffffff','#ff5f8f'],14,{spd:6,size:.8,grav:4})}return r}}
 {const ec=mgEatCandy;mgEatCandy=function(){const c=MG.cand;if(c){mgBeam(c.x,c.z,'#ffd23a',1.2,10,.7);mgSpark(c.x,1.6,c.z,['#ffd23a','#ff5f9e','#7cc6ff','#ffffff'],24,{spd:7,up:3,grav:6})}const n0=MG.rise.length;const r=ec.apply(this,arguments);
     for(const q of MG.rise.slice(n0)){const p=q.m.position;mgPuffs(p.x,.4,p.z,['#e8c48a','#fff1dd'],4,{r:2,size:2.2,spd:2,rise:.6})}return r}}
-{const st=mgStomp;mgStomp=function(){const r=st.apply(this,arguments);if(r){const mo=MG.mo;if(!(mo.ghostT>0&&MG.role==='thief'))mgSpark(mo.x,1,mo.z,['#e8c48a','#ffffff'],6,{spd:3})}return r}}
+// ---------- 마녀 평타: 사탕 구슬 (원거리 · 느리고 약해요) ----------
+// 지팡이 끝에서 조준한 쪽으로 천천히 날아가요(초속 11m, 도둑 6.4m). 맞으면 하트 반 칸. 벽에 막히면 터져요. 대시 중엔 안 맞아요.
+MGI.stomp='<svg viewBox="0 0 24 24"><path d="M3 20 9.5 13.5" stroke="#fff8ee" stroke-width="3.2" stroke-linecap="round"/><path d="M3 20 9.5 13.5" stroke="#4a2a1a" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="1.6 1.6"/><circle cx="14.5" cy="9.5" r="5.6" fill="#ff5f9e" stroke="#4a2a1a" stroke-width="1.8"/><path d="M11.5 9.5a3 3 0 0 1 5.4-1.8" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><path d="M20.5 3.2l.5 1.3 1.3.5-1.3.5-.5 1.3-.5-1.3-1.3-.5 1.3-.5z" fill="#ffd23a" stroke="#4a2a1a" stroke-width=".7"/></svg>';
+MGS.shoot=(x,z)=>{const v=mgEar(x,z);mgOsc('triangle',1100,380,.28,.14*v);mgOsc('sine',520,260,.3,.1*v);mgNoise(.2,2400,900,1.2,.1*v,'bandpass')};
+MGS.pop=(x,z)=>{const v=mgEar(x,z);mgOsc('sine',420,90,.22,.22*v);mgNoise(.18,2600,400,.8,.2*v)};
+function mgOrbMesh(){const g=new THREE.Group();const b=new THREE.Mesh(new THREE.SphereGeometry(.8,16,12),new THREE.MeshLambertMaterial({color:'#ff5f9e',emissive:'#7a1040'}));g.add(b);
+  const r=new THREE.Mesh(new THREE.TorusGeometry(.83,.12,6,20),new THREE.MeshBasicMaterial({color:'#ffffff'}));g.add(r);
+  const gl=new THREE.Sprite(new THREE.SpriteMaterial({map:mgTex('glow'),color:'#ffb3d6',transparent:true,depthWrite:false,fog:false}));gl.scale.setScalar(3.4);g.add(gl);return g}
+mgStomp=function(aim){const mo=MG.mo;if(mo.cd.stomp>0||mo.lockT>0||mo.jump||mo.charge||mo.eatT>0||MG.over)return false;
+  const P=aim?{x:aim.x,z:aim.z}:mgAim();const fx=-Math.sin(mo.yaw),fz=-Math.cos(mo.yaw),H=MGP.moH/9.2;
+  const sx=mo.x+fx*1.4+Math.cos(mo.yaw)*1.3,sz=mo.z+fz*1.4-Math.sin(mo.yaw)*1.3,sy=6.3*H;
+  let dx=P.x-sx,dz=P.z-sz,L=Math.hypot(dx,dz);if(L<.5){dx=fx;dz=fz;L=1}
+  mo.cd.stomp=MGP.stomp.cd;mo.lockT=.3;mo.m.atkT=.6;MG.stat.atk.orb=(MG.stat.atk.orb||0)+1;
+  const m=mgOrbMesh();m.position.set(sx,sy,sz);MG.g.add(m);(MG.orbs||(MG.orbs=[])).push({x:sx,y:sy,z:sz,ux:dx/L,uz:dz/L,d:0,m,id:Math.random()});
+  MGS.shoot(sx,sz);if(!(mo.ghostT>0&&MG.role==='thief')){mgGlowAt(sx,sy,sz,'#ffb3d6',3.5,.3);mgSpark(sx,sy,sz,['#ff5f9e','#ffffff'],8,{spd:4,grav:2})}return true};
+function mgOrbBoom(o,hit){MGS.pop(o.x,o.z);mgGlowAt(o.x,o.y,o.z,'#ffb3d6',hit?5:3.5,.3);mgSpark(o.x,o.y,o.z,['#ff5f9e','#ffffff','#ffd23a'],hit?14:9,{spd:6,grav:8});mgPuffs(o.x,o.y,o.z,['#ffd6ea','#ffffff'],3,{r:.4,size:1.4,spd:2,op:.8});mgDrop(o.m);o.dead=1}
+function mgOrbTick(dt){if(!MG.orbs||!MG.orbs.length)return;const th=MG.th,W=MGW(),sp=MGP.stomp.spd;
+  for(const o of MG.orbs){if(o.dead)continue;const st=sp*dt;o.x+=o.ux*st;o.z+=o.uz*st;o.d+=st;
+    o.y=Math.max(1.1,o.y-Math.max(0,(o.y-1.1))*Math.min(1,dt*2.6)-dt*.6);o.m.position.set(o.x,o.y,o.z);o.m.children[1].rotation.x+=dt*9;o.m.children[1].rotation.y+=dt*6;
+    mgEmit('ob'+o.id,26,dt,()=>mgP('glow',Math.random()<.5?'#ff9ec7':'#ffffff',o.x+mgR(-.2,.2),o.y+mgR(-.2,.2),o.z+mgR(-.2,.2),{life:.35,s0:.9,s1:.15,op:.85}));
+    if(Math.hypot(th.x-o.x,th.z-o.z)<MGP.stomp.r+MGP.thR&&o.y<2.6&&!(th.dashT>0)){if(mgHurt(o,'orb',MGP.stomp.dmg)){mgOrbBoom(o,1);continue}}
+    if(MG.decoy&&Math.hypot(MG.decoy.x-o.x,MG.decoy.z-o.z)<MGP.stomp.r+MGP.thR){MG.decoy.t=0;mgOrbBoom(o,1);continue}
+    if(o.d>MGP.stomp.range||o.x<.5||o.z<.5||o.x>W-.5||o.z>W-.5||(o.y<WH&&mgPtInWall(o.x,o.z,.15)))mgOrbBoom(o,0)}
+  MG.orbs=MG.orbs.filter(o=>!o.dead)}
+// AI 도둑: 날아오는 구슬 길을 피해요
+{const dg=mgDangerAt;mgDangerAt=function(x,z){let d=dg(x,z);for(const o of MG.orbs||[])for(let t=0;t<=1.2;t+=.2){const ox=o.x+o.ux*MGP.stomp.spd*t,oz=o.z+o.uz*MGP.stomp.spd*t;if(Math.hypot(x-ox,z-oz)<MGP.stomp.r+1.1){d+=t<.5?3.5:2;break}}return d}}
+{const cl=mgClean;mgClean=function(){for(const o of MG.orbs||[])mgDrop(o.m);MG.orbs=[];return cl.apply(this,arguments)}}
 
 // ---------- 투명: 장식까지 통째로 ----------
 function mgFade(g,o){if(!g||g.userData.__fo===o)return;g.userData.__fo=o;g.traverse(c=>{const ms=c.material?(Array.isArray(c.material)?c.material:[c.material]):[];for(const mt of ms){
@@ -197,11 +223,11 @@ function mgViewToggle(){MG.view=MG.view===3?1:3;SAVE.mgView=MG.view;try{saveGame
 
 // ---------- 스킬 끌어서 조준 ----------
 // 끌 수 있는 스킬: 마녀는 거리 있는 스킬 + 박쥐·곰(방향), 도둑은 분신(방향)·껌·미끼(자리)·순간이동(방향)
-const MGAIM={w:{tower:'pt',ice:'pt',magnet:'pt',slip:'pt',rev:'pt',trap:'pt',skel:'pt',spider:'line',soldier:'line',bat:'dir',bear:'dir'},t:{decoy:'dir',gum:'pt',lure:'pt',tele:'dir',jump:'dir'}};
+const MGAIM={w:{stomp:'dir',tower:'pt',ice:'pt',magnet:'pt',slip:'pt',rev:'pt',trap:'pt',skel:'pt',spider:'line',soldier:'line',bat:'dir',bear:'dir'},t:{decoy:'dir',gum:'pt',lure:'pt',tele:'dir',jump:'dir'}};
 const MGAR={tower:5.5,ice:7.5,magnet:13,slip:6.5,rev:6.5,trap:6.5,skel:5.2,gum:2.6,lure:1.6};
 const MGDR={a:null};
 function mgAimKind(a){return MG.role==='thief'?MGAIM.t[a]:MGAIM.w[a]}
-function mgAimRange(a){if(MG.role==='thief')return a==='gum'?6:a==='lure'?12:a==='decoy'?8:18;const S=MGWS[a];return a==='bat'?26:a==='bear'?18:(S&&S.range)||20}
+function mgAimRange(a){if(MG.role==='thief')return a==='gum'?6:a==='lure'?12:a==='decoy'?8:18;if(a==='stomp')return MGP.stomp.range;const S=MGWS[a];return a==='bat'?26:a==='bear'?18:(S&&S.range)||20}
 function mgDragAim(){const d=MGDR,me=MG.role==='thief'?MG.th:MG.mo,R=Math.min(110,innerHeight*.28);let dx=d.cx-d.x0,dy=d.cy-d.y0;const L=Math.hypot(dx,dy);const f=Math.min(1,L/R);
   const fx=-Math.sin(me.yaw),fz=-Math.cos(me.yaw),rx=Math.cos(me.yaw),rz=-Math.sin(me.yaw);const ux=(fx*-dy+rx*dx)/(L||1),uz=(fz*-dy+rz*dx)/(L||1);
   const range=mgAimRange(d.a),kind=mgAimKind(d.a);const dist=kind==='dir'?range:Math.max(2,range*f);const W=MGW();
@@ -215,13 +241,13 @@ function mgPrevSync(){const d=MGDR;if(!d.a||!d.g)return;const P=mgDragAim();d.P=
   const r=MGAR[d.a]||2;const ang=Math.atan2(P.z-me.z,P.x-me.x),len=Math.hypot(P.x-me.x,P.z-me.z);
   if(kind==='pt'){u.ring.visible=u.fill.visible=true;u.ring.scale.set(r,r,1);u.fill.scale.set(r,r,1);u.ring.position.x=u.fill.position.x=P.x-me.x;u.ring.position.z=u.fill.position.z=P.z-me.z;u.dot.visible=false}
   else{u.ring.visible=u.fill.visible=false;u.dot.visible=true;u.dot.position.set(P.x-me.x,.18,P.z-me.z)}
-  const w=kind==='dir'&&MG.role==='mon'?(d.a==='bat'?5:4.6):kind==='line'?2.6:.5;u.bar.scale.set(len,w,1);u.bar.position.set((P.x-me.x)/2,.15,(P.z-me.z)/2);u.bar.rotation.set(-Math.PI/2,0,-ang);
+  const w=d.a==='stomp'?1.7:kind==='dir'&&MG.role==='mon'?(d.a==='bat'?5:4.6):kind==='line'?2.6:.5;u.bar.scale.set(len,w,1);u.bar.position.set((P.x-me.x)/2,.15,(P.z-me.z)/2);u.bar.rotation.set(-Math.PI/2,0,-ang);
   d.g.position.set(me.x,0,me.z)}
 function mgBtnDown(e,b){const a=b.dataset.a;e.preventDefault();e.stopPropagation();if(!MG.on||MG.over||MG.pause||MG.cdn>0)return;
-  const kind=a==='dash'||a==='stomp'?null:mgAimKind(a);
+  const kind=a==='dash'?null:mgAimKind(a);
   if(!kind){mgAct(a);b.classList.add('prs');setTimeout(()=>b.classList.remove('prs'),120);return}
   // 쿨타임 중이면 그냥 막혀요
-  const me=MG.role==='thief'?MG.th:MG.mo;if((me.cd[a]||0)>0){mgAct(a);return}
+  const me=MG.role==='thief'?MG.th:MG.mo;if((me.cd[a]||0)>0||me.lockT>0){mgAct(a);return}
   MGDR.a=a;MGDR.id=e.pointerId;MGDR.b=b;MGDR.x0=MGDR.cx=e.clientX;MGDR.y0=MGDR.cy=e.clientY;MGDR.moved=false;MGDR.cancel=false;b.classList.add('prs');try{b.setPointerCapture(e.pointerId)}catch(_){}}
 function mgBtnMove(e){const d=MGDR;if(!d.a||e.pointerId!==d.id)return;d.cx=e.clientX;d.cy=e.clientY;const L=Math.hypot(d.cx-d.x0,d.cy-d.y0);
   if(!d.moved&&L>14){d.moved=true;mgPrevMake();$('mgHud').classList.add('aiming')}
@@ -229,7 +255,7 @@ function mgBtnMove(e){const d=MGDR;if(!d.a||e.pointerId!==d.id)return;d.cx=e.cli
 function mgBtnUp(e){const d=MGDR;if(!d.a||(e&&e.pointerId!==d.id))return;const a=d.a,b=d.b;b.classList.remove('prs','cx');$('mgHud').classList.remove('aiming');
   if(d.moved&&!d.cancel&&MG.on&&!MG.over&&!MG.pause){mgPrevSync();mgActAim(a,d.P)}else if(!d.moved)mgAct(a);
   d.a=null;mgPrevDrop()}
-function mgActAim(a,P){if(!MG.on||MG.over||MG.pause||MG.cdn>0)return;if(MG.role==='thief')mgThSkill(a,P);else mgCast(a,{x:P.x,z:P.z,drag:1})}
+function mgActAim(a,P){if(!MG.on||MG.over||MG.pause||MG.cdn>0)return;if(MG.role==='thief')mgThSkill(a,P);else if(a==='stomp')mgStomp({x:P.x,z:P.z});else mgCast(a,{x:P.x,z:P.z,drag:1})}
 
 // ---------- 화면 붙이기 ----------
 {const hd=mgHud;mgHud=function(on){const first=!$('mgHud');hd.call(this,on);const h=$('mgHud');
@@ -250,7 +276,7 @@ function mgBtnPaint(){for(const b of document.querySelectorAll('#mgBtns [data-a]
   $('mgHud').classList.toggle('fast',MG.role==='mon'&&mo.fastT>0||MG.role==='thief'&&(th.sprintT>0||th.dashT>0));$('mgHud').classList.toggle('frost',MG.role==='mon'&&mo.freezeT>0);
   $('mgCross').hidden=MG.role!=='mon'||!!MGDR.a&&MGDR.moved}}
 // 상태 효과 + 모습은 매 프레임
-{const tk=mgTick;mgTick=function(dt){tk.apply(this,arguments);if(!MG.on||!MG.g)return;try{mgLooks();mgAuraTick(dt);if(MGDR.a&&MGDR.moved)mgPrevSync()}catch(e){console.warn(e)}}}
+{const tk=mgTick;mgTick=function(dt){tk.apply(this,arguments);if(!MG.on||!MG.g)return;try{if(!MG.pause&&!MG.over&&MG.cdn<=0)mgOrbTick(dt);mgLooks();mgAuraTick(dt);if(MGDR.a&&MGDR.moved)mgPrevSync()}catch(e){console.warn(e)}}}
 {const cl=mgClean;mgClean=function(){MGDR.a=null;MGDR.g=null;MG.spinG=null;MGFX.em={};return cl.apply(this,arguments)}}
 
 {const st=document.createElement('style');st.textContent=`
