@@ -1,0 +1,3 @@
+(async()=>{const w=ms=>new Promise(r=>setTimeout(r,ms));$('pgM').hidden=true;titleScreen();SAVE.rgHelp=1;rgStart({mode:'ai',me:1,ail:2});await w(1500);document.querySelectorAll('#rgOrd,#rgOrdM').forEach(e=>e.hidden=true);const errs=[];window.addEventListener('error',e=>errs.push(e.message));const log=[];
+for(let k=0;k<5;k++){if(RG.S.augWait===1){await rgAct({a:'aug',id:RG.S.offer[1][0]})}await rgAct({a:'end'});let g=0;while(RG.S.cur!==1&&g++<80)await w(250);log.push(RG.S.turn+':'+RG.S.units.filter(u=>u.owner===2).map(u=>u.type[0]+u.r+u.c).join(',')+' nx'+RG.S.nexus[1])}
+return JSON.stringify({log,errs,aug:RG.S.aug[2]})})()

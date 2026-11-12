@@ -1,0 +1,18 @@
+/* ================= 50차: 마녀의 미로 맵 고르기도 큰 사진 + < > 로 넘겨 보기 ================= */
+{const mp=mapPick;mapPick=function(go,who){const r=mp.apply(this,arguments);const M=$('mapM');if(!M||M.hidden)return r;const grid=M.querySelector('.map-grid');if(!grid)return r;
+  const bs=[...grid.querySelectorAll('.map-b')];if(!bs.length)return r;let i=Math.max(0,bs.findIndex(b=>b.dataset.k===(SAVE.lastMap||SAVE.eq.theme)));
+  grid.style.display='none';let car=M.querySelector('.mp-car');if(car)car.remove();car=document.createElement('div');car.className='mp-car';grid.after(car);
+  const arrow=d=>`<button class="rg-arw" data-d="${d}" aria-label="${d<0?'이전 맵':'다음 맵'}"><svg viewBox="0 0 24 24"><path d="${d<0?'M15 5 L8 12 L15 19':'M9 5 L16 12 L9 19'}" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`;
+  const draw=()=>{const b=bs[i],pic=b.querySelector('i'),nm=b.querySelector('b').textContent;grid.prepend(b);
+    car.innerHTML=`<div class="rg-car">${arrow(-1)}<div class="rg-pic mp-pic"><span>${nm}</span></div>${arrow(1)}</div><div class="rg-dots">${bs.map((_,k)=>`<i class="${k===i?'on':''}"></i>`).join('')}</div><button class="mbtn berry mp-go"><span class="mt"><b>이 맵으로 시작</b></span></button>`;
+    for(const a of car.querySelectorAll('.rg-arw'))a.onclick=e=>{e.stopPropagation();i=(i+(+a.dataset.d)+bs.length)%bs.length;try{SFX.card()}catch(_){}draw()};
+    {const pp=car.querySelector('.mp-pic');if(pic&&pic.style.backgroundImage)pp.style.backgroundImage=pic.style.backgroundImage;else if(pic)pp.style.background=getComputedStyle(pic).background}
+    car.querySelector('.mp-go').onclick=e=>{e.stopPropagation();SAVE.lastMap=bs[i].dataset.k;try{saveGame()}catch(_){}bs[i].click()};
+    car.querySelector('.mp-pic').onclick=()=>car.querySelector('.mp-go').click()};draw();
+  // 넘기는 손가락 밀기
+  let sx=null;car.addEventListener('pointerdown',e=>{sx=e.clientX},{passive:true});car.addEventListener('pointerup',e=>{if(sx==null)return;const dx=e.clientX-sx;sx=null;if(Math.abs(dx)>40){i=(i+(dx<0?1:-1)+bs.length)%bs.length;try{SFX.card()}catch(_){}draw()}});
+  clearInterval(mapPick.h);const ML=M.querySelector('#mapLeft');if(ML){const fx=()=>{const t=ML.textContent;if(t.includes('첫 번째 맵으로'))ML.textContent=t.replace('첫 번째 맵으로','보이는 맵으로')};fx();new MutationObserver(fx).observe(ML,{childList:true,characterData:true,subtree:true})}
+  return r}}
+{const L=null;if(L)new MutationObserver(()=>{const t=L.textContent;if(t.includes('첫 번째 맵으로')){const n=t.replace('첫 번째 맵으로','보이는 맵으로');if(n!==t)L.textContent=n}}).observe(L,{childList:true,characterData:true,subtree:true})}
+{const st=document.createElement('style');st.textContent=`.mp-car{display:flex;flex-direction:column;align-items:center;gap:6px;width:min(620px,86vw)}.mp-car .rg-car{width:100%}.mp-car .rg-pic{aspect-ratio:16/9;max-height:min(52vh,300px);cursor:pointer}.mp-car .mp-go{min-width:200px}.mp-car .mp-go{justify-content:center!important;padding-left:12px!important}.mp-car .mp-go .mt{align-items:center!important;width:100%;text-align:center}#role{overflow:hidden!important}#mapM #mapLeft{display:none!important}
+#aiLvl{margin-top:16px!important}`;document.head.appendChild(st)}
