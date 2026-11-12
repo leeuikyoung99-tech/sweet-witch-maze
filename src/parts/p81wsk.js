@@ -158,3 +158,6 @@ mgBtnLayout=function(){const box=$('mgBtns');if(!box||!MG.on)return;const big=bo
 #mgHud .mg-btns.arc .mg-ab .sec{font-size:clamp(16px,5vh,22px);align-items:start;padding-top:22%}
 #mgHud .mg-btns.arc .mg-ab.used{filter:grayscale(1);opacity:.6}`;document.head.appendChild(st)}
 try{const d=$('bDash')&&$('bDash').querySelector('svg');if(d)MGI.dash=d.outerHTML}catch(e){} // 대시 아이콘도 메인 게임과 같게
+// 스킬 고르기 아래 설명도 한 줄로 (넘치면 글자를 줄여요)
+{const sd=mgSelDraw;mgSelDraw=function(){sd.apply(this,arguments);const n=document.querySelector('#mgSel .mg-sel-bot p');if(!n)return;n.style.fontSize='';let f=parseFloat(getComputedStyle(n).fontSize)||13;for(let i=0;i<10&&n.scrollWidth>n.clientWidth+1&&f>9;i++){f-=.5;n.style.fontSize=f+'px'}}}
+{const st=document.createElement('style');st.textContent=`#mgSel .mg-sel-bot p{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:0;line-height:1.3}`;document.head.appendChild(st)}

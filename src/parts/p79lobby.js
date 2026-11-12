@@ -33,11 +33,13 @@ function lbEnsure(){if($('lbWrap'))return;const pane=$('role').querySelector('.u
   w.addEventListener('pointerup',e=>{if(sx==null)return;const dx=e.clientX-sx;sx=null;if(Math.abs(dx)>40)lbStep(dx<0?1:-1)})}
 function lbDefRole(){const k=LOBBY.game==='mini'?SAVE.lbMiniRole:SAVE.lbRole;return k==='hero'||k==='devil'?k:'hero'}
 function lbStep(d){const L=lbMapsAll();LOBBY.i=(LOBBY.i+d+L.length)%L.length;try{SFX.card()}catch(e){}lbDraw()}
-function lbNote(){const c=ROLECTX,mini=LOBBY.game==='mini';
-  if(mini)return c==='ai'?'3분 한 판 · 시작하면 스킬을 골라요 · 보상과 등급은 없어요':c==='rand'?'판돈·등급 없이 가볍게 · 맵은 두 사람이 고른 맵 중 무작위':'방을 만들어 친구에게 코드를 알려 줘요 · 맵은 방장이 고른 맵';
-  if(c==='rand'){let t='';try{t=` · 도둑 ${rankTxtP(SAVE.rankT.p)} · 마녀 ${rankTxtP(SAVE.rankW.p)}`}catch(e){}return'고른 역할로 3판 · 맵은 두 사람이 고른 맵 중 무작위'+t}
-  if(c==='friend')return'3판 · 판마다 증강체가 쌓여요 · 맵은 방장이 고른 맵 · 랭크는 바뀌지 않아요';
-  return'3판 모두 이 맵에서 · 판마다 증강체가 쌓여요 (이기면 다음 판 2장)'}
+function lbNote(){const c=ROLECTX,mini=LOBBY.game==='mini'; // 한 줄로 짧게
+  if(mini)return c==='ai'?'3분 한 판 · 시작하면 스킬 고르기':c==='rand'?'판돈·등급 없이 가볍게 한 판':'방장이 고른 맵 · 가볍게 한 판';
+  if(c==='rand')return'고른 역할로 3판 · 맵은 둘 중 무작위';
+  if(c==='friend')return'3판 · 방장이 고른 맵 · 랭크 없음';
+  return'3판 · 판마다 증강체가 쌓여요'}
+// 설명이 두 줄이 되지 않게 글자를 줄여 맞춰요
+function lbFitNote(){const n=document.querySelector('#lbWrap .lb-note');if(!n)return;n.style.fontSize='';let f=parseFloat(getComputedStyle(n).fontSize)||13;for(let i=0;i<8&&n.scrollWidth>n.clientWidth+1&&f>9;i++){f-=.5;n.style.fontSize=f+'px'}}
 function lbDraw(){lbEnsure();const w=$('lbWrap'),R=$('role');R.classList.add('lb');R.classList.toggle('lb-mini',LOBBY.game==='mini');
   const ctx=LBCTX[ROLECTX]||'혼자 하기',t=R.querySelector('.uni-t');for(const b of $('lbTabs').children)b.classList.toggle('on',b.dataset.g===LOBBY.game);
   // 설정 화면
@@ -50,7 +52,7 @@ function lbDraw(){lbEnsure();const w=$('lbWrap'),R=$('role');R.classList.add('lb
     <div class="lb-right"><div class="lb-roles">${G.roles.map(([r,n,c])=>`<button class="lb-r ${c}${LOBBY.role===r?' on':''}" data-r="${r}" aria-label="${n}"><span>${art(r)}</span><b>${n}</b></button>`).join('')}</div>
       ${ROLECTX==='ai'?`<div class="lb-ail"><i>${LBI.bot}</i>${AIL_N.map((n,j)=>`<button data-l="${j}" class="${j===ail?'on':''}">${n}</button>`).join('')}</div>`:''}
       <p class="lb-note">${lbNote()}</p>
-      <button class="lb-go${own?'':' off'}" id="lbGo" aria-label="시작">${LBI.play}<b>시작</b></button></div></div>`}
+      <button class="lb-go${own?'':' off'}" id="lbGo" aria-label="시작">${LBI.play}<b>시작</b></button></div></div>`;lbFitNote()}
 async function lbGo(){const L=lbMapsAll(),k=L[LOBBY.i];if(!lbOwn(k)){SFX.deny();tMsg('이 맵은 꾸미기에서 열 수 있어요');return}const r=LOBBY.role||'hero';
   LOBBY.map=k;SAVE.lastMap=k;if(LOBBY.game==='mini')SAVE.lbMiniRole=r;else SAVE.lbRole=r;saveGame();SFX.click();try{await initAudio()}catch(e){}
   if(LOBBY.game==='main'){SET.gmode='classic';return roleGo(r)}
@@ -119,7 +121,7 @@ LOBBY.fresh=true;
 .lb-r:not(.on) span{opacity:.75}
 .lb-ail{display:flex;align-items:center;gap:5px;justify-content:center}.lb-ail i{width:26px;height:26px;flex:0 0 auto}.lb-ail i svg{width:100%;height:100%}
 .lb-ail button{flex:1;min-width:0;padding:4px 2px;border-radius:12px;border:2.5px solid var(--choco);background:#fff8ee;font:clamp(12px,3.4vh,15px) var(--f-display);color:var(--choco);cursor:pointer}.lb-ail button.on{background:#ffd23a;box-shadow:0 3px 0 var(--choco)}
-.lb-note{margin:0;font-size:clamp(10px,2.9vh,13px);line-height:1.3;color:var(--choco);opacity:.85;text-align:center}
+.lb-note{margin:0;font-size:clamp(10px,2.9vh,13px);line-height:1.3;color:var(--choco);opacity:.85;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lb-go{display:flex;align-items:center;justify-content:center;gap:6px;height:clamp(42px,13vh,56px);border-radius:28px;border:3px solid var(--choco);background:#ff5f9e;box-shadow:0 4px 0 var(--choco);cursor:pointer;padding:0 16px}
 .lb-go svg{width:24px;height:24px}.lb-go b{font:clamp(18px,5.4vh,24px) var(--f-display);color:#fff;-webkit-text-stroke:4px var(--choco);paint-order:stroke;letter-spacing:2px}
 .lb-go:active{transform:translateY(3px);box-shadow:0 1px 0 var(--choco)}.lb-go.off{filter:grayscale(.85);opacity:.65}
