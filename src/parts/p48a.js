@@ -31,7 +31,7 @@ document.addEventListener('pointerup',e=>tswEnd(e,false),true);document.addEvent
 
 // ----- 마녀 프리즘 증강체: 황금 소다통 → 두 수 앞 보기 (판마다 한 번, 벽 스킬 두 번의 최적 자리) -----
 {const i=AUGW2.findIndex(q=>q[0]==='w_goldsoda');if(i>=0)AUGW2.splice(i,1)}
-{const q=['w_plan2','p','두 수 앞 보기','판마다 한 번 벽 스킬을 고르면|두 번 쓸 최적 자리를 알려줘요','target'];AUGW2.push(q);AUGI2[q[0]]={id:q[0],side:'w',tier:q[1],n:q[2],d:q[3],ic:q[4],need:null,minR:0}}
+{const q=['w_plan2','p','두 수 앞 보기','판마다 한 번 벽 밀기를 고르면|두 번 쓸 최적 자리를 알려줘요','target'];AUGW2.push(q);AUGI2[q[0]]={id:q[0],side:'w',tier:q[1],n:q[2],d:q[3],ic:q[4],need:null,minR:0}}
 const PLAN2={on:false,used:false,steps:[],i:0,gain:[],tot:0,mt:-1};
 function p2Cands(kind,ex){const out=[];const h=G.hero,[hx,hz]=cellOf(h.x,h.z);
   if(kind==='move'){for(const w of B.walls){if(w.temp||w.anim||ex.includes(w))continue;for(const q of wallShifts(w))out.push({k:'move',w,o:w.o,x:q.x,z:q.z})}}

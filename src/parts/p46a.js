@@ -17,8 +17,8 @@ function myWall(){const k=SAVE.wallCard;return WALLC.includes(k)&&wallOpen(k)?k:
   return d.map(k=>k==='move'?wc:k).filter(k=>!WALLC.includes(k)||k===wc)}}
 // 증강체 조건: 내 벽 스킬도 덱에 든 걸로 봐요
 {const ac=augCtx;augCtx=function(side,S){const r=ac.apply(this,arguments);const w=side==='w'?myWall():(NET.on?(WALLC.includes(NET.peerWall)?NET.peerWall:'move'):'move');if(r&&Array.isArray(r.deck)&&!r.deck.includes(w))r.deck=r.deck.concat(w);return r}}
-{const a=AUGI2.w_wall2;if(a)a.need=['move','turn'];const b=AUGI2.w_blockbonus;if(b)b.d='벽 스킬로 길이 5칸 이상 늘면|소다 +2'}
-{const q=AUGW2.findIndex(x=>x[0]==='w_blockbonus');if(q>=0)AUGW2[q][3]='벽 스킬로 길이 5칸 이상 늘면|소다 +2'}
+{const a=AUGI2.w_wall2;if(a)a.need=['move','turn'];const b=AUGI2.w_blockbonus;if(b)b.d='벽 밀기로 길이 5칸 이상 늘면|소다 +2'}
+{const q=AUGW2.findIndex(x=>x[0]==='w_blockbonus');if(q>=0)AUGW2[q][3]='벽 밀기로 길이 5칸 이상 늘면|소다 +2'}
 {const i=AUGW2.findIndex(q=>q[0]==='w_quake');if(i>=0)AUGW2.splice(i,1)}
 // 온라인: 내 벽 스킬을 상대에게 알려요
 {const ns=netSend;netSend=function(m){if(m&&(m.t==='walls'||m.t==='prof'))m.wc=myWall();return ns.apply(this,arguments)}}
@@ -95,14 +95,14 @@ function wallTap46(k){if(!wallOpen(k)){const pr=typeof unlPrice==='function'?unl
     const b=$('deckSel').querySelector('.dk-buy');b.onclick=()=>{if(SAVE.coins<pr){SFX.deny();return}SAVE.coins-=pr;SAVE.unl['c:'+k]=1;SAVE.wallCard=k;saveGame();try{syncCoins()}catch(e){}SFX.win();renderDeck();$('deckSel').innerHTML=`<b class="dk-new">열렸어요!</b> <b>${CARDS[k].n}</b> · 벽 스킬로 골랐어요`};SFX.card();return}
   SAVE.wallCard=k;saveGame();SFX.card();DECKV.pick=null;renderDeck();$('deckSel').innerHTML=`<b>${CARDS[k].n}</b> · ${CARD_DESC[k]||''} · 벽 스킬은 하나만 골라 써요`}
 {const rd=renderDeck;renderDeck=function(){const r=rd.apply(this,arguments);const W=DECKV.tab==='witch';const top=$('deckTop'),pool=$('deckPool');if(!top||!pool||!W)return r;
-  const fx=top.querySelector('.dk.fixed');if(fx)fx.remove();$('deckN').textContent='카드 5장 + 벽 스킬 1개';const cur=myWall();
+  const fx=top.querySelector('.dk.fixed');if(fx)fx.remove();$('deckN').textContent='카드 5장 + 고정 스킬 1개';const cur=myWall();
   const tile=(k,cls)=>dkTile(k,true,'wall46').replace('class="dk ','class="dk '+cls+' ');
-  top.insertAdjacentHTML('afterbegin',`<div class="wuse46"><span class="wtag46">벽 스킬</span>${tile(cur,'wtop46')}</div>`);
+  top.insertAdjacentHTML('afterbegin',`<div class="wuse46"><span class="wtag46">고정 스킬</span>${tile(cur,'wtop46')}</div>`);
   const cand=WALLC.filter(k=>k!==cur);
   pool.insertAdjacentHTML('afterbegin',`<div class="wgrp46"><b>벽 스킬<br>후보</b>${cand.map(k=>{let h=tile(k,'wcand46'+(wallOpen(k)?'':' locked'));if(!wallOpen(k)){let w='';try{w=unlockWhere('c',k).replace('스토리 ','')}catch(e){}if(!w)try{w=unlPrice('c',k)+'코인'}catch(e){}h=h.replace('</button>',`<span class="lk"><small>${w}</small></span></button>`)}return h}).join('')}</div>`);
   const s=$('deckSel');if(s&&/벽 밀기는 2장씩/.test(s.textContent))s.innerHTML='카드를 누르면 설명이 나와요 · 벽 스킬 후보를 누르면 바로 바뀌어요';
   return r}}
-{const dtp=deckTap;deckTap=function(a,k){if(a==='wall46'){if(k===myWall()){SFX.card();DECKV.pick=null;renderDeck();$('deckSel').innerHTML=`<b>${CARDS[k].n}</b> · ${CARD_DESC[k]||''} · 지금 쓰는 벽 스킬이에요`;return}wallTap46(k);return}return dtp.apply(this,arguments)}}
+{const dtp=deckTap;deckTap=function(a,k){if(a==='wall46'){if(k===myWall()){SFX.card();DECKV.pick=null;renderDeck();$('deckSel').innerHTML=`<b>${CARDS[k].n}</b> · ${CARD_DESC[k]||''} · 고정 스킬이에요 · 늘 덱에 들어가요`;return}wallTap46(k);return}return dtp.apply(this,arguments)}}
 {const st=document.createElement('style');st.textContent=`
 #deckTop .wuse46{display:flex;flex-direction:column;align-items:center;gap:2px;margin-right:4px}
 #deckS #deckTop{align-items:flex-end}
