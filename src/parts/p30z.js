@@ -121,7 +121,7 @@ setInterval(()=>{if(screen!=='play'||G.over)wcUpdate()},300);
 function junction(cx,cz){let n=0;for(const[dx,dz]of DIRS){const nx=cx+dx,nz=cz+dz;if(nx<0||nz<0||nx>=N||nz>=N)continue;if(canStep(cx,cz,dx,dz)&&MASK[idx(nx,nz)])n++}return n>=3}
 function markCell(x,z){if(x<0||z<0||x>=N||z>=N)return;const i=idx(x,z);G.seen[i]=1;G.memE[i]=x<N-1?(B.E[i]?1:0):1;G.memS[i]=z<N-1?(B.S[i]?1:0):1}
 {const uh=updHero;updHero=function(dt){const h=G.hero;const dash0=h?h.dashT:0;const r=uh.apply(this,arguments);if(!h||G.over||h.remote||h.isRival)return r;const A=AG();
-  if(A.t_iframe&&dash0>0&&!(h.dashT>0))h.inv=Math.max(h.inv||0,.4);
+  if(A.t_iframe&&dash0>0&&!(h.dashT>0))h.inv=Math.max(h.inv||0,.8);
   if(A.t_shield){if(!(h.jshield>0)){h.__shT=(h.__shT||0)+dt;if(h.__shT>=20){h.__shT=0;h.jshield=10;if(G.mode==='hero')say('젤리 보호막이 생겼어요',false,1)}}}
   if(A.t_breath&&G.t-(h.__lastHit??-99)>5&&h.hp>0)h.hp=Math.min(h.hpMax||100,h.hp+2*dt);
   if(A.t_five){const k=Math.floor((h.manaGot||0)/5);if(k>(h.__five||0)){h.__five=k;h.__free=true}}
