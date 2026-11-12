@@ -183,3 +183,21 @@ function mgGuardTick(dt){const c=MG.cand,mo=MG.mo;if(!c){MG.guard=0;return}const
 #mgHud #mgCancel{transform:none!important;flex-direction:column;justify-content:center;gap:0;padding:0;border-radius:50%;background:#fff8ee;box-shadow:0 3px 0 var(--choco);font-size:11px;line-height:1}
 #mgHud #mgCancel i{width:52%;height:52%;border:0;background:none;padding:0}#mgHud #mgCancel i svg path:first-child{stroke:#ff5f5f}
 #mgHud #mgCancel.hot{background:#ff6b6b;color:#fff;transform:scale(1.15)!important}#mgHud #mgCancel.hot i svg path:first-child{stroke:#fff}`;document.head.appendChild(st)}
+// ---------- 메인 게임에서 남은 것 치우기 ----------
+// 메인 게임의 연기 조각(G.fx)은 메인 화면에서만 움직여서, 미니게임에선 흰 덩어리로 멈춰 보였어요. 정답 길 선(G.pathLines)도 남아 있었어요.
+function mgWallCrumb(w){const x=w.x*C,z=w.z*C;mgSpark(x,1.6,z,['#e0a060','#c97a3a','#fff1dd'],14,{spd:7,grav:12,size:.8,tex:'glow'});mgSpark(x,2.4,z,['#ffd6a0','#e8c48a'],8,{spd:5,grav:10,size:.5})}
+{const hw=mgHideWorld;mgHideWorld=function(on){if(on){try{for(const k of['pathLines','fx','projs','sigils','marks','candies'])for(const o of(G[k]||[]))drop(o.g||o.m||o);for(const k of['pathLines','fx','projs','sigils','marks'])G[k]=[]}catch(e){console.warn(e)}}return hw.apply(this,arguments)}}
+// ---------- 취소는 평타(큰 버튼) 위로: 조준은 위·왼쪽으로 끌어서 큰 버튼 쪽으로는 지나가지 않아요 ----------
+// 끄는 동안 큰 버튼이 빨간 X '취소'로 바뀌고, 그 위에서 놓으면 안 써요. 따로 떠 있는 취소 동그라미는 없앴어요.
+{const mv=mgBtnMove;mgBtnMove=function(e){mv.apply(this,arguments);const d=MGDR;if(!d.a||!d.moved)return;const big=document.querySelector('#mgBtns .mg-ab.big');if(!big)return;const r=big.getBoundingClientRect();
+  const inC=e.clientX>r.left-6&&e.clientX<r.right+6&&e.clientY>r.top-6&&e.clientY<r.bottom+6;big.classList.toggle('hot',inC);if(inC&&!d.cancel){d.cancel=true;d.b.classList.add('cx');mgPrevSync()}}}
+{const up=mgBtnUp;mgBtnUp=function(e){const r=up.apply(this,arguments);const big=document.querySelector('#mgBtns .mg-ab.big');if(big)big.classList.remove('hot');return r}}
+{const bp=mgBtnPaint;mgBtnPaint=function(){bp.apply(this,arguments);const big=document.querySelector('#mgBtns .mg-ab.big');if(big&&!big.querySelector('.cxo')){const o=document.createElement('span');o.className='cxo';o.innerHTML=`${MGI_CX}<b>취소</b>`;big.appendChild(o)}}}
+{const st=document.createElement('style');st.textContent=`
+#mgHud #mgCancel{display:none!important}
+#mgHud .mg-ab.big .cxo{position:absolute;inset:-3px;border-radius:50%;display:none;flex-direction:column;align-items:center;justify-content:center;background:#fff8ee;border:3px solid var(--choco);z-index:4;font:14px var(--f-display);color:var(--choco);pointer-events:none}
+#mgHud .mg-ab.big .cxo svg{width:44%;height:44%}#mgHud .mg-ab.big .cxo svg path:first-child{stroke:#ff5f5f}
+#mgHud.aiming .mg-ab.big{opacity:1!important;filter:none!important}#mgHud.aiming .mg-ab.big .cxo{display:flex}
+#mgHud .mg-ab.big.hot .cxo{background:#ff6b6b;color:#fff;transform:scale(1.1)}#mgHud .mg-ab.big.hot .cxo svg path:first-child{stroke:#fff}`;document.head.appendChild(st)}
+// 마녀 미니맵은 마녀가 처음 바라보는 쪽(도둑 출발점 쪽)이 위로 오게 뒤집어요 (돌아가진 않아요)
+{const st=document.createElement('style');st.textContent=`#mgHud.witch #mgMap{transform:rotate(180deg)}`;document.head.appendChild(st)}

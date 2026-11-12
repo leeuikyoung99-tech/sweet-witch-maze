@@ -85,7 +85,7 @@ function mgAddWalls(n){const th=MG.th,mo=MG.mo;const[tx,tz]=cellOf(th.x,th.z);le
   syncWallMeshes();for(const w of fresh){const m=WORLD.wallMeshes.get(w);if(m){const y=m.position.y;m.position.y=y-8;MG.rise.push({m,y,t:0})}}
   B.ver=(B.ver||0)+1;return added}
 function mgSmash(o,r){let hit=false;for(const w of B.walls.slice()){if(mgSegDist(o.x,o.z,w)<r+WT/2){B.walls.splice(B.walls.indexOf(w),1);hit=true;
-    try{burstFx(w.o==='H'?w.x*C:w.x*C,w.z*C,'smoke')}catch(e){}}}
+    try{mgWallCrumb(w)}catch(e){}}}
   if(hit){rebuildEdges();syncWallMeshes();B.ver=(B.ver||0)+1;try{SFX.crunch()}catch(e){}MG.shake=Math.max(MG.shake||0,.25)}return hit}
 // ---------- 캐릭터 ----------
 function mgThiefModel(){const m=makeChar('hero',1.85,heroLook());try{play(m,'Idle')}catch(e){}return m}

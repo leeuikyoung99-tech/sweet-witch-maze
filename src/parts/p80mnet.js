@@ -50,7 +50,7 @@ function mgNetRx(d){if(!MG.on||!MG.net||!MG.g){if(d.k==='again'){MGN.again.peer=
     MG.got=d.got;if(d.exit&&!MG.exitOpen)mgOpenExit();else mgMsg(`도둑이 사탕을 먹었어요 (${MG.got}/${MGP.candies}) · 벽이 솟았어요`,1.6);if(d.c)mgNetCand(d.c[0],d.c[1]);break}
   case 'wadd':{const fresh=[];for(const[o,x,z]of d.w){if(B.walls.some(w=>w.x===x&&w.z===z&&w.o===o))continue;const w={o,x,z};B.walls.push(w);fresh.push(w)}
     rebuildEdges();syncWallMeshes();B.ver=(B.ver||0)+1;for(const w of fresh){const m=WORLD.wallMeshes.get(w);if(m){const y=m.position.y;m.position.y=y-8;MG.rise.push({m,y,t:0})}}if(fresh.length)MGS.rise();break}
-  case 'wdel':{let hit=false;for(const[o,x,z]of d.w){const i=B.walls.findIndex(w=>w.x===x&&w.z===z&&w.o===o);if(i<0)continue;B.walls.splice(i,1);hit=true;try{burstFx(x*C,z*C,'smoke')}catch(e){}}
+  case 'wdel':{let hit=false;for(const[o,x,z]of d.w){const i=B.walls.findIndex(w=>w.x===x&&w.z===z&&w.o===o);if(i<0)continue;B.walls.splice(i,1);hit=true;try{mgWallCrumb({o,x,z})}catch(e){}}
     if(hit){rebuildEdges();syncWallMeshes();B.ver=(B.ver||0)+1;try{SFX.crunch()}catch(e){}MG.shake=Math.max(MG.shake||0,.25)}break}
   case 'ioff':{const ks=new Set(d.ks);for(const it of MG.items)if(ks.has(it.key))it.t=0;break}
   case 'hurt':th.hp=d.hp;th.inv=MGP.inv;MGS.hurt();mgSpark(th.x,1.6,th.z,['#ffd23a','#ffffff','#ff5f8f'],14,{spd:6,size:.8,grav:4});mgMsg(d.why==='orb'?'사탕 구슬이 맞았어요!':'맞혔어요!',1);
