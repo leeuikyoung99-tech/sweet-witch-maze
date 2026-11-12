@@ -144,9 +144,7 @@ mgBtnLayout=function(){const box=$('mgBtns');if(!box||!MG.on)return;const big=bo
   const W=innerWidth,H=innerHeight;const Bs=Math.round(Math.max(70,Math.min(98,H*.25))),s=Math.round(Bs*.76),pad=Math.round(Math.max(8,Math.min(14,H*.03)));let sr=0;try{sr=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sar'))||0}catch(e){}
   const cx=W-Math.max(pad,sr)-Bs/2,cy=H-pad-Bs/2;const put=(b,x,y,z)=>{b.style.position='fixed';b.style.left=(x-z/2)+'px';b.style.top=(y-z/2)+'px';b.style.width=b.style.height=z+'px';b.style.margin='0'};
   put(big,cx,cy,Bs);const R=Bs/2+s/2+Math.round(Bs*.09);const ang=sk.length<=1?[205]:sk.length===2?[180,232]:[180,228,276];
-  sk.forEach((b,i)=>{const a=ang[i]*Math.PI/180;put(b,cx+R*Math.cos(a),cy+R*Math.sin(a),s)});
-  // 취소 칸: 스킬 바로 바깥(왼쪽 위)에 동그랗게, 끄는 동안만 보여요
-  const c=$('mgCancel');if(c){const z=Math.round(s*.8),r=R+s*.92+6,a=225*Math.PI/180;c.style.left=(cx+r*Math.cos(a)-z/2)+'px';c.style.top=(cy+r*Math.sin(a)-z/2)+'px';c.style.width=c.style.height=z+'px'}};
+  sk.forEach((b,i)=>{const a=ang[i]*Math.PI/180;put(b,cx+R*Math.cos(a),cy+R*Math.sin(a),s)});};
 {const st=document.createElement('style');st.textContent=`
 #mgHud .mg-btns.arc .mg-ab{border:3px solid var(--choco)!important;border-radius:50%!important;padding:0!important;display:grid;place-items:center;color:#fff;
   background:linear-gradient(color-mix(in srgb,var(--c) 55%,#fff),var(--c))!important;box-shadow:0 4px 0 var(--choco),inset 0 -5px 0 #0002,inset 0 4px 0 #fff7!important}
@@ -187,17 +185,17 @@ function mgGuardTick(dt){const c=MG.cand,mo=MG.mo;if(!c){MG.guard=0;return}const
 // 메인 게임의 연기 조각(G.fx)은 메인 화면에서만 움직여서, 미니게임에선 흰 덩어리로 멈춰 보였어요. 정답 길 선(G.pathLines)도 남아 있었어요.
 function mgWallCrumb(w){const x=w.x*C,z=w.z*C;mgSpark(x,1.6,z,['#e0a060','#c97a3a','#fff1dd'],14,{spd:7,grav:12,size:.8,tex:'glow'});mgSpark(x,2.4,z,['#ffd6a0','#e8c48a'],8,{spd:5,grav:10,size:.5})}
 {const hw=mgHideWorld;mgHideWorld=function(on){if(on){try{for(const k of['pathLines','fx','projs','sigils','marks','candies'])for(const o of(G[k]||[]))drop(o.g||o.m||o);for(const k of['pathLines','fx','projs','sigils','marks'])G[k]=[]}catch(e){console.warn(e)}}return hw.apply(this,arguments)}}
-// ---------- 취소는 평타(큰 버튼) 위로: 조준은 위·왼쪽으로 끌어서 큰 버튼 쪽으로는 지나가지 않아요 ----------
-// 끄는 동안 큰 버튼이 빨간 X '취소'로 바뀌고, 그 위에서 놓으면 안 써요. 따로 떠 있는 취소 동그라미는 없앴어요.
-{const mv=mgBtnMove;mgBtnMove=function(e){mv.apply(this,arguments);const d=MGDR;if(!d.a||!d.moved)return;const big=document.querySelector('#mgBtns .mg-ab.big');if(!big)return;const r=big.getBoundingClientRect();
-  const inC=e.clientX>r.left-6&&e.clientX<r.right+6&&e.clientY>r.top-6&&e.clientY<r.bottom+6;big.classList.toggle('hot',inC);if(inC&&!d.cancel){d.cancel=true;d.b.classList.add('cx');mgPrevSync()}}}
-{const up=mgBtnUp;mgBtnUp=function(e){const r=up.apply(this,arguments);const big=document.querySelector('#mgBtns .mg-ab.big');if(big)big.classList.remove('hot');return r}}
-{const bp=mgBtnPaint;mgBtnPaint=function(){bp.apply(this,arguments);const big=document.querySelector('#mgBtns .mg-ab.big');if(big&&!big.querySelector('.cxo')){const o=document.createElement('span');o.className='cxo';o.innerHTML=`${MGI_CX}<b>취소</b>`;big.appendChild(o)}}}
+// ---------- 취소: 와일드 리프트처럼 스킬 묶음 오른쪽 위의 X 버튼 ----------
+// 스킬을 끄는 동안만 떠요. X 쪽으로 끌어서 놓으면 안 써요. 미니맵과 겹치는 화면에선 끄는 동안 미니맵을 잠깐 숨겨요.
+function mgCancelPlace(){const c=$('mgCancel'),box=$('mgBtns');if(!c||!box)return;const bs=[...box.querySelectorAll('.mg-ab')];if(!bs.length)return;
+  const big=box.querySelector('.mg-ab.big');const br=big.getBoundingClientRect();let top=1e9;for(const b of bs){const r=b.getBoundingClientRect();top=Math.min(top,r.top)}
+  const z=Math.round(br.width*.6),x=br.right-z/2-2,y=top-12-z/2;c.style.left=(x-z/2)+'px';c.style.top=Math.max(8,y-z/2)+'px';c.style.width=c.style.height=z+'px';
+  const m=document.querySelector('#mgHud .mg-map');if(m){const mr=m.getBoundingClientRect();$('mgHud').classList.toggle('cxmap',y-z/2<mr.bottom+4)}}
+{const mv=mgBtnMove;mgBtnMove=function(e){const d=MGDR;const was=d.moved;mv.apply(this,arguments);if(d.a&&d.moved&&!was)mgCancelPlace()}}
 {const st=document.createElement('style');st.textContent=`
-#mgHud #mgCancel{display:none!important}
-#mgHud .mg-ab.big .cxo{position:absolute;inset:-3px;border-radius:50%;display:none;flex-direction:column;align-items:center;justify-content:center;background:#fff8ee;border:3px solid var(--choco);z-index:4;font:14px var(--f-display);color:var(--choco);pointer-events:none}
-#mgHud .mg-ab.big .cxo svg{width:44%;height:44%}#mgHud .mg-ab.big .cxo svg path:first-child{stroke:#ff5f5f}
-#mgHud.aiming .mg-ab.big{opacity:1!important;filter:none!important}#mgHud.aiming .mg-ab.big .cxo{display:flex}
-#mgHud .mg-ab.big.hot .cxo{background:#ff6b6b;color:#fff;transform:scale(1.1)}#mgHud .mg-ab.big.hot .cxo svg path:first-child{stroke:#fff}`;document.head.appendChild(st)}
+#mgHud #mgCancel{transform:none!important;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:0;border-radius:50%;background:#3a1d10cc;border:3px solid #ff5f5f;box-shadow:0 0 0 3px #ff5f5f55;color:#fff;font-size:0}
+#mgHud #mgCancel b,#mgHud #mgCancel{font-size:0}#mgHud #mgCancel i{width:56%;height:56%;border:0;background:none;padding:0}#mgHud #mgCancel i svg path:first-child{stroke:#ff5f5f}#mgHud #mgCancel i svg path:last-child{stroke:#ff5f5f}
+#mgHud #mgCancel.hot{background:#ff5f5f;transform:scale(1.15)!important}#mgHud #mgCancel.hot i svg path{stroke:#fff}
+#mgHud.aiming.cxmap .mg-map{visibility:hidden}`;document.head.appendChild(st)}
 // 마녀 미니맵은 마녀가 처음 바라보는 쪽(도둑 출발점 쪽)이 위로 오게 뒤집어요 (돌아가진 않아요)
 {const st=document.createElement('style');st.textContent=`#mgHud.witch #mgMap{transform:rotate(180deg)}`;document.head.appendChild(st)}
