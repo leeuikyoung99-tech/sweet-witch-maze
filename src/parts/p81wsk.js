@@ -161,3 +161,19 @@ try{const d=$('bDash')&&$('bDash').querySelector('svg');if(d)MGI.dash=d.outerHTM
 // 스킬 고르기 아래 설명도 한 줄로 (넘치면 글자를 줄여요)
 {const sd=mgSelDraw;mgSelDraw=function(){sd.apply(this,arguments);const n=document.querySelector('#mgSel .mg-sel-bot p');if(!n)return;n.style.fontSize='';let f=parseFloat(getComputedStyle(n).fontSize)||13;for(let i=0;i<10&&n.scrollWidth>n.clientWidth+1&&f>9;i++){f-=.5;n.style.fontSize=f+'px'}}}
 {const st=document.createElement('style');st.textContent=`#mgSel .mg-sel-bot p{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:0;line-height:1.3}`;document.head.appendChild(st)}
+// ---------- 사탕 지키기 막기: 마녀가 사탕 8m 안에 5초 넘게 있으면 사탕이 먼 곳으로 도망가요 ----------
+// 정하는 건 도둑 쪽(혼자 하기는 그냥 내 쪽). 남은 시간은 양쪽 화면 가운데 위에 작은 막대로 보여요.
+const MGGUARD={r:8,T:5};
+function mgFleeCell(){const mo=MG.mo,th=MG.th;let best=null;for(let i=0;i<90;i++){const x=(Math.random()*N)|0,z=(Math.random()*N)|0;if(!mgOpen(x,z)||(x===EXIT[0]&&z===EXIT[1]))continue;const px=cx2x(x),pz=cx2x(z);
+  const dM=Math.hypot(px-mo.x,pz-mo.z),dT=Math.hypot(px-th.x,pz-th.z);const sc=Math.min(dM,34)+Math.min(dT,12)*.3+Math.random()*3-(dM<20?60:0);if(!best||sc>best.sc)best={x:px,z:pz,sc}}return best}
+function mgCandFlee(x,z){const c=MG.cand;if(c){mgSpark(c.x,1.6,c.z,['#ffd23a','#ff5f9e','#ffffff'],18,{spd:7,up:3,grav:5});try{mgBeam(c.x,c.z,'#ffd23a',1,8,.5)}catch(e){}}
+  mgNetCand(x,z);mgSpark(x,1.6,z,['#ffd23a','#ffffff'],14,{spd:5,up:4,grav:4});MGS.whoosh(x,z);MGS.candy();mgMsg(MG.role==='thief'?'마녀가 지켜서 사탕이 도망갔어요!':'사탕이 도망갔어요! 너무 오래 지켰어요',1.8);MG.guard=0}
+function mgGuardTick(dt){const c=MG.cand,mo=MG.mo;if(!c){MG.guard=0;return}const near=Math.hypot(mo.x-c.x,mo.z-c.z)<MGGUARD.r;MG.guard=near?(MG.guard||0)+dt:Math.max(0,(MG.guard||0)-dt*.6);
+  if(MG.guard>=MGGUARD.T&&!(MG.net&&MG.role==='mon')){const q=mgFleeCell();if(q){mgCandFlee(q.x,q.z);if(MG.net)mgSend({k:'cand',x:mgR2(q.x),z:mgR2(q.z),flee:1})}else MG.guard=0}
+  const g=$('mgGuard');if(g){const k=Math.min(1,(MG.guard||0)/MGGUARD.T);g.classList.toggle('on',k>.08);$('mgHud').classList.toggle('guard',k>.08);g.querySelector('i').style.width=(k*100).toFixed(0)+'%'}}
+{const tk=mgTick;mgTick=function(dt){tk.apply(this,arguments);if(MG.on&&MG.g&&!MG.pause&&!MG.over&&MG.cdn<=0)try{mgGuardTick(dt)}catch(e){console.warn(e)}}}
+{const nr=mgNetRx;mgNetRx=function(d){if(d&&d.k==='cand'&&d.flee&&MG.on&&MG.g){mgCandFlee(d.x,d.z);return}return nr.apply(this,arguments)}}
+{const hd=mgHud;mgHud=function(on){const first=!$('mgHud');const r=hd.apply(this,arguments);if(first){const m=document.querySelector('#mgHud .mg-mid');const g=document.createElement('div');g.id='mgGuard';g.innerHTML=`<span>${MGI.candy}</span><b><i></i></b>`;m.appendChild(g)}
+  if(on){MG.guard=0;const g=$('mgGuard');if(g)g.classList.remove('on')}return r}}
+{const st=document.createElement('style');st.textContent=`#mgGuard{display:none;align-items:center;gap:4px;background:#4a2a1ad0;border-radius:10px;padding:2px 8px 2px 4px}#mgGuard.on{display:flex}#mgHud.guard .mg-msg{top:100px}
+#mgGuard span{width:18px;height:18px;display:block}#mgGuard span svg{width:100%;height:100%}#mgGuard b{display:block;width:64px;height:7px;border-radius:4px;background:#ffffff40;overflow:hidden}#mgGuard i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffd23a,#ff5f5f)}`;document.head.appendChild(st)}
