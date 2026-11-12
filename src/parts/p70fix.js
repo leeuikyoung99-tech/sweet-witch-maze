@@ -33,3 +33,13 @@ setInterval(()=>{try{sk70Fit()}catch(e){}},400);addEventListener('resize',()=>se
 .aug-btns button.ab70 svg{width:100%;height:100%}
 .aug-btns .ab70n{position:absolute;right:-6px;bottom:-6px;min-width:18px;height:18px;border-radius:9px;background:#fff;color:var(--choco);border:2px solid var(--choco);font:11px/14px var(--f-display);font-style:normal;text-align:center}`;
 document.head.appendChild(st)}
+
+// 처음 켰을 때 소리: 예전엔 화면을 한 번 누르기 전까지 소리 장치를 아예 만들지 않았어요.
+// 이제 켜자마자 소리 장치를 만들어 봐요. 홈 화면에 설치한 앱·플레이 스토어 앱처럼 크롬이 바로 재생을 허락하면 그때부터 제목 음악이 나와요.
+// 브라우저 탭처럼 막혀 있으면 기다렸다가 첫 터치에 바로 켜요(눌렀다 떼는 순간).
+try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}// 아이폰 무음 스위치에도 음악이 나오게
+function snd71Kick(){try{if(A.ctx&&A.ctx.state==='running'){try{applySnd()}catch(e){}audioMenuMusic()}}catch(e){}}
+{const start=()=>{try{Promise.resolve(initAudio()).then(()=>{const c=A.ctx;if(!c)return;try{c.addEventListener('statechange',snd71Kick)}catch(e){}snd71Kick()})}catch(e){}};
+  if(document.readyState==='complete')start();else addEventListener('load',start,{once:true})}
+// 누르기 시작할 때도 깨워 봐요 (기기에 따라 이때 허락되기도 해요). 이미 켜져 있으면 아무것도 안 해요.
+for(const ev of['pointerdown','touchstart'])document.addEventListener(ev,()=>{try{if(A.ctx&&A.ctx.state!=='running')A.ctx.resume().then(snd71Kick).catch(()=>{})}catch(e){}},{capture:true,passive:true});
