@@ -81,7 +81,7 @@ function lbApplyMap(k){k=k||LOBBY.agreed||LOBBY.map||SAVE.lastMap;if(!k||!THEMES
 // 미니게임 스킬 고르기 '시작' → mgSelDone
 {const so=mgSelOpen;mgSelOpen=function(role){so.apply(this,arguments);const m=$('mgSel');if(m&&!m.dataset.lb){m.dataset.lb=1;
     m.addEventListener('click',e=>{const go=e.target.closest('#mgSelGo');if(!go)return;e.stopImmediatePropagation();const R=m.dataset.role,th=R==='thief',sel=th?MGSEL.thief:MGSEL.witch;
-      if(sel.length!==(th?2:5)){SFX.deny();return}SFX.click();m.hidden=true;mgSelDone(R,sel)},true)}}}
+      if(sel.length!==(th?2:MGWN)){SFX.deny();return}SFX.click();m.hidden=true;mgSelDone(R,sel)},true)}}}
 
 {const st=document.createElement('style');st.textContent=`
 #role.lb .row.roles,#role.lb #aiLvl,#role.lb #mgTabs,#role.lb #roleNote,#role.lb .uni-mid{display:none!important}

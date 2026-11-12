@@ -34,7 +34,8 @@ function mgFxStep(p,dt){const k=Math.min(1,p.t/p.life);
 const mgR=(a,b)=>a+Math.random()*(b-a);
 function mgSpark(x,y,z,cols,n,o){o=o||{};for(let i=0;i<n;i++){const a=Math.random()*6.28,e=mgR(-.2,1),sp=(o.spd||6)*mgR(.4,1);
   mgP(o.tex||(i%3?'star':'glow'),cols[i%cols.length],x+mgR(-.3,.3)*(o.r||1),y+mgR(-.3,.3)*(o.r||1),z+mgR(-.3,.3)*(o.r||1),{vx:Math.cos(a)*sp*Math.cos(e),vz:Math.sin(a)*sp*Math.cos(e),vy:sp*Math.sin(e)+(o.up||0),grav:o.grav??6,drag:o.drag??1.5,life:mgR(.5,1)*(o.life||.9),s0:(o.size||.7)*mgR(.7,1.3),s1:(o.size||.7)*(o.shrink??.3),op:1,add:o.add,follow:o.follow,spin:mgR(-4,4)})}}
-function mgPuffs(x,y,z,cols,n,o){o=o||{};for(let i=0;i<n;i++){const a=Math.random()*6.28,r=mgR(0,o.r||1.5),sp=o.spd??1.5;
+function mgPuffs(x,y,z,cols,n,o){o=o||{};if(!o.keep)return; // 흰 구름 덩어리는 연막·지도 가리기에만 (다른 곳에선 이상해 보여서 뺐어요)
+  for(let i=0;i<n;i++){const a=Math.random()*6.28,r=mgR(0,o.r||1.5),sp=o.spd??1.5;
   mgP('puff',cols[i%cols.length],x+Math.cos(a)*r,y+mgR(-.3,.6)*(o.h||1),z+Math.sin(a)*r,{vx:Math.cos(a)*sp*mgR(.5,1.2),vz:Math.sin(a)*sp*mgR(.5,1.2),vy:o.rise??.8,drag:1.2,life:mgR(.75,1.2)*(o.life||1.1),s0:(o.size||2)*.6,s1:(o.size||2)*mgR(1,1.4),op:o.op||.95,fin:.15,pow:1.6,follow:o.follow,spin:mgR(-.6,.6)})}}
 function mgGlowAt(x,y,z,col,size,life,o){return mgP('glow',col,x,y,z,Object.assign({life:life||.35,s0:size*.4,s1:size,op:1,add:true,fin:.05,pow:1.4},o||{}))}
 function mgHearts(x,z,n){for(let i=0;i<n;i++)mgP('heart',i%2?'#ff5f8f':'#ff9ec7',x+mgR(-.8,.8),mgR(.6,1.6),z+mgR(-.8,.8),{vy:mgR(2,3.5),vx:mgR(-.6,.6),vz:mgR(-.6,.6),life:mgR(1,1.4),s0:.5,s1:.9,rot:false,fin:.1,pow:3})}
@@ -73,14 +74,13 @@ function mgAuraTick(dt){if(!MG.on||!MG.g||MG.pause)return;const th=MG.th,mo=MG.m
   const vis=!(mo.ghostT>0&&me);
   if(mo.fastT>0&&vis){mgEmit('fst',16,dt,()=>mgP('glow',Math.random()<.5?'#a98bff':'#d9c2ff',mo.x+mgR(-1.6,1.6),mgR(.2,1.2),mo.z+mgR(-1.6,1.6),{life:.6,s0:1.3,s1:.3,vy:1.5,op:.85}));
     mgEmit('fsE',5,dt,()=>mgP('star','#ffd23a',mgR(-1.2,1.2),head+mgR(-.5,.6),mgR(-1.2,1.2),{follow:mo,life:.5,s0:.6,s1:.1}))}
-  if(mo.slowT>0&&vis)mgEmit('gm',6,dt,()=>mgP('puff','#ff9ec7',mo.x+mgR(-1.8,1.8),mgR(.1,.6),mo.z+mgR(-1.8,1.8),{life:.7,s0:.8,s1:1.2,op:.9}));
+  if(mo.slowT>0&&vis)mgEmit('gm',8,dt,()=>mgP('glow','#ff8cc6',mo.x+mgR(-1.8,1.8),mgR(.1,.5),mo.z+mgR(-1.8,1.8),{life:.6,s0:.7,s1:.2,op:.8}));
   if(mo.smokeT>0){if(!MG.smk)MG.smk=0;mgEmit('smk',me?14:20,dt,()=>{const a=Math.random()*6.28,r=mgR(.3,3.2);
     mgP('puff',['#ffffff','#ffe0ef','#e0f2ff','#ffd6ea'][(Math.random()*4)|0],Math.cos(a)*r,head+mgR(-1.2,1.6),Math.sin(a)*r,{follow:mo,life:mgR(1,1.5),s0:2,s1:mgR(4,6),op:.96,fin:.2,pow:1.5,vy:.15,spin:mgR(-.4,.4)})})}
   if(mo.freezeT>0)mgEmit('frz',14,dt,()=>{const a=Math.random()*6.28,r=mgR(1.6,2.6);mgP('star',Math.random()<.6?'#9fdcff':'#ffffff',Math.cos(a)*r,mgR(.5,head),Math.sin(a)*r,{follow:mo,life:.7,s0:.8,s1:.15,vy:-.2})});
   if(mo.eatT>0)mgEmit('eat',10,dt,()=>mgP('star','#7ee8c8',mgR(-.8,.8),head-.6,mgR(-.8,.8),{follow:mo,life:.6,s0:.5,s1:.1,vy:1.5,vx:mgR(-1,1)}));
-  if(mo.charge&&vis)mgEmit('chg',30,dt,()=>mgP('puff',Math.random()<.5?'#e8c48a':'#fff1dd',mo.x-mo.charge.ux*1.5+mgR(-1.2,1.2),mgR(.1,.8),mo.z-mo.charge.uz*1.5+mgR(-1.2,1.2),{life:.7,s0:1,s1:2.4,op:.9,vy:.6}));
+  if(mo.charge&&vis)mgEmit('chg',30,dt,()=>mgP(Math.random()<.5?'star':'glow',Math.random()<.5?'#ff9e5f':'#ffd23a',mo.x-mo.charge.ux*1.5+mgR(-1.2,1.2),mgR(.2,1.4),mo.z-mo.charge.uz*1.5+mgR(-1.2,1.2),{life:.4,s0:.8,s1:.15,op:.9}));
   if(mo.jump&&vis)mgEmit('jmp',26,dt,()=>mgP('glow',Math.random()<.5?'#b98cff':'#ffffff',mo.x+mgR(-1,1),(mo.hy||0)+mgR(.5,3),mo.z+mgR(-1,1),{life:.5,s0:1,s1:.2,op:.85}));
-  if(mo.ghostT>0&&me&&mo.moving)mgEmit('gst',5,dt,()=>mgP('puff','#e8c48a',mo.x+mgR(-1.6,1.6),.3,mo.z+mgR(-1.6,1.6),{life:.8,s0:.9,s1:1.8,op:.7,vy:.3})); // 투명 마녀: 발밑 먼지만 살짝
   // 떨어지는 공격의 빛 꼬리
   for(const h of MG.hits)if(h.fall&&h.t<h.T){const fm=h.fall.mesh;mgEmit('fl'+(h.id||(h.id=Math.random())),24,dt,()=>mgP('glow',h.why==='ice'?'#bfeaff':h.why==='magnet'?'#ff8a8a':'#ffd6ea',fm.position.x+mgR(-.4,.4),fm.position.y+1,fm.position.z+mgR(-.4,.4),{life:.35,s0:1.2,s1:.2,op:.8}))}
   // 회오리 날
@@ -115,7 +115,7 @@ function mgThFx(k,ox,oz){const th=MG.th,mo=MG.mo,c=MGCOLS[k]||'#ffffff',hide=th.
   else if(k==='xray'){mgRing(th.x,th.z,26,c,.9);mgRing(th.x,th.z,16,'#ffffff',.7);mgGlowAt(th.x,1,th.z,c,5)}
   else if(k==='compass'){mgRing(th.x,th.z,7,c,.6);mgSpark(th.x,1,th.z,[c,'#ffd23a','#ffffff'],14,{spd:4,up:2})}
   else if(k==='smoke'){const H=MGP.moH/9.2*6.4;for(let i=0;i<10;i++)mgP('puff','#ffffff',th.x,1.4,th.z,{path:[th.x,1.4,th.z,mo.x+mgR(-1,1),H+mgR(-1,1),mo.z+mgR(-1,1),3],life:.3+i*.04,s0:.8,s1:2.4,op:.95});
-    mgPuffs(mo.x,H,mo.z,['#ffffff','#ffe0ef','#e0f2ff'],16,{r:2.6,size:4.5,h:2,follow:null,life:1.4})}
+    mgPuffs(mo.x,H,mo.z,['#ffffff','#ffe0ef','#e0f2ff'],16,{keep:1,r:2.6,size:4.5,h:2,follow:null,life:1.4})}
   else if(k==='freeze'){mgSpark(mo.x,4,mo.z,[c,'#ffffff','#bfeaff'],34,{spd:9,r:2,grav:3});mgRing(mo.x,mo.z,9,c,.7);mgBeam(mo.x,mo.z,'#bfeaff',2.6,10,.7)}
   else if(k==='tele'||k==='jump'){mgPortal(ox,oz,c,.7);mgPortal(th.x,th.z,c,.7);const n=10;for(let i=0;i<=n;i++){const x=ox+(th.x-ox)*i/n,z=oz+(th.z-oz)*i/n;mgP('star',i%2?c:'#ffffff',x,1.2+Math.sin(i/n*Math.PI)*1.5,z,{life:.35+i*.04,s0:.8,s1:.1,fin:.2})}
     mgGlowAt(th.x,1.2,th.z,'#ffffff',4,.3);if(MG.role==='thief'){mgFlashW();MG.fovKick=1}}}
@@ -125,7 +125,7 @@ function mgWiFx(k){const mo=MG.mo,c=MGCOLS[k]||'#ffffff',H=MGP.moH/9.2,head=6.4*
   if(!['spin','bear','ghost'].includes(k)){mgGlowAt(sx,head+1.5,sz,c,4,.4);mgSpark(sx,head+1.5,sz,[c,'#ffffff'],10,{spd:5,grav:2})}
   if(k==='eye'){mgRing(mo.x,mo.z,8,c,.6);mgGlowAt(mo.x,head,mo.z,c,7,.5);mgSpark(mo.x,head,mo.z,['#ffd23a',c,'#ffffff'],18,{spd:6,r:1.2})}
   else if(k==='ghost'){mgPuffs(mo.x,head*.6,mo.z,['#e6dcff','#ffffff','#d9c2ff'],14,{r:2.2,size:3.5,h:3})}
-  else if(k==='fog'){const th=MG.th;mgPuffs(th.x,2.6,th.z,['#c9b3ff','#e6dcff'],8,{r:.8,size:1.8})}
+  else if(k==='fog'){const th=MG.th;mgPuffs(th.x,2.6,th.z,['#c9b3ff','#e6dcff'],8,{keep:1,r:.8,size:1.8})}
   else if(k==='fake'){for(const it of MG.items)if(it.type==='fake'&&it.T-it.t<.05){mgPuffs(it.x,1.2,it.z,['#ffffff','#ffe0ef'],8,{r:1,size:2});mgSpark(it.x,1.6,it.z,['#ffd23a','#ffffff'],10,{spd:4})}}
   else if(k==='skel'){mgPuffs(mo.x,.4,mo.z,['#e8c48a','#fff1dd'],12,{r:2.6,size:2.6,spd:4,rise:.5})}
   else if(k==='bear'){mgGlowAt(mo.x,head,mo.z,c,6,.4);mgRing(mo.x,mo.z,7,c,.5);mgPuffs(mo.x,.4,mo.z,['#e8c48a'],8,{r:2,size:2.4,spd:3})}
@@ -166,7 +166,7 @@ mgStomp=function(aim){const mo=MG.mo;if(mo.cd.stomp>0||mo.lockT>0||mo.jump||mo.c
   const P=aim?{x:aim.x,z:aim.z}:mgAim();const fx=-Math.sin(mo.yaw),fz=-Math.cos(mo.yaw),H=MGP.moH/9.2;
   const sx=mo.x+fx*1.4+Math.cos(mo.yaw)*1.3,sz=mo.z+fz*1.4-Math.sin(mo.yaw)*1.3,sy=6.3*H;
   let dx=P.x-sx,dz=P.z-sz,L=Math.hypot(dx,dz);if(L<.5){dx=fx;dz=fz;L=1}
-  mo.cd.stomp=MGP.stomp.cd;mo.lockT=.3;mo.m.atkT=.6;MG.stat.atk.orb=(MG.stat.atk.orb||0)+1;
+  mo.cd.stomp=MGP.stomp.cd;mo.lockT=.12;mo.m.atkT=.6;MG.stat.atk.orb=(MG.stat.atk.orb||0)+1;
   const m=mgOrbMesh();m.position.set(sx,sy,sz);MG.g.add(m);(MG.orbs||(MG.orbs=[])).push({x:sx,y:sy,z:sz,ux:dx/L,uz:dz/L,d:0,m,id:Math.random()});
   MGS.shoot(sx,sz);if(!(mo.ghostT>0&&MG.role==='thief')){mgGlowAt(sx,sy,sz,'#ffb3d6',3.5,.3);mgSpark(sx,sy,sz,['#ff5f9e','#ffffff'],8,{spd:4,grav:2})}return true};
 function mgOrbBoom(o,hit){MGS.pop(o.x,o.z);mgGlowAt(o.x,o.y,o.z,'#ffb3d6',hit?5:3.5,.3);mgSpark(o.x,o.y,o.z,['#ff5f9e','#ffffff','#ffd23a'],hit?14:9,{spd:6,grav:8});mgPuffs(o.x,o.y,o.z,['#ffd6ea','#ffffff'],3,{r:.4,size:1.4,spd:2,op:.8});mgDrop(o.m);o.dead=1}
@@ -178,6 +178,14 @@ function mgOrbTick(dt){if(!MG.orbs||!MG.orbs.length)return;const th=MG.th,W=MGW(
     if(MG.decoy&&Math.hypot(MG.decoy.x-o.x,MG.decoy.z-o.z)<MGP.stomp.r+MGP.thR){MG.decoy.t=0;mgOrbBoom(o,1);continue}
     if(o.d>MGP.stomp.range||o.x<.5||o.z<.5||o.x>W-.5||o.z>W-.5||(o.y<WH&&mgPtInWall(o.x,o.z,.15)))mgOrbBoom(o,0)}
   MG.orbs=MG.orbs.filter(o=>!o.dead)}
+// 휩쓸기(박쥐 떼): 예고가 끝나면 박쥐 떼 앞머리가 실제로 날아가며, 지나갈 때 닿으면 맞아요
+function mgSweep(x,z,ux,uz,w,len,spd,why){(MG.sweeps||(MG.sweeps=[])).push({x,z,ux,uz,w,len,spd,why,d:0})}
+function mgSweepTick(dt){if(!MG.sweeps||!MG.sweeps.length)return;const th=MG.th;
+  for(const s of MG.sweeps){const d0=s.d;s.d=Math.min(s.len,s.d+s.spd*dt);const dx=th.x-s.x,dz=th.z-s.z,t=dx*s.ux+dz*s.uz,p=Math.abs(-dx*s.uz+dz*s.ux);
+    if(!s.hit&&p<s.w/2+MGP.thR&&t>d0-2.2&&t<s.d+.6){if(mgHurt({x:s.x,z:s.z},s.why,1))s.hit=1}
+    if(MG.decoy&&!s.dh){const q=MG.decoy,ex=q.x-s.x,ez=q.z-s.z,tt=ex*s.ux+ez*s.uz,pp=Math.abs(-ex*s.uz+ez*s.ux);if(pp<s.w/2+MGP.thR&&tt>d0-2.2&&tt<s.d+.6){q.t=0;s.dh=1}}}
+  MG.sweeps=MG.sweeps.filter(s=>s.d<s.len)}
+{const cl=mgClean;mgClean=function(){MG.sweeps=[];return cl.apply(this,arguments)}}
 // AI 도둑: 날아오는 구슬 길을 피해요
 {const dg=mgDangerAt;mgDangerAt=function(x,z){let d=dg(x,z);for(const o of MG.orbs||[])for(let t=0;t<=1.2;t+=.2){const ox=o.x+o.ux*MGP.stomp.spd*t,oz=o.z+o.uz*MGP.stomp.spd*t;if(Math.hypot(x-ox,z-oz)<MGP.stomp.r+1.1){d+=t<.5?3.5:2;break}}return d}}
 {const cl=mgClean;mgClean=function(){for(const o of MG.orbs||[])mgDrop(o.m);MG.orbs=[];return cl.apply(this,arguments)}}
@@ -224,7 +232,7 @@ function mgViewToggle(){MG.view=MG.view===3?1:3;SAVE.mgView=MG.view;try{saveGame
 // ---------- 스킬 끌어서 조준 ----------
 // 끌 수 있는 스킬: 마녀는 거리 있는 스킬 + 박쥐·곰(방향), 도둑은 분신(방향)·껌·미끼(자리)·순간이동(방향)
 const MGAIM={w:{stomp:'dir',tower:'pt',ice:'pt',magnet:'pt',slip:'pt',rev:'pt',trap:'pt',skel:'pt',spider:'line',soldier:'line',bat:'dir',bear:'dir'},t:{decoy:'dir',gum:'pt',lure:'pt',tele:'dir',jump:'dir'}};
-const MGAR={tower:5.5,ice:7.5,magnet:13,slip:6.5,rev:6.5,trap:6.5,skel:5.2,gum:2.6,lure:1.6};
+const MGAR={tower:4.5,ice:7.5,magnet:13,slip:6.5,rev:6.5,trap:6.5,skel:5.2,gum:2.6,lure:1.6};
 const MGDR={a:null};
 function mgAimKind(a){return MG.role==='thief'?MGAIM.t[a]:MGAIM.w[a]}
 function mgAimRange(a){if(MG.role==='thief')return a==='gum'?6:a==='lure'?12:a==='decoy'?8:18;if(a==='stomp')return MGP.stomp.range;const S=MGWS[a];return a==='bat'?26:a==='bear'?18:(S&&S.range)||20}
@@ -276,7 +284,7 @@ function mgBtnPaint(){for(const b of document.querySelectorAll('#mgBtns [data-a]
   $('mgHud').classList.toggle('fast',MG.role==='mon'&&mo.fastT>0||MG.role==='thief'&&(th.sprintT>0||th.dashT>0));$('mgHud').classList.toggle('frost',MG.role==='mon'&&mo.freezeT>0);
   $('mgCross').hidden=MG.role!=='mon'||!!MGDR.a&&MGDR.moved}}
 // 상태 효과 + 모습은 매 프레임
-{const tk=mgTick;mgTick=function(dt){tk.apply(this,arguments);if(!MG.on||!MG.g)return;try{if(!MG.pause&&!MG.over&&MG.cdn<=0)mgOrbTick(dt);mgLooks();mgAuraTick(dt);if(MGDR.a&&MGDR.moved)mgPrevSync()}catch(e){console.warn(e)}}}
+{const tk=mgTick;mgTick=function(dt){tk.apply(this,arguments);if(!MG.on||!MG.g)return;try{if(!MG.pause&&!MG.over&&MG.cdn<=0){mgOrbTick(dt);mgSweepTick(dt)}mgLooks();mgAuraTick(dt);if(MGDR.a&&MGDR.moved)mgPrevSync()}catch(e){console.warn(e)}}}
 {const cl=mgClean;mgClean=function(){MGDR.a=null;MGDR.g=null;MG.spinG=null;MGFX.em={};return cl.apply(this,arguments)}}
 
 {const st=document.createElement('style');st.textContent=`
@@ -310,3 +318,42 @@ function mgBtnPaint(){for(const b of document.querySelectorAll('#mgBtns [data-a]
 .mg-sel-c span{border-radius:50%;background:radial-gradient(circle,#fffdf8 0 63%,transparent 65%),var(--c,#e3c9a8);padding:3px;box-sizing:border-box}
 @media (max-height:340px){.mg-go{height:42px;min-width:88px;font-size:19px}}
 `;document.head.appendChild(st)}
+{const dg=mgDangerAt;mgDangerAt=function(x,z){let d=dg(x,z);for(const s of MG.sweeps||[]){const dx=x-s.x,dz=z-s.z,t=dx*s.ux+dz*s.uz,p=Math.abs(-dx*s.uz+dz*s.ux);if(p<s.w/2+1.2&&t>s.d-1)d+=3.5}return d}}
+// ---------- 스킬 끌다가 취소: 위쪽 가운데 '취소' 칸에 놓으면 안 써요 ----------
+const MGI_CX='<svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7 7 17" stroke="#fff" stroke-width="3.6" stroke-linecap="round"/><path d="M7 7l10 10M17 7 7 17" stroke="#4a2a1a" stroke-width="1.4" stroke-linecap="round"/></svg>';
+{const hd=mgHud;mgHud=function(on){const first=!$('mgHud');const r=hd.apply(this,arguments);if(first){const c=document.createElement('div');c.id='mgCancel';c.innerHTML=`<i>${MGI_CX}</i><b>취소</b>`;$('mgHud').appendChild(c)}return r}}
+{const mv=mgBtnMove;mgBtnMove=function(e){mv.apply(this,arguments);const d=MGDR;if(!d.a||!d.moved)return;const c=$('mgCancel'),r=c.getBoundingClientRect();const inC=e.clientX>r.left-10&&e.clientX<r.right+10&&e.clientY>r.top-10&&e.clientY<r.bottom+14;
+  c.classList.toggle('hot',inC);if(inC&&!d.cancel){d.cancel=true;d.b.classList.add('cx');mgPrevSync()}}}
+{const up=mgBtnUp;mgBtnUp=function(e){const r=up.apply(this,arguments);const c=$('mgCancel');if(c)c.classList.remove('hot');return r}}
+// ---------- 마녀 지도: 도둑이 다음 사탕(또는 출구)까지 가는 가장 빠른 길이 늘 보여요 ----------
+function mgThiefRoute(){const th=MG.th;const sx=th.cloakT>0&&th.lx!=null?th.lx:th.x,sz=th.cloakT>0&&th.lz!=null?th.lz:th.z;const[cx,cz]=cellOf(sx,sz);
+  const goal=MG.exitOpen?EXIT:MG.cand?cellOf(MG.cand.x,MG.cand.z):null;if(!goal||!mgOpen(cx,cz))return null;
+  const key=cx+','+cz+'>'+goal+':'+B.walls.length+':'+(B.ver||0);if(MG.routeKey===key)return MG.route;MG.routeKey=key;const p=mgPathTo(cx,cz,goal[0],goal[1]);MG.route=p?[[cx,cz],...p]:null;return MG.route}
+{const dm=mgDrawMap;mgDrawMap=function(){dm.apply(this,arguments);if(!MG.on||MG.role!=='mon')return;const th=MG.th;if(!(th.cloakT>0)){th.lx=th.x;th.lz=th.z}const R=mgThiefRoute();if(!R||R.length<2)return;
+  const cv=$('mgMap'),x=cv.getContext('2d'),S=cv.width,k=S/MGW();x.save();x.lineCap='round';x.lineJoin='round';
+  x.beginPath();R.forEach(([a,b],i)=>{const px=cx2x(a)*k,pz=cx2x(b)*k;i?x.lineTo(px,pz):x.moveTo(px,pz)});
+  x.strokeStyle='#ffffffcc';x.lineWidth=Math.max(5,S/26);x.stroke();x.strokeStyle='#ff5f9e';x.lineWidth=Math.max(2.5,S/60);x.setLineDash([S/30,S/50]);x.stroke();x.restore()}}
+{const st=document.createElement('style');st.textContent=`
+#mgCancel{position:fixed;left:50%;top:44px;transform:translateX(-50%);display:none;align-items:center;gap:6px;padding:5px 16px 5px 6px;border-radius:26px;border:3px solid var(--choco);background:#fff8eee6;box-shadow:0 3px 0 var(--choco);font:16px var(--f-display);color:var(--choco);z-index:4;pointer-events:none}
+#mgCancel i{width:34px;height:34px;border-radius:50%;background:#ff8a8a;border:2.5px solid var(--choco);display:grid;place-items:center;padding:4px;box-sizing:border-box}#mgCancel i svg{width:100%;height:100%}
+#mgHud.aiming #mgCancel{display:flex}#mgCancel.hot{background:#ff8a8a;color:#fff;transform:translateX(-50%) scale(1.12)}
+#mgHud.aiming .mg-mid,#mgHud.aiming .mg-msg{visibility:hidden}`;document.head.appendChild(st)}
+// ---------- 스킬 버튼은 평타(도둑 대시 · 마녀 사탕 구슬)를 둘러싸요 ----------
+// 평타가 오른쪽 아래 큰 버튼, 스킬은 그 둘레 원호(왼쪽 → 위). 마녀 5개는 안쪽 3 + 바깥 2.
+function mgBtnLayout(){const box=$('mgBtns');if(!box||!MG.on)return;const big=box.querySelector('.mg-ab.big');if(!big)return;const sk=[...box.querySelectorAll('.mg-ab:not(.big)')];box.classList.add('arc');
+  const W=innerWidth,H=innerHeight,small=H<345;const Bs=small?68:80,s=small?48:56,pad=small?10:14;let sr=0;try{sr=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sar'))||0}catch(e){}
+  const cx=W-Math.max(pad,sr)-Bs/2-4,cy=H-pad-Bs/2-4;const put=(b,x,y,z)=>{b.style.position='fixed';b.style.left=(x-z/2)+'px';b.style.top=(y-z/2)+'px';b.style.width=b.style.height=z+'px';b.style.margin='0'};
+  put(big,cx,cy,Bs);const n=sk.length,R1=Math.max(Bs/2+s/2+10,(s+6)/(2*Math.sin(Math.PI/8))),R2=R1+s+6;
+  const inner=n<=1?[225]:n===2?[192,258]:[180,225,270];let outer=n===4?[225]:n>=5?[202,248]:[];
+  const map=$('mgMap')?$('mgMap').parentNode.getBoundingClientRect():null;const hitMap=(x,y)=>map&&x+s/2>map.left-4&&x-s/2<map.right+4&&y-s/2<map.bottom+6&&y+s/2>map.top-4;
+  // 미니맵에 닿으면 바깥 줄을 왼쪽으로 돌려요
+  const bad=o=>o.some(a=>hitMap(cx+R2*Math.cos(a*Math.PI/180),cy+R2*Math.sin(a*Math.PI/180))||cy+R2*Math.sin(a*Math.PI/180)-s/2<56);
+  if(n>=5&&bad(outer))outer=[192,228];for(let t=0;t<4&&bad(outer);t++)outer=outer.map(a=>a-4);
+  sk.forEach((b,i)=>{const R=i<3?R1:R2,a=(i<3?inner[i]:outer[i-3])*Math.PI/180;put(b,cx+R*Math.cos(a),cy+R*Math.sin(a),s)})}
+{const hd=mgHud;mgHud=function(on){const r=hd.apply(this,arguments);if(on)requestAnimationFrame(mgBtnLayout);return r}}
+addEventListener('resize',()=>{if(MG.on)setTimeout(mgBtnLayout,60)});
+{const st=document.createElement('style');st.textContent=`
+.mg-btns.arc{position:fixed;right:0;bottom:0;width:0;height:0;display:block;gap:0}.mg-btns.arc .mg-row,.mg-btns.arc .mg-grid{display:contents}
+.mg-btns.arc .mg-ab{padding:10px!important}.mg-btns.arc .mg-ab.big{padding:16px!important}
+.mg-btns.arc .mg-ab.mgcard{border-radius:50%;padding:7px!important;background:radial-gradient(circle at 50% 45%,#fffdf8 0 56%,transparent 58%),linear-gradient(160deg,color-mix(in srgb,var(--c) 55%,#fff) 0%,var(--c) 55%,color-mix(in srgb,var(--c) 75%,#4a2a1a) 100%)!important}
+.mg-btns.arc .mg-ab.mgcard::before,.mg-btns.arc .mg-ab.mgcard .cd{border-radius:50%}`;document.head.appendChild(st)}

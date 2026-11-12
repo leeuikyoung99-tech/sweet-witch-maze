@@ -5,9 +5,9 @@
 // 거대 마녀(키 8.5m, 벽이 허리)는 느리고 벽을 몸으로 부숴요. 스킬은 마녀 덱 5장(쿨타임 김) + 늘 쓰는 밟기.
 // 도둑은 대시 + 고른 스킬 2개(미니게임에 맞게 바뀐 효과). 둘 다 판 전에 스킬을 골라요.
 // 모든 공격은 바닥 예고가 먼저 떠서 피할 수 있고, 남는 효과(덫·거미줄·가짜 사탕)는 시간이 지나면 사라져요.
-// 3분 한 판 · 도둑 체력 5(하트 반 칸씩) · 미니맵에 서로의 위치가 늘 보여요(망토·투명 때만 빼고) · 보상과 등급 없음.
+// 3분 한 판 · 도둑 체력 3(하트 반 칸씩) · 미니맵에 서로의 위치가 늘 보여요(망토·투명 때만 빼고) · 보상과 등급 없음.
 const MG={on:false,role:'thief',T:180,cx:0,cz:0,g:null,hidden:[],pause:false,over:false,cdn:0,t:0,rise:[],parts:[],hits:[],items:[]};
-const MGP={thSpd:6.4,dashSpd:17,dashT:.26,dashCd:3,thR:.45,hp:5,inv:1.4,moSpd:4,moR:1.9,moH:8.5,eyeTh:1.62,eyeMo:7.7,candies:6,wallsPer:10,stomp:{cd:2.4,dmg:.5,spd:11,r:.85,range:30}};
+const MGP={thSpd:6.4,dashSpd:17,dashT:.26,dashCd:3,thR:.45,hp:3,inv:1.8,moSpd:4,moR:1.9,moH:8.5,eyeTh:1.62,eyeMo:7.7,candies:6,wallsPer:10,stomp:{cd:1,dmg:.5,spd:10,r:.85,range:30}};
 // 마녀 카드 → 거대 마녀 스킬 (cd 쿨타임 초)
 const MGWS={
  tower:{n:'사탕 폭탄',d:'조준한 곳에 큰 사탕 폭탄을 내리꽂아요',cd:14,range:28},
@@ -26,7 +26,7 @@ const MGWS={
  bat:{n:'박쥐 떼',d:'박쥐 떼가 앞쪽을 길게 휩쓸어요',cd:14,range:0},
  bear:{n:'곰 돌진',d:'앞으로 돌진하며 벽을 다 부숴요',cd:15,range:0},
  soldier:{n:'사탕 창 비',d:'사탕 창을 한 줄로 차례차례 내리꽂아요',cd:13,range:24}};
-const MGWK=Object.keys(MGWS);
+const MGWK=Object.keys(MGWS),MGWN=3; // 마녀 스킬은 3개 (하나하나 강하게)
 // 도둑 스킬 (미니게임 효과)
 const MGTS={
  decoy:{d:'분신이 반대쪽으로 달려요 · 마녀 미니맵에 점이 둘',cd:18},cloak:{d:'5초 동안 투명 · 마녀 미니맵에서 사라져요',cd:20},
@@ -239,10 +239,10 @@ function mgScatter(p,r,n){const out=[{x:p.x,z:p.z}];for(let i=1;i<n;i++){const a
 function mgCast(k,aim){const mo=MG.mo,S=MGWS[k];if(!S||mo.cd[k]>0||mo.lockT>0||mo.jump||mo.charge||mo.eatT>0||MG.over)return false;
   let f=Math.atan2(-Math.cos(mo.yaw),-Math.sin(mo.yaw));let P=aim?{x:aim.x,z:aim.z}:mgAim();if(aim&&aim.drag&&(k==='bat'||k==='bear'))f=Math.atan2(P.z-mo.z,P.x-mo.x);const ux=Math.cos(f),uz=Math.sin(f);mgClampPt(P,S.range||40);
   mo.cd[k]=S.cd;mo.lockT=.45;mo.m.atkT=.6;MG.stat.atk[k]=(MG.stat.atk[k]||0)+1;
-  if(k==='tower'){mgHit('circle',{x:P.x,z:P.z,r:5.5},1.5,{fall:{mesh:mgBombMesh(),y0:42,spin:2},why:k,end:()=>{MGS.boom(P.x,P.z,1);mgBurst(P.x,P.z,['#ff5f9e','#ffffff','#ffd23a','#7cc6ff'],40,13,.9);mgRing(P.x,P.z,11,'#ffd6ea',.6);mgRing(P.x,P.z,7,'#ffffff',.45);MG.shake=Math.max(MG.shake||0,.5)}})}
+  if(k==='tower'){mgHit('circle',{x:P.x,z:P.z,r:4.5},1.5,{fall:{mesh:mgBombMesh(),y0:42,spin:2},why:k,end:()=>{MGS.boom(P.x,P.z,1);mgBurst(P.x,P.z,['#ff5f9e','#ffffff','#ffd23a','#7cc6ff'],40,13,.9);mgRing(P.x,P.z,11,'#ffd6ea',.6);mgRing(P.x,P.z,7,'#ffffff',.45);MG.shake=Math.max(MG.shake||0,.5)}})}
   else if(k==='ice'){mgScatter(P,7.5,7).forEach((q,i)=>mgHit('circle',{x:q.x,z:q.z,r:2.4},1.1+i*.14,{dmg:0,eff:'slow',quiet:i>0,why:k,fall:{mesh:mgIceMesh(),y0:34,spin:4},end:()=>{MGS.ice(q.x,q.z);mgBurst(q.x,q.z,['#bfeaff','#ffffff','#7cc6ff'],10,8,.5);mgRing(q.x,q.z,3.5,'#bfeaff',.35)}}))}
   else if(k==='magnet'){mgHit('circle',{x:P.x,z:P.z,r:2.6},1.2,{why:k,fall:{mesh:mgMagnetMesh(),y0:36},end:()=>{MGS.boom(P.x,P.z);const g=mgMagnetMesh();g.add(mgFlat(13,'#ff4a4a',.08,.09));const rg=new THREE.Mesh(new THREE.RingGeometry(12.6,13,48),new THREE.MeshBasicMaterial({color:'#ff4a4a',transparent:true,opacity:.6,depthWrite:false,side:THREE.DoubleSide}));rg.rotation.x=-Math.PI/2;rg.position.y=.12;g.add(rg);mgItem('magnet',P.x,P.z,3.5,13,g);mgMsg(MG.role==='thief'?'자석에 끌려가요! 반대로 달려요':'자석 사탕!',1.4)}})}
-  else if(k==='spin'){const c={x:mo.x,z:mo.z};mo.lockT=1.5;mo.spinT=1.5;MGS.whoosh(c.x,c.z);mgHit('circle',{x:c.x,z:c.z,r:8.5},1.5,{why:k,end:()=>{MGS.swing(c.x,c.z);MGS.boom(c.x,c.z);mgRing(c.x,c.z,10,'#ff9ec7',.5);mgBurst(c.x,c.z,['#ff5f9e','#ffffff'],24,12,.6,3)}})}
+  else if(k==='spin'){const c={x:mo.x,z:mo.z};mo.lockT=1.5;mo.spinT=1.5;MGS.whoosh(c.x,c.z);mgHit('circle',{x:c.x,z:c.z,r:7.5},1.5,{why:k,end:()=>{MGS.swing(c.x,c.z);MGS.boom(c.x,c.z);mgRing(c.x,c.z,10,'#ff9ec7',.5);mgBurst(c.x,c.z,['#ff5f9e','#ffffff'],24,12,.6,3)}})}
   else if(k==='slip'||k==='rev'||k==='trap'){mgScatter(P,6.5,6).forEach((q,i)=>mgHit('circle',{x:q.x,z:q.z,r:1.6},.7+i*.06,{dmg:0,quiet:i>0,why:k,fall:{mesh:mgBlobMesh(k),y0:22,spin:3},end:()=>{mgItem(k,q.x,q.z,12,1.6,mgPadMesh(k));mgBurst(q.x,q.z,['#ffffff','#ffd23a'],5,5,.4)}}));MGS.whoosh(P.x,P.z)}
   else if(k==='fake'){for(let i=0;i<2;i++){const c=mgFarCell(16);if(c){const g=mgCandyMesh();mgItem('fake',c.x,c.z,30,1.7,g)}}MGS.magic();mgMsg(MG.role==='mon'?'가짜 사탕 2개를 뿌렸어요':'사탕 냄새가 나요…',1.4)}
   else if(k==='fog'){MG.th.fogT=10;MGS.magic();mgMsg(MG.role==='thief'?'지도가 가려졌어요!':'도둑 지도를 가렸어요',1.4)}
@@ -251,7 +251,7 @@ function mgCast(k,aim){const mo=MG.mo,S=MGWS[k];if(!S||mo.cd[k]>0||mo.lockT>0||m
     mgHit('circle',{x:p.x,z:p.z,r:5.2},1.3,{why:k,end:()=>{MGS.boom(p.x,p.z,1);mgSmash({x:p.x,z:p.z},3.5);mgRing(p.x,p.z,10,'#b98cff',.55);mgBurst(p.x,p.z,['#b98cff','#ffffff','#7a3ff0'],30,11,.8);MG.shake=Math.max(MG.shake||0,.6)}})}
   else if(k==='spider'){const L=Math.max(6,Math.hypot(P.x-mo.x,P.z-mo.z)),dir=Math.atan2(P.z-mo.z,P.x-mo.x);mgHit('rect',{x:mo.x,z:mo.z,w:2.8,len:L,dir},.8,{dmg:0,eff:'root',why:k,end:()=>{MGS.web(P.x,P.z);mgItem('web',P.x,P.z,10,3.4,mgWebMesh(3.4));mgBurst(P.x,P.z,['#ffffff','#e0ffe8'],12,6,.4)}})}
   else if(k==='ghost'){mo.ghostT=5;MGS.magic();mgMsg(MG.role==='mon'?'투명해졌어요':'마녀가 사라졌어요!',1.4)}
-  else if(k==='bat'){mgHit('rect',{x:mo.x,z:mo.z,w:5,len:26,dir:f},1.1,{why:k,end:()=>{MGS.bats(mo.x+ux*10,mo.z+uz*10);for(let i=0;i<30;i++){const sx=(Math.random()-.5)*4.4,sp=26+Math.random()*9;mgP('bat',i%4?'#3a1d50':'#7a5cc0',mo.x-uz*sx,1.4+Math.random()*3.2,mo.z+ux*sx,{vx:ux*sp,vz:uz*sp,vy:(Math.random()-.5)*2,life:.95+Math.random()*.15,s0:1.5+Math.random()*.6,s1:1.6,flap:18+Math.random()*8,rot:false,fin:.05,pow:6})}}})}
+  else if(k==='bat'){const bx0=mo.x,bz0=mo.z;mgHit('rect',{x:mo.x,z:mo.z,w:5,len:26,dir:f},1.1,{why:k,dmg:0,end:()=>{mgSweep(bx0,bz0,ux,uz,5,26,30,'bat');MGS.bats(mo.x+ux*10,mo.z+uz*10);for(let i=0;i<30;i++){const sx=(Math.random()-.5)*4.4,sp=26+Math.random()*9;mgP('bat',i%4?'#3a1d50':'#7a5cc0',mo.x-uz*sx,1.4+Math.random()*3.2,mo.z+ux*sx,{vx:ux*sp,vz:uz*sp,vy:(Math.random()-.5)*2,life:.95+Math.random()*.15,s0:1.5+Math.random()*.6,s1:1.6,flap:18+Math.random()*8,rot:false,fin:.05,pow:6})}}})}
   else if(k==='bear'){mo.lockT=1;mgHit('rect',{x:mo.x,z:mo.z,w:4.6,len:18,dir:f},1,{dmg:0,why:k,end:()=>{mo.charge={ux,uz,d:18};MGS.whoosh(mo.x,mo.z)}})}
   else if(k==='soldier'){const dir=Math.atan2(P.z-mo.z,P.x-mo.x),cx=Math.cos(dir),cz=Math.sin(dir);for(let i=0;i<6;i++){const q=mgClampPt({x:mo.x+cx*(5+i*3.8),z:mo.z+cz*(5+i*3.8)},0);
       mgHit('circle',{x:q.x,z:q.z,r:2.3},1+i*.2,{quiet:i>0,why:k,fall:{mesh:mgSpearMesh(),y0:30},end:()=>{MGS.boom(q.x,q.z);mgBurst(q.x,q.z,['#ff5f9e','#fff8ee'],8,7,.45);mgRing(q.x,q.z,3.5,'#ffffff',.3)}})}}
@@ -298,8 +298,8 @@ function mgAtExit(){const th=MG.th;const[cx,cz]=cellOf(th.x,th.z);if(cx!==EXIT[0
 // ---------- 시작 · 끝 ----------
 let MGSEL={thief:null,witch:null};
 function mgDefThief(){const s=(SAVE.skills||['decoy','cloak']).filter(k=>k in MGTS);while(s.length<2)for(const k of MGTK)if(!s.includes(k)){s.push(k);break}return s.slice(0,2)}
-function mgDefWitch(){const s=(SAVE.deck||[]).filter(k=>k in MGWS);while(s.length<5)for(const k of MGWK)if(!s.includes(k)){s.push(k);break}return s.slice(0,5)}
-function mgRandWitch(){const a=MGWK.slice().sort(()=>Math.random()-.5);return a.slice(0,5)}
+function mgDefWitch(){const s=(SAVE.deck||[]).filter(k=>k in MGWS);while(s.length<MGWN)for(const k of MGWK)if(!s.includes(k)){s.push(k);break}return s.slice(0,MGWN)}
+function mgRandWitch(){const a=MGWK.slice().sort(()=>Math.random()-.5);return a.slice(0,MGWN)}
 function mgRandThief(){const a=MGTK.filter(k=>k!=='heal'||Math.random()<.5).sort(()=>Math.random()-.5);return a.slice(0,2)}
 function mgStart(role,thSk,woSk){MG.role=role;MG.on=true;MG.over=false;MG.pause=false;MG.t=0;MG.cdn=3.2;MG.got=0;MG.exitOpen=false;MG.rise=[];MG.parts=[];MG.hits=[];MG.items=[];MG.decoy=null;MG.cand=null;MG.exitG=null;MG.msgQ=null;
   MG.stat={atk:{},sk:{},hit:0,cand:0,src:{}};MG.compG=null;MG.compKey='';camPreview=false;try{clearStage();STAGE.on=false}catch(e){}
@@ -346,7 +346,7 @@ function mgThTick(dt,mv){const th=MG.th;th.inv=Math.max(0,th.inv-dt);for(const k
   th.x+=th.kx*dt;th.z+=th.kz*dt;th.kx*=Math.pow(.02,dt);th.kz*=Math.pow(.02,dt);
   mgBound(th,MGP.thR,ox,oz,true);
   if(th.moving&&th.dashT<=0)th.bob+=dt*10;
-  const mo=MG.mo;if(!mo.jump&&Math.hypot(th.x-mo.x,th.z-mo.z)<MGP.moR+MGP.thR+.2&&!(mo.ghostT>0))mgHurt(mo,'body');
+  const mo=MG.mo;{const bx=th.x-mo.x,bz=th.z-mo.z,bd=Math.hypot(bx,bz);if(!mo.jump&&bd<MGP.moR+MGP.thR+.2&&!(th.dashT>0)){const L=bd||1;th.kx=bx/L*7;th.kz=bz/L*7}} // 마녀 몸에 닿으면 밀려나기만 (피해 없음)
   const c=MG.cand;if(c&&Math.hypot(th.x-c.x,th.z-c.z)<1.7)mgEatCandy();
   if(MG.exitOpen&&mgAtExit())mgEnd('thief','exit');
   // 분신
@@ -405,7 +405,7 @@ function mgMonAI(dt){const mo=MG.mo,th=MG.th,ai=MG.ai,lvl=AIL==null?1:AIL;let tx
         else if(k==='fake'||k==='fog')ok=MG.t>8;else if(k==='eye')ok=d>14;else if(k==='skel')ok=d>7&&d<18;else if(k==='ghost')ok=d<20;else if(k==='bat')ok=d<24;else if(k==='bear')ok=d<16&&d>5;
         if(ok&&Math.random()<[.35,.6,.85][lvl]){if(k==='bat'||k==='bear'){const a=Math.atan2(pz-mo.z,px-mo.x);mo.yaw=Math.atan2(-Math.cos(a),-Math.sin(a))}if(mgCast(k,aim))return[0,0]}}
       // 평타: 느린 사탕 구슬을 도둑이 갈 곳으로 던져요
-      if(mo.cd.stomp<=0&&d<28&&!(th.cloakT>0)&&Math.random()<[.45,.65,.85][lvl]){const tt=d/MGP.stomp.spd*[.4,.75,.95][lvl];const ax=tx+th.dx*(th.moving?MGP.thSpd:0)*tt+(Math.random()-.5)*err,az=tz+th.dz*(th.moving?MGP.thSpd:0)*tt+(Math.random()-.5)*err;if(mgStomp({x:ax,z:az}))return[0,0]}}
+      if(mo.cd.stomp<=0&&d<26&&!(th.cloakT>0)&&Math.random()<[.3,.45,.7][lvl]){const tt=d/MGP.stomp.spd*[.3,.6,.9][lvl];const ax=tx+th.dx*(th.moving?MGP.thSpd:0)*tt+(Math.random()-.5)*err,az=tz+th.dz*(th.moving?MGP.thSpd:0)*tt+(Math.random()-.5)*err;if(mgStomp({x:ax,z:az}))return[0,0]}}
     const L=d||1;return d>MGP.moR+.6?[dx/L,dz/L]:[0,0]}
   return[0,0]}
 // ---------- 한 프레임 ----------
@@ -516,16 +516,16 @@ function mgDrawMap(){const cv=$('mgMap');if(!cv)return;const x=cv.getContext('2d
 // ---------- 판 전에 스킬 고르기 ----------
 function mgSelOpen(role){let m=$('mgSel');if(!m){m=document.createElement('div');m.id='mgSel';m.className='mg-pick';document.body.appendChild(m);
     m.addEventListener('click',async e=>{const R=m.dataset.role;if(e.target.closest('#mgSelX')){SFX.click();m.hidden=true;return}
-      const go=e.target.closest('#mgSelGo');if(go){const sel=R==='thief'?MGSEL.thief:MGSEL.witch;if(sel.length!==(R==='thief'?2:5)){SFX.deny();return}SFX.click();m.hidden=true;try{await initAudio()}catch(_){}
+      const go=e.target.closest('#mgSelGo');if(go){const sel=R==='thief'?MGSEL.thief:MGSEL.witch;if(sel.length!==(R==='thief'?2:MGWN)){SFX.deny();return}SFX.click();m.hidden=true;try{await initAudio()}catch(_){}
         if(R==='thief'){SAVE.mgTh=sel.slice();saveGame();mgStart('thief',sel.slice(),mgRandWitch())}else{SAVE.mgWi=sel.slice();saveGame();mgStart('mon',mgRandThief(),sel.slice())}return}
-      const c=e.target.closest('[data-k]');if(!c)return;const k=c.dataset.k,sel=R==='thief'?MGSEL.thief:MGSEL.witch,max=R==='thief'?2:5;const i=sel.indexOf(k);
+      const c=e.target.closest('[data-k]');if(!c)return;const k=c.dataset.k,sel=R==='thief'?MGSEL.thief:MGSEL.witch,max=R==='thief'?2:MGWN;const i=sel.indexOf(k);
       if(i>=0)sel.splice(i,1);else{if(sel.length>=max)sel.shift();sel.push(k)}MGSEL.last=k;SFX.card();mgSelDraw()})}
-  m.dataset.role=role;if(role==='thief')MGSEL.thief=(SAVE.mgTh||mgDefThief()).filter(k=>k in MGTS).slice(0,2);else MGSEL.witch=(SAVE.mgWi||mgDefWitch()).filter(k=>k in MGWS).slice(0,5);MGSEL.last=null;mgSelDraw();m.hidden=false}
-function mgSelDraw(){const m=$('mgSel'),R=m.dataset.role,th=R==='thief',sel=th?MGSEL.thief:MGSEL.witch,max=th?2:5,keys=th?MGTK:MGWK;
+  m.dataset.role=role;if(role==='thief')MGSEL.thief=(SAVE.mgTh||mgDefThief()).filter(k=>k in MGTS).slice(0,2);else MGSEL.witch=(SAVE.mgWi||mgDefWitch()).filter(k=>k in MGWS).slice(0,MGWN);MGSEL.last=null;mgSelDraw();m.hidden=false}
+function mgSelDraw(){const m=$('mgSel'),R=m.dataset.role,th=R==='thief',sel=th?MGSEL.thief:MGSEL.witch,max=th?2:MGWN,keys=th?MGTK:MGWK;
   const nm=k=>th?mgSkName(k):MGWS[k].n,ic=k=>th?mgSkSvg(k):(ART[k]||''),ds=k=>th?MGTS[k].d:MGWS[k].d;const last=MGSEL.last||sel[sel.length-1];
   m.innerHTML=`<div class="slab mg-pk mg-sel"><div class="mg-pk-top"><span class="mg-tag">${th?MGI.thief:MGI.witch}</span><b>${th?'쿠키 도둑 스킬':'거대 마녀 스킬'} <em>${sel.length}/${max}</em></b><button class="mg-ib" id="mgSelX" aria-label="닫기"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" stroke="#4a2a1a" stroke-width="3" stroke-linecap="round"/></svg></button></div>
     <div class="mg-sel-grid ${th?'t':'w'}">${keys.map(k=>`<button class="mg-sel-c${sel.includes(k)?' on':''}" data-k="${k}" style="--c:${MGCOLS[k]||'#e3c9a8'}" aria-label="${nm(k)}"><span>${ic(k)}</span><b>${nm(k)}</b>${sel.includes(k)?`<i>${sel.indexOf(k)+1}</i>`:''}</button>`).join('')}</div>
-    <div class="mg-sel-bot"><p>${last?`<b>${nm(last)}</b> · ${ds(last)}`:(th?'대시는 늘 있어요 · 스킬 2개를 골라요':'사탕 구슬(평타)은 늘 있어요 · 스킬 5개를 골라요')}</p><button class="mg-go${sel.length===max?'':' off'}" id="mgSelGo" aria-label="시작">시작</button></div></div>`}
+    <div class="mg-sel-bot"><p>${last?`<b>${nm(last)}</b> · ${ds(last)}`:(th?'대시는 늘 있어요 · 스킬 2개를 골라요':'사탕 구슬(평타)은 늘 있어요 · 스킬 3개를 골라요')}</p><button class="mg-go${sel.length===max?'':' off'}" id="mgSelGo" aria-label="시작">시작</button></div></div>`}
 
 {const st=document.createElement('style');st.textContent=`
 #mgHud{position:fixed;inset:0;z-index:20;pointer-events:none;font-family:var(--f-display);color:var(--choco)}
