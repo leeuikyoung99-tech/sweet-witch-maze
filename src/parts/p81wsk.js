@@ -189,7 +189,8 @@ function mgWallCrumb(w){const x=w.x*C,z=w.z*C;mgSpark(x,1.6,z,['#e0a060','#c97a3
 // 스킬을 끄는 동안만 떠요. X 쪽으로 끌어서 놓으면 안 써요. 미니맵과 겹치는 화면에선 끄는 동안 미니맵을 잠깐 숨겨요.
 function mgCancelPlace(){const c=$('mgCancel'),box=$('mgBtns');if(!c||!box)return;const bs=[...box.querySelectorAll('.mg-ab')];if(!bs.length)return;
   const big=box.querySelector('.mg-ab.big');const br=big.getBoundingClientRect();let top=1e9;for(const b of bs){const r=b.getBoundingClientRect();top=Math.min(top,r.top)}
-  const z=Math.round(br.width*.6),x=br.right-z/2-2,y=top-12-z/2;c.style.left=(x-z/2)+'px';c.style.top=Math.max(8,y-z/2)+'px';c.style.width=c.style.height=z+'px';
+  const z=Math.round(br.width*(innerHeight<360?.52:.6)),x=br.right-z/2-2,gap=Math.max(50,innerHeight*.14);let y=top-gap-z/2;y=Math.max(54+z/2,y); // 스킬과 충분히 떨어지게 (위 버튼줄 아래까지)
+  c.style.left=(x-z/2)+'px';c.style.top=(y-z/2)+'px';c.style.width=c.style.height=z+'px';
   const m=document.querySelector('#mgHud .mg-map');if(m){const mr=m.getBoundingClientRect();$('mgHud').classList.toggle('cxmap',y-z/2<mr.bottom+4)}}
 {const mv=mgBtnMove;mgBtnMove=function(e){const d=MGDR;const was=d.moved;mv.apply(this,arguments);if(d.a&&d.moved&&!was)mgCancelPlace()}}
 {const st=document.createElement('style');st.textContent=`
