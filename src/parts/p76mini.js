@@ -7,7 +7,7 @@
 // 모든 공격은 바닥 예고가 먼저 떠서 피할 수 있고, 남는 효과(덫·거미줄·가짜 사탕)는 시간이 지나면 사라져요.
 // 3분 한 판 · 도둑 체력 3(하트 반 칸씩) · 미니맵에 서로의 위치가 늘 보여요(망토·투명 때만 빼고) · 보상과 등급 없음.
 const MG={on:false,role:'thief',T:180,cx:0,cz:0,g:null,hidden:[],pause:false,over:false,cdn:0,t:0,rise:[],parts:[],hits:[],items:[]};
-const MGP={thSpd:6.4,dashSpd:17,dashT:.26,dashCd:3,thR:.45,hp:3,inv:1.8,moSpd:4,moR:1.9,moH:8.5,eyeTh:1.62,eyeMo:7.7,candies:6,wallsPer:10,stomp:{cd:1,dmg:.5,spd:10,r:.85,range:30}};
+const MGP={thSpd:6.4,dashSpd:17,dashT:.26,dashCd:3,thR:.45,hp:3,inv:2.1,moSpd:4,moR:1.9,moH:8.5,eyeTh:1.62,eyeMo:7.7,candies:6,wallsPer:10,stomp:{cd:1,dmg:.5,spd:9,r:.6,range:30}};
 // 마녀 카드 → 거대 마녀 스킬 (cd 쿨타임 초)
 const MGWS={
  tower:{n:'사탕 폭탄',d:'조준한 곳에 큰 사탕 폭탄을 내리꽂아요',cd:14,range:28},
@@ -239,6 +239,7 @@ function mgScatter(p,r,n){const out=[{x:p.x,z:p.z}];for(let i=1;i<n;i++){const a
 function mgCast(k,aim){const mo=MG.mo,S=MGWS[k];if(!S||mo.cd[k]>0||mo.lockT>0||mo.jump||mo.charge||mo.eatT>0||MG.over)return false;
   let f=Math.atan2(-Math.cos(mo.yaw),-Math.sin(mo.yaw));let P=aim?{x:aim.x,z:aim.z}:mgAim();if(aim&&aim.drag&&(k==='bat'||k==='bear'))f=Math.atan2(P.z-mo.z,P.x-mo.x);const ux=Math.cos(f),uz=Math.sin(f);mgClampPt(P,S.range||40);
   mo.cd[k]=S.cd;mo.lockT=.45;mo.m.atkT=.6;MG.stat.atk[k]=(MG.stat.atk[k]||0)+1;
+  if(typeof MGCAST!=='undefined'&&MGCAST[k]){MGCAST[k]({P,f,ux,uz,mo,S,aim});return true}
   if(k==='tower'){mgHit('circle',{x:P.x,z:P.z,r:4.5},1.5,{fall:{mesh:mgBombMesh(),y0:42,spin:2},why:k,end:()=>{MGS.boom(P.x,P.z,1);mgBurst(P.x,P.z,['#ff5f9e','#ffffff','#ffd23a','#7cc6ff'],40,13,.9);mgRing(P.x,P.z,11,'#ffd6ea',.6);mgRing(P.x,P.z,7,'#ffffff',.45);MG.shake=Math.max(MG.shake||0,.5)}})}
   else if(k==='ice'){mgScatter(P,7.5,7).forEach((q,i)=>mgHit('circle',{x:q.x,z:q.z,r:2.4},1.1+i*.14,{dmg:0,eff:'slow',quiet:i>0,why:k,fall:{mesh:mgIceMesh(),y0:34,spin:4},end:()=>{MGS.ice(q.x,q.z);mgBurst(q.x,q.z,['#bfeaff','#ffffff','#7cc6ff'],10,8,.5);mgRing(q.x,q.z,3.5,'#bfeaff',.35)}}))}
   else if(k==='magnet'){mgHit('circle',{x:P.x,z:P.z,r:2.6},1.2,{why:k,fall:{mesh:mgMagnetMesh(),y0:36},end:()=>{MGS.boom(P.x,P.z);const g=mgMagnetMesh();g.add(mgFlat(13,'#ff4a4a',.08,.09));const rg=new THREE.Mesh(new THREE.RingGeometry(12.6,13,48),new THREE.MeshBasicMaterial({color:'#ff4a4a',transparent:true,opacity:.6,depthWrite:false,side:THREE.DoubleSide}));rg.rotation.x=-Math.PI/2;rg.position.y=.12;g.add(rg);mgItem('magnet',P.x,P.z,3.5,13,g);mgMsg(MG.role==='thief'?'자석에 끌려가요! 반대로 달려요':'자석 사탕!',1.4)}})}
@@ -400,12 +401,10 @@ function mgMonAI(dt){const mo=MG.mo,th=MG.th,ai=MG.ai,lvl=AIL==null?1:AIL;let tx
       const lead=[.15,.45,.7][lvl];const px=tx+th.dx*(th.moving?MGP.thSpd:0)*lead,pz=tz+th.dz*(th.moving?MGP.thSpd:0)*lead;const err=[3.5,2,.8][lvl];
       const aim={x:px+(Math.random()-.5)*err,z:pz+(Math.random()-.5)*err};
       const ready=mo.sk.filter(k=>mo.cd[k]<=0).sort(()=>Math.random()-.5);
-      for(const k of ready){const S=MGWS[k];let ok=false;
-        if(['tower','ice','magnet','soldier','spider'].includes(k))ok=d<(S.range||24)-1;else if(k==='spin')ok=d<8;else if(['slip','rev','trap'].includes(k)){ok=d<24;if(MG.cand){aim.x=(th.x+MG.cand.x)/2;aim.z=(th.z+MG.cand.z)/2}}
-        else if(k==='fake'||k==='fog')ok=MG.t>8;else if(k==='eye')ok=d>14;else if(k==='skel')ok=d>7&&d<18;else if(k==='ghost')ok=d<20;else if(k==='bat')ok=d<24;else if(k==='bear')ok=d<16&&d>5;
-        if(ok&&Math.random()<[.35,.6,.85][lvl]){if(k==='bat'||k==='bear'){const a=Math.atan2(pz-mo.z,px-mo.x);mo.yaw=Math.atan2(-Math.cos(a),-Math.sin(a))}if(mgCast(k,aim))return[0,0]}}
+      for(const k of ready){const S=MGWS[k];const ok=mgAiOk(k,d,aim,px,pz);
+        if(ok&&Math.random()<[.35,.6,.85][lvl]){if(k==='spider'||k==='bear'){const a=Math.atan2(pz-mo.z,px-mo.x);mo.yaw=Math.atan2(-Math.cos(a),-Math.sin(a))}if(mgCast(k,aim))return[0,0]}}
       // 평타: 느린 사탕 구슬을 도둑이 갈 곳으로 던져요
-      if(mo.cd.stomp<=0&&d<26&&!(th.cloakT>0)&&Math.random()<[.3,.45,.7][lvl]){const tt=d/MGP.stomp.spd*[.3,.6,.9][lvl];const ax=tx+th.dx*(th.moving?MGP.thSpd:0)*tt+(Math.random()-.5)*err,az=tz+th.dz*(th.moving?MGP.thSpd:0)*tt+(Math.random()-.5)*err;if(mgStomp({x:ax,z:az}))return[0,0]}}
+      if(mo.cd.stomp<=0&&d<26&&!(th.cloakT>0)&&Math.random()<[.22,.35,.6][lvl]){const tt=d/MGP.stomp.spd*[.3,.6,.9][lvl];const ax=tx+th.dx*(th.moving?MGP.thSpd:0)*tt+(Math.random()-.5)*err,az=tz+th.dz*(th.moving?MGP.thSpd:0)*tt+(Math.random()-.5)*err;if(mgStomp({x:ax,z:az}))return[0,0]}}
     const L=d||1;return d>MGP.moR+.6?[dx/L,dz/L]:[0,0]}
   return[0,0]}
 // ---------- 한 프레임 ----------

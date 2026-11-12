@@ -179,10 +179,10 @@ function mgOrbTick(dt){if(!MG.orbs||!MG.orbs.length)return;const th=MG.th,W=MGW(
     if(o.d>MGP.stomp.range||o.x<.5||o.z<.5||o.x>W-.5||o.z>W-.5||(o.y<WH&&mgPtInWall(o.x,o.z,.15)))mgOrbBoom(o,0)}
   MG.orbs=MG.orbs.filter(o=>!o.dead)}
 // 휩쓸기(박쥐 떼): 예고가 끝나면 박쥐 떼 앞머리가 실제로 날아가며, 지나갈 때 닿으면 맞아요
-function mgSweep(x,z,ux,uz,w,len,spd,why){(MG.sweeps||(MG.sweeps=[])).push({x,z,ux,uz,w,len,spd,why,d:0})}
+function mgSweep(x,z,ux,uz,w,len,spd,why,dmg){(MG.sweeps||(MG.sweeps=[])).push({x,z,ux,uz,w,len,spd,why,d:0,dmg:dmg||1})}
 function mgSweepTick(dt){if(!MG.sweeps||!MG.sweeps.length)return;const th=MG.th;
   for(const s of MG.sweeps){const d0=s.d;s.d=Math.min(s.len,s.d+s.spd*dt);const dx=th.x-s.x,dz=th.z-s.z,t=dx*s.ux+dz*s.uz,p=Math.abs(-dx*s.uz+dz*s.ux);
-    if(!s.hit&&p<s.w/2+MGP.thR&&t>d0-2.2&&t<s.d+.6){if(mgHurt({x:s.x,z:s.z},s.why,1))s.hit=1}
+    if(!s.hit&&p<s.w/2+MGP.thR&&t>d0-2.2&&t<s.d+.6){if(mgHurt({x:s.x,z:s.z},s.why,s.dmg))s.hit=1}
     if(MG.decoy&&!s.dh){const q=MG.decoy,ex=q.x-s.x,ez=q.z-s.z,tt=ex*s.ux+ez*s.uz,pp=Math.abs(-ex*s.uz+ez*s.ux);if(pp<s.w/2+MGP.thR&&tt>d0-2.2&&tt<s.d+.6){q.t=0;s.dh=1}}}
   MG.sweeps=MG.sweeps.filter(s=>s.d<s.len)}
 {const cl=mgClean;mgClean=function(){MG.sweeps=[];return cl.apply(this,arguments)}}
