@@ -67,3 +67,30 @@ setInterval(()=>{try{if(screen!=='misS')return;const b=document.querySelector('#
 // 새 미션까지 남은 시간: 아래 줄 대신 제목 옆 작은 글씨(작은 화면에서 아래가 잘렸어요)
 {const t=$('misS').querySelector('.pane-top>b'),n=$('misNote');if(t&&n)t.after(n)}
 {const st=document.createElement('style');st.textContent=`#misS .pane-top #misNote{flex:1 1 auto;min-width:0;margin:0 0 0 10px!important;font:12px var(--f-ui)!important;color:#8a6a50;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0!important}`;document.head.appendChild(st)}
+// ----- 마녀 증강체 '두 수 앞 보기' → '자동 두 수': 버튼을 누르면 가장 좋은 벽 밀기 2번을 차례로 알아서 해요 -----
+// 판마다 한 번, 소다·벽 밀기 쿨타임과 상관없이. 온라인 마녀(거울 쪽)는 자리를 보내고 도둑(진행) 쪽이 똑같이 밀어요.
+{const a=AUGI2.w_plan2,T='자동 두 수',D2='판마다 한 번 버튼을 누르면|가장 좋은 벽 밀기 2번을 알아서 해요';if(a){a.n=T;a.d=D2}const q=AUGW2.find(x=>x[0]==='w_plan2');if(q){q[2]=T;q[3]=D2}}
+try{AB70.plan2=['target','자동 두 수','p']}catch(e){}
+function p2MoveWall(w,o,nx,nz){if(!w||!B.walls.includes(w)||w.anim)return 'gone';if(o!==w.o||Math.abs(nx-w.x)+Math.abs(nz-w.z)!==1)return 'far';
+  if(allHeroes().some(q=>wallDist(q.x,q.z,o,nx,nz)<WALL_NEAR))return 'near';if(heroNearWall(w))return 'heronear';const r=tryWall(o,nx,nz,w,allCells());if(r!=='ok')return r;
+  const old={o:w.o,x:w.x,z:w.z};w.o=o;w.x=nx;w.z=nz;w.prev={x:old.x,z:old.z};w.lockUntil=G.t+WALL_LOCK;rebuildEdges();try{G.stats.wallMoves++}catch(e){}w.anim={t:0,from:old};
+  try{syncPosts()}catch(e){}try{SFX.crunch()}catch(e){}w.moved=1;try{tintWall(w)}catch(e){}try{rebuildPathLines()}catch(e){}
+  if(G.mode==='hero')say('🍪 쿠키 벽이 움직였어요',true,1.2);return 'ok'}
+function p2Go(c){if(G.mirror){try{netSend({t:'card',i:-1,k:'p2mv',wi:B.walls.indexOf(c.w),o:c.o,nx:c.x,nz:c.z})}catch(e){}SFX.crunch();return 'ok'}return p2MoveWall(c.w,c.o,c.x,c.z)}
+p2Activate=function(){if(PLAN2.used||G.mode!=='devil'||!G.hero||G.over||G.cdn)return;let p=null;try{p=p2Plan('move')}catch(e){p=null}
+  if(!p){say('자동 두 수 · 지금은 도둑 길을 늘릴 벽이 없어요',false,1.8);SFX.deny();return}
+  PLAN2.used=true;PLAN2.on=false;try{augHud()}catch(e){}try{SFX.magic()}catch(e){}
+  const c1=p.steps[0];const w1=c1.w;const r1=p2Go(c1);if(r1!=='ok'){PLAN2.used=false;say('자동 두 수 · 지금은 밀 수 없어요',false,1.5);try{augHud()}catch(e){}return}
+  say(`자동 두 수 ① 도둑 길 +${p.gain[0]}칸`,false,1.4);
+  setTimeout(()=>{if(G.over||screen!=='play'||G.mode!=='devil')return;let b=null;try{b=p2Best1('move',[w1])}catch(e){b=null}
+    if(!b){say('자동 두 수 ② 지금은 더 늘릴 벽이 없어요',false,1.6);return}
+    const r2=p2Go(b.c);if(r2==='ok')say(`자동 두 수 ② 도둑 길 +${b.g}칸`,false,1.6)},1300)};
+// 진행(도둑) 쪽: 거울 마녀가 보낸 자동 밀기 (판마다 두 번까지)
+{const hc=handleCard;handleCard=function(d){if(d&&d.k==='p2mv'){if(G.aug&&G.aug.w_plan2&&(G.p2n|0)<2){const r=p2MoveWall(B.walls[d.wi],d.o,d.nx,d.nz);if(r==='ok')G.p2n=(G.p2n|0)+1}return}return hc.apply(this,arguments)}}
+{const bm=beginMatch;beginMatch=function(){G.p2n=0;return bm.apply(this,arguments)}}
+// 버튼: 다른 마녀 증강체처럼 칩 옆 아이콘 (예전 '두 수 보기' 떠 있는 버튼은 숨겨요)
+p2BtnSync=function(){const b=$('p2Btn');if(b)b.hidden=true};
+{const ah=augHud;augHud=function(){const r=ah.apply(this,arguments);try{const db=$('augBtnD');if(!db||!G.devil)return r;const want=AG().w_plan2&&!PLAN2.used&&G.mode==='devil';let b=db.querySelector('[data-a="plan2"]');
+  if(want){if(!b){db.insertAdjacentHTML('beforeend','<button data-a="plan2"></button>');ab70Icons();ab70Pos()}db.hidden=false}else if(!want&&b){b.remove();if(!db.querySelector('button,span'))db.hidden=true}}catch(e){}return r}}
+setInterval(()=>{try{if(screen==='play'&&G.mode==='devil'&&AG().w_plan2)augHud()}catch(e){}},700);
+{const st=document.createElement("style");st.textContent="#p2Btn{display:none!important}";document.head.appendChild(st)}
