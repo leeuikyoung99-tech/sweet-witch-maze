@@ -246,3 +246,15 @@ MGCAST.bat=function({mo}){const T=3.2,sp=[];for(let i=0;i<26;i++){const p=mgP('b
 {const ok=mgAiOk;mgAiOk=function(k,d,aim,px,pz){if(k==='bat')return d<10;return ok.apply(this,arguments)}}
 {const st=document.createElement('style');st.textContent=`#mgHud .mg-btns.arc .mg-ab.recast{filter:none!important;opacity:1!important;box-shadow:0 4px 0 var(--choco),0 0 0 4px #ffd23a,0 0 18px #ffd23a!important;animation:mgRc .5s ease-in-out infinite alternate}
 @keyframes mgRc{to{transform:scale(1.08)}}#mgHud .mg-btns.arc .mg-ab.recast::after{content:attr(data-n);display:grid!important;place-items:center;position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:#ffd23a;border:2px solid var(--choco);font:13px var(--f-display);color:var(--choco);opacity:1!important;animation:none;box-shadow:none;inset:auto -6px auto auto}`;document.head.appendChild(st)}
+
+// ===== 83: 사탕 자리 = 도둑과 마녀가 '같은 시간'에 닿는 곳 =====
+// 도둑은 벽을 돌아가는 실제 길(BFS) ÷ 도둑 속도, 마녀는 벽을 부수며 곧장 가니 직선 거리 ÷ 마녀 속도.
+// 두 시간이 가장 비슷한 칸들 중에서(도둑이 3초 넘게 걸리는 곳만) 하나를 골라요. 너무 뻔하지 않게 비슷한 후보 몇 개 중 무작위.
+function mgThiefDist(){const th=MG.th,[sx,sz]=cellOf(th.x,th.z),D=new Float32Array(N*N).fill(-1);if(!mgOpen(sx,sz))return D;const q=[idx(sx,sz)];D[idx(sx,sz)]=Math.hypot(th.x-cx2x(sx),th.z-cx2x(sz));
+  for(let h=0;h<q.length;h++){const i=q[h],x=i%N,z=(i/N)|0;for(const[dx,dz]of DIRS){const nx=x+dx,nz=z+dz;if(!mgOpen(nx,nz)||D[idx(nx,nz)]>=0||!canStep(x,z,dx,dz))continue;D[idx(nx,nz)]=D[i]+C;q.push(idx(nx,nz))}}return D}
+function mgEqualCell(minWitch){const mo=MG.mo,D=mgThiefDist(),c=[];const vT=MGP.thSpd,vW=MGP.moSpd;
+  for(let z=0;z<N;z++)for(let x=0;x<N;x++){const d=D[idx(x,z)];if(d<0||(x===EXIT[0]&&z===EXIT[1]))continue;const px=cx2x(x),pz=cx2x(z),tT=d/vT,dW=Math.hypot(px-mo.x,pz-mo.z),tW=Math.max(0,dW-MGP.moR)/vW;
+    if(tT<3||(minWitch&&dW<minWitch))continue;c.push({x:px,z:pz,sc:Math.abs(tT-tW),tT})}
+  if(!c.length)return null;c.sort((a,b)=>a.sc-b.sc);const top=c.filter(q=>q.sc<=c[0].sc+.6).slice(0,6);return top[(Math.random()*top.length)|0]}
+mgSpawnCandy=function(){const c=mgEqualCell()||mgFarCell(20);const g=mgCandyMesh();g.position.set(c.x,0,c.z);MG.g.add(g);MG.cand={x:c.x,z:c.z,g}};
+{const ff=mgFleeCell;mgFleeCell=function(){return mgEqualCell(20)||ff.apply(this,arguments)}}
