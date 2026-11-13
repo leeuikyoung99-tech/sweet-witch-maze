@@ -7,10 +7,11 @@ const TTI={
  mini:'<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M6 40h36" stroke="#4a2a1a" stroke-width="3" stroke-linecap="round"/><path d="M12 40 18 22h12l6 18z" fill="#b98cff" stroke="#4a2a1a" stroke-width="3" stroke-linejoin="round"/><circle cx="24" cy="17" r="7" fill="#fff" stroke="#4a2a1a" stroke-width="3"/><path d="M13 12h22L24 2z" fill="#7a4dd0" stroke="#4a2a1a" stroke-width="3" stroke-linejoin="round"/><path d="M9 13h30" stroke="#4a2a1a" stroke-width="3" stroke-linecap="round"/><circle cx="21.5" cy="17.5" r="1.3" fill="#4a2a1a"/><circle cx="26.5" cy="17.5" r="1.3" fill="#4a2a1a"/><path d="M38 24l-3 16" stroke="#fff8ee" stroke-width="3"/><circle cx="38.5" cy="22" r="3.5" fill="#ff5f9e" stroke="#4a2a1a" stroke-width="2"/></svg>'};
 {const row=$('bAI').parentNode,slab=row.parentNode;const mk=(id,cls,ic,t,s)=>{const b=document.createElement('button');b.className='mbtn '+cls;b.id=id;b.innerHTML=`<span class="mi">${ic}</span><span class="mt"><b>${t}</b><small>${s}</small></span>`;return b};
   const bMain=mk('bMain','mint',TTI.main,'메인 '+'게임','마녀의 미로'),bMini=mk('bMini','grape',TTI.mini,'미니게임','거대 마녀');
-  // 돌아가기: 위쪽 왼쪽(프로필 자리), 둥근 아이콘 버튼
-  const bk=document.createElement('button');bk.id='bTBack';bk.className='ib tback';bk.setAttribute('aria-label','돌아가기');bk.innerHTML=LBI.back;slab.appendChild(bk);
-  // 게임 안 제목(로고 대신)
+  // 닫기: 다른 창처럼 위 오른쪽 X (설정 자리, 게임 안에서는 설정을 숨겨요)
+  const bk=document.createElement('button');bk.id='bTBack';bk.className='bk31 abs';bk.setAttribute('aria-label','닫기');slab.appendChild(bk);
+  // 게임 안 제목(로고 대신) + 맵 사진 그림판
   const hd=document.createElement('div');hd.id='ttHead';hd.innerHTML='<span class="ti"></span><b></b>';slab.insertBefore(hd,$('tRank'));
+  const art=document.createElement('div');art.id='ttArt';art.innerHTML='<div class="ta-in"><span class="ta-t"></span><i>VS</i><span class="ta-w"></span></div>';slab.insertBefore(art,row);
   row.insertBefore(bMain,$('bAI'));row.insertBefore($('bStage'),$('bAI'));row.insertBefore(bMini,$('bAI'));row.classList.add('tt');
   bMain.onclick=async()=>{try{await initAudio()}catch(e){}SFX.click();TT.mode='main';ttSync()};
   bMini.onclick=async()=>{try{await initAudio()}catch(e){}SFX.click();TT.mode='mini';ttSync()};
@@ -18,14 +19,17 @@ const TTI={
 const TTSUB={main:{bAI:'AI와 대결',bRandT:'도둑 랭크 · 마녀 랭크',bOnline:'코드로 방 만들기'},mini:{bAI:'AI와 대결',bRandT:'판돈·등급 없이',bOnline:'코드로 방 만들기'}};
 function ttSync(){const row=$('bAI').parentNode,slab=row.parentNode,m=TT.mode;row.classList.toggle('sub',!!m);row.classList.toggle('mini',m==='mini');
   slab.classList.toggle('t-top',!m);slab.classList.toggle('t-main',m==='main');slab.classList.toggle('t-mini',m==='mini');
-  const hd=$('ttHead');if(m){hd.querySelector('b').textContent=m==='mini'?'거대 마녀':'마녀의 미로';hd.querySelector('.ti').innerHTML=TTI[m]}
+  const hd=$('ttHead');if(m){hd.querySelector('b').textContent=m==='mini'?'거대 마녀':'마녀의 미로';hd.querySelector('.ti').innerHTML=TTI[m];ttArtDraw()}
   if(m){for(const id in TTSUB[m]){const s=$(id)&&$(id).querySelector('small');if(s)s.textContent=TTSUB[m][id]}const t=$('bOnline').querySelector('b');if(t)t.textContent=m==='main'?'친구랑 대전하기':'친구랑 하기'}
   LOBBY.pick=m||'main';ttFit()}
+function ttArtDraw(){const a=$('ttArt');if(!a)return;let k=LOBBY.map;if(!k||!MAPIMG[k])k=(SAVE&&SAVE.lbMap&&MAPIMG[SAVE.lbMap])?SAVE.lbMap:'candy';
+  if(a.dataset.k!==k){a.dataset.k=k;a.style.backgroundImage=`url(${MAPIMG[k]})`}
+  const t=a.querySelector('.ta-t'),w=a.querySelector('.ta-w');if(!t.firstChild){t.innerHTML=MGI.thief||'';w.innerHTML=MGI.witch||''}}
 // 창 크기는 첫 화면·메인·미니 모두 같게: 세 모양의 높이를 재서 가장 큰 값을 최소 높이로
-function ttFit(){const row=$('bAI').parentNode,slab=row.parentNode;slab.style.minHeight='';
+function ttFit(){const row=$('bAI').parentNode,slab=row.parentNode,z0=slab.style.zoom;slab.style.minHeight='';slab.style.zoom='';
   const SC=['t-top','t-main','t-mini'],RC=['sub','mini'],cs=SC.filter(c=>slab.classList.contains(c)),rs=RC.filter(c=>row.classList.contains(c));let h=0;
   for(const [sc,rc] of [['t-top',[]],['t-main',['sub']],['t-mini',['sub','mini']]]){slab.classList.remove(...SC);slab.classList.add(sc);row.classList.remove(...RC);row.classList.add(...rc);h=Math.max(h,slab.offsetHeight)}
-  slab.classList.remove(...SC);slab.classList.add(...cs);row.classList.remove(...RC);row.classList.add(...rs);if(h>0)slab.style.minHeight=h+'px'}
+  slab.classList.remove(...SC);slab.classList.add(...cs);row.classList.remove(...RC);row.classList.add(...rs);if(h>0)slab.style.minHeight=h+'px';slab.style.zoom=z0;try{fitScr()}catch(e){}}
 addEventListener('resize',()=>{try{ttFit()}catch(e){}});
 {const ts=titleScreen;titleScreen=function(){const r=ts.apply(this,arguments);try{ttSync()}catch(e){}return r}}
 {const st0=syncTitle;syncTitle=function(){const r=st0.apply(this,arguments);try{ttSync()}catch(e){}return r}}
@@ -39,31 +43,24 @@ function ttRoleTitle(){const g=LOBBY.game==='mini';return (g?'거대 마녀':'�
 .menu-row.tt #bAI,.menu-row.tt #bRandT,.menu-row.tt #bOnline{display:none}
 .menu-row.tt.sub #bAI,.menu-row.tt.sub #bRandT,.menu-row.tt.sub #bOnline{display:flex}
 .menu-row.tt.sub #bMain,.menu-row.tt.sub #bMini,.menu-row.tt.sub #bStage{display:none}
-/* 창 크기는 세 화면 모두 같게, 게임 안은 큰 카드로 채워요 */
-.title-slab.t-top,.title-slab.t-main,.title-slab.t-mini{box-sizing:border-box;width:min(660px,94vw)}.title-slab.t-top{justify-content:center}
+/* 창 크기는 세 화면 모두 같게. 첫 화면 = 로고·랭크·게임 3개·아래 메뉴, 게임 안 = 제목·맵 그림판·놀이 버튼 3개 */
+.title-slab.t-top,.title-slab.t-main,.title-slab.t-mini{box-sizing:border-box;width:min(680px,97vw)}.title-slab.t-top{justify-content:center}
 .menu-row.tt{width:100%}.menu-row.tt>.mbtn{flex:1 1 0;min-width:0;justify-content:center}
-.menu-row.tt.sub{flex:1 1 auto;align-items:stretch;gap:10px;margin-bottom:2px}
-.menu-row.tt.sub>.mbtn{flex-direction:column;justify-content:center;gap:6px;padding:12px 8px 10px;border-radius:22px}
-.menu-row.tt.sub>.mbtn::after{left:18px;right:18px}
-.menu-row.tt.sub>.mbtn .mi{width:clamp(44px,13vh,72px);height:clamp(44px,13vh,72px);border-radius:18px}.menu-row.tt.sub>.mbtn .mi svg{width:82%;height:82%}
-.menu-row.tt.sub>.mbtn .mt{align-items:center;text-align:center}.menu-row.tt.sub>.mbtn b{font-size:clamp(17px,5vh,24px)}.menu-row.tt.sub>.mbtn small{font-size:clamp(11px,2.9vh,13px)}
-.title-slab.t-mini .menu-row.tt.sub{margin-bottom:6px}
-.title-slab.t-mini .menu-row.tt.sub>.mbtn{gap:10px}.title-slab.t-mini .menu-row.tt.sub>.mbtn .mi{width:clamp(50px,20vh,104px);height:clamp(50px,20vh,104px);border-radius:24px}.title-slab.t-mini .menu-row.tt.sub>.mbtn b{font-size:clamp(20px,6.4vh,30px)}.title-slab.t-mini .menu-row.tt.sub>.mbtn small{font-size:clamp(12px,3.4vh,15px)}
-/* 첫 화면: 로고 + 게임 3개 + 상점만. 게임 안: 로고 대신 제목, 위 왼쪽 돌아가기 */
-.title-slab #bTBack,.title-slab #ttHead{display:none}
-.title-slab.t-main #bTBack,.title-slab.t-mini #bTBack{display:grid;place-items:center}
-#bTBack{position:absolute;left:13px;top:13px;width:42px;height:42px;padding:0;z-index:3}#bTBack svg{width:24px;height:24px}
-.title-slab.t-mini #bTBack{background:#e9dcff}
-.title-slab.t-main #bProf,.title-slab.t-mini #bProf{display:none!important}
+.title-slab #bTBack,.title-slab #ttHead,.title-slab #ttArt{display:none}
+.title-slab.t-main #bTBack,.title-slab.t-mini #bTBack{display:block}
+.title-slab #bTBack.abs{right:13px;top:13px}
+.title-slab.t-main #bSnd,.title-slab.t-mini #bSnd,.title-slab.t-main #bProf,.title-slab.t-mini #bProf{display:none!important}
 .title-slab.t-main>.duo,.title-slab.t-main>h1,.title-slab.t-main>.kicker,.title-slab.t-mini>.duo,.title-slab.t-mini>h1,.title-slab.t-mini>.kicker{display:none!important}
-.title-slab.t-main #ttHead,.title-slab.t-mini #ttHead{display:flex;align-items:center;justify-content:center;gap:8px;margin:2px 0 10px;min-height:42px}
-#ttHead .ti svg{width:40px;height:40px;display:block}#ttHead b{font:30px var(--f-display);color:var(--choco);letter-spacing:.5px;white-space:nowrap}
+.title-slab.t-main #tRank,.title-slab.t-mini #tRank,.title-slab.t-main .sub-row,.title-slab.t-mini .sub-row{display:none!important}
+.title-slab.t-main #ttHead,.title-slab.t-mini #ttHead{display:flex;align-items:center;justify-content:center;gap:8px;margin:2px 0 0;min-height:44px}
+#ttHead .ti svg{width:38px;height:38px;display:block}#ttHead b{font:28px var(--f-display);color:var(--choco);letter-spacing:.5px;white-space:nowrap}
 .title-slab.t-mini #ttHead b{color:#6b3fc4}
-.title-slab.t-top #tRank,.title-slab.t-mini #tRank{display:none!important}
-.title-slab.t-top .sub-row>*:not(#bShop),.title-slab.t-mini .sub-row>*:not(#bShop){display:none!important}
-.title-slab.t-main .sub-row #bShop{display:none!important}
-.title-slab.t-mini .sub-row{display:none!important}
-.title-slab.t-top .sub-row #bShop{padding-left:22px;padding-right:22px;min-width:150px;justify-content:center}
-@media (max-height:340px){#ttHead b{font-size:24px}#ttHead .ti svg{width:30px;height:30px}.title-slab.t-main #ttHead,.title-slab.t-mini #ttHead{margin:0;min-height:44px}
-.title-slab.t-main .menu-row.tt.sub>.mbtn{padding:7px 6px 6px;gap:3px}.title-slab.t-main .menu-row.tt.sub>.mbtn .mi{width:36px;height:36px;border-radius:13px}}
+.title-slab.t-main #ttArt,.title-slab.t-mini #ttArt{display:block;flex:1 1 0;min-height:64px;width:100%;position:relative;border:3px solid var(--choco);border-radius:18px;overflow:hidden;background:#f6e2c8 50% 55%/cover no-repeat;box-shadow:0 4px 0 var(--choco)}
+#ttArt::before{content:"";position:absolute;inset:0;background:linear-gradient(#fff0 35%,#4a2a1a59)}
+.title-slab.t-mini #ttArt::before{background:linear-gradient(#7a4dd055,#4a1f9a99)}
+#ttArt .ta-in{position:absolute;inset:6% 0 4%;display:flex;align-items:flex-end;justify-content:center;gap:4%}
+#ttArt .ta-in>span{height:86%;aspect-ratio:1;display:block;filter:drop-shadow(0 3px 0 #4a2a1a99)}#ttArt .ta-in svg{width:100%;height:100%;display:block}
+#ttArt .ta-in>i{align-self:center;font:normal clamp(18px,6vh,30px) var(--f-display);color:#fff;-webkit-text-stroke:2px var(--choco);paint-order:stroke;text-shadow:0 3px 0 var(--choco)}
+.title-slab.t-mini #ttArt .ta-t{height:48%}.title-slab.t-mini #ttArt .ta-w{height:100%}.title-slab.t-mini #ttArt .ta-in{inset:4% 0 0}
+@media (max-height:340px){#ttHead b{font-size:24px}#ttHead .ti svg{width:30px;height:30px}.title-slab.t-main #ttHead,.title-slab.t-mini #ttHead{margin:0}}
 `;document.head.appendChild(st)}
