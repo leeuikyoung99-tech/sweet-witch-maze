@@ -6,6 +6,7 @@
 // 도둑은 대시 + 고른 스킬 2개(미니게임에 맞게 바뀐 효과). 둘 다 판 전에 스킬을 골라요.
 // 모든 공격은 바닥 예고가 먼저 떠서 피할 수 있고, 남는 효과(덫·거미줄·가짜 사탕)는 시간이 지나면 사라져요.
 // 3분 한 판 · 도둑 체력 3(하트 반 칸씩) · 미니맵에 서로의 위치가 늘 보여요(망토·투명 때만 빼고) · 보상과 등급 없음.
+// AI 난이도(미니게임, 2026-11-13): 예전 '쉬움'이 새 '어려움', 보통·쉬움은 그보다 더 쉽게
 const MG={on:false,role:'thief',T:180,cx:0,cz:0,g:null,hidden:[],pause:false,over:false,cdn:0,t:0,rise:[],parts:[],hits:[],items:[]};
 const MGP={thSpd:6.4,dashSpd:17,dashT:.26,dashCd:3,thR:.45,hp:3,inv:2.1,moSpd:4,moR:1.9,moH:8.5,eyeTh:1.62,eyeMo:7.7,candies:6,wallsPer:10,stomp:{cd:1,dmg:.5,spd:9,r:.6,range:30}};
 // 마녀 카드 → 거대 마녀 스킬 (cd 쿨타임 초)
@@ -310,7 +311,7 @@ function mgStart(role,thSk,woSk){MG.role=role;MG.on=true;MG.over=false;MG.pause=
   MG.th.sk.forEach(k=>MG.th.cd[k]=0);MG.th.dash2=MG.th.sk.includes('dash2');MG.th.charges=MG.th.dash2?2:1;
   MG.mo={x:cx2x(MID),z:cx2x(EXIT[1]===0?3:N-4),yaw:EXIT[1]===0?Math.PI:0,pitch:-.42,m:wm,moving:false,cd:{stomp:2},sk:woSk||mgDefWitch(),lockT:0,stepT:0};
   MG.mo.sk.forEach((k,i)=>MG.mo.cd[k]=4+i*1.5);
-  MG.ai={tt:0,mt:0,react:[.5,.3,.15][AIL==null?1:AIL],path:null,pathT:0};
+  MG.ai={tt:0,mt:0,react:[1.1,.8,.5][AIL==null?1:AIL],path:null,pathT:0};
   mgSpawnCandy();show('mini');mgHud(true);mgHudSync();try{musicGame()}catch(e){}mgMsg(role==='thief'?'사탕 6개를 먹고 반대편으로 넘어가요':'도둑을 잡아요 · 도둑이 사탕을 먹으면 벽이 솟아요',2.6)}
 function mgEnd(win,why){if(MG.over)return;MG.over=true;MG.why=why;const me=(MG.role==='thief')===(win==='thief');
   try{(me?SFX.win:SFX.lose)()}catch(e){}
@@ -385,7 +386,7 @@ function mgThiefAI(dt){const th=MG.th,ai=MG.ai,mo=MG.mo;ai.tt-=dt;if(ai.tt>0&&ai
   if(here>.2||mgDangerAt(th.x+gxv*2.5,th.z+gzv*2.5)>.2){best=null;for(let i=0;i<16;i++){const a=i/16*Math.PI*2,ux=Math.cos(a),uz=Math.sin(a);let dg=0;
       for(const k of[1.3,2.8,4.4]){const px=th.x+ux*k,pz=th.z+uz*k;const[qx,qz]=cellOf(px,pz);if(!mgOpen(qx,qz)||(Math.abs(qx-cx)+Math.abs(qz-cz)===1&&!canStep(cx,cz,qx-cx,qz-cz))){dg+=6;break}dg+=mgDangerAt(px,pz)}
       const sc=dg*1.7-(ux*gxv+uz*gzv);if(!best||sc<best[0])best=[sc,ux,uz]}}
-  if(here>=3.5&&th.charges>0&&Math.random()<[.45,.8,.95][lvl]){th.dx=best[1];th.dz=best[2];th.moving=true;mgDash(th)}
+  if(here>=3.5&&th.charges>0&&Math.random()<[.15,.3,.45][lvl]){th.dx=best[1];th.dz=best[2];th.moving=true;mgDash(th)}
   // 스킬
   const dm=Math.hypot(th.x-mo.x,th.z-mo.z);for(const k of th.sk){if(th.cd[k]>0)continue;let use=false;
     if(k==='sprint')use=dm<12||MG.exitOpen;else if(k==="heal")use=th.hp<=2.5;else if(k==='decoy'||k==='cloak'||k==='smoke'||k==='freeze')use=dm<11;else if(k==='gum'||k==='lure')use=dm<10;
@@ -398,13 +399,13 @@ function mgMonAI(dt){const mo=MG.mo,th=MG.th,ai=MG.ai,lvl=AIL==null?1:AIL;let tx
   if(MG.decoy&&ai.fooled==null)ai.fooled=Math.random()<.6;if(!MG.decoy)ai.fooled=null;
   const dx=tx-mo.x,dz=tz-mo.z,d=Math.hypot(dx,dz);mo.yaw=Math.atan2(-dx,-dz);
   if(!mo.jump&&!mo.charge&&!(mo.lockT>0)&&!(mo.eatT>0)&&!(mo.smokeT>0)){ai.mt-=dt;if(ai.mt<=0){ai.mt=ai.react*1.3;
-      const lead=[.15,.45,.7][lvl];const px=tx+th.dx*(th.moving?MGP.thSpd:0)*lead,pz=tz+th.dz*(th.moving?MGP.thSpd:0)*lead;const err=[3.5,2,.8][lvl];
+      const lead=[0,.05,.15][lvl];const px=tx+th.dx*(th.moving?MGP.thSpd:0)*lead,pz=tz+th.dz*(th.moving?MGP.thSpd:0)*lead;const err=[6,4.8,3.5][lvl];
       const aim={x:px+(Math.random()-.5)*err,z:pz+(Math.random()-.5)*err};
       const ready=mo.sk.filter(k=>mo.cd[k]<=0).sort(()=>Math.random()-.5);
       for(const k of ready){const S=MGWS[k];const ok=mgAiOk(k,d,aim,px,pz);
-        if(ok&&Math.random()<[.35,.6,.85][lvl]){if(k==='spider'||k==='bear'){const a=Math.atan2(pz-mo.z,px-mo.x);mo.yaw=Math.atan2(-Math.cos(a),-Math.sin(a))}if(mgCast(k,aim))return[0,0]}}
+        if(ok&&Math.random()<[.12,.22,.35][lvl]){if(k==='spider'||k==='bear'){const a=Math.atan2(pz-mo.z,px-mo.x);mo.yaw=Math.atan2(-Math.cos(a),-Math.sin(a))}if(mgCast(k,aim))return[0,0]}}
       // 평타: 느린 사탕 구슬을 도둑이 갈 곳으로 던져요
-      if(mo.cd.stomp<=0&&d<26&&!(th.cloakT>0)&&Math.random()<[.22,.35,.6][lvl]){const tt=d/MGP.stomp.spd*[.3,.6,.9][lvl];const ax=tx+th.dx*(th.moving?MGP.thSpd:0)*tt+(Math.random()-.5)*err,az=tz+th.dz*(th.moving?MGP.thSpd:0)*tt+(Math.random()-.5)*err;if(mgStomp({x:ax,z:az}))return[0,0]}}
+      if(mo.cd.stomp<=0&&d<26&&!(th.cloakT>0)&&Math.random()<[.08,.14,.22][lvl]){const tt=.5*[0,.15,.3][lvl];const ax=tx+th.dx*(th.moving?MGP.thSpd:0)*tt+(Math.random()-.5)*err,az=tz+th.dz*(th.moving?MGP.thSpd:0)*tt+(Math.random()-.5)*err;if(mgStomp({x:ax,z:az}))return[0,0]}}
     const L=d||1;return d>MGP.moR+.6?[dx/L,dz/L]:[0,0]}
   return[0,0]}
 // ---------- 한 프레임 ----------

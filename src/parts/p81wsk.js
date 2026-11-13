@@ -200,3 +200,49 @@ function mgCancelPlace(){const c=$('mgCancel'),box=$('mgBtns');if(!c||!box)retur
 #mgHud.aiming.cxmap .mg-map{visibility:hidden}`;document.head.appendChild(st)}
 // 마녀 미니맵은 마녀가 처음 바라보는 쪽(도둑 출발점 쪽)이 위로 오게 뒤집어요 (돌아가진 않아요)
 {const st=document.createElement('style');st.textContent=`#mgHud.witch #mgMap{transform:rotate(180deg)}`;document.head.appendChild(st)}
+
+// ===== 82: 평타 · 곰 · 박쥐 다시 (사용자 요청 2026-11-13) =====
+// 평타: 지팡이 끝에서 조준한 곳으로 마법 줄기가 바로 날아가 내리꽂혀요. 거리 제한 없음(판 안이면 어디든). 0.5초 예고(작은 원) 뒤 하트 반 칸.
+MGP.stomp.range=120;MGAIM.w.stomp='pt';MGAR.stomp=1.7;
+function mgBolt(aim){const mo=MG.mo,H=MGP.moH/9.2;const P=mgClampPt(aim?{x:aim.x,z:aim.z}:mgAim(),0);
+  mo.cd.stomp=MGP.stomp.cd;mo.lockT=.12;mo.m.atkT=.6;MG.stat.atk.orb=(MG.stat.atk.orb||0)+1;
+  const fx=-Math.sin(mo.yaw),fz=-Math.cos(mo.yaw),sx=mo.x+fx*1.4+Math.cos(mo.yaw)*1.3,sz=mo.z+fz*1.4-Math.sin(mo.yaw)*1.3,sy=7.4*H,T=.5;
+  MGS.shoot(sx,sz);const vis=!(mo.ghostT>0&&MG.role==='thief');
+  if(vis){mgGlowAt(sx,sy,sz,'#ffb3d6',3.5,.3)}
+  // 줄기: 빛 알갱이 여러 개가 지팡이에서 목표로 차례로 날아가요 (위에서 아래로 휘어 내리꽂힘)
+  for(let i=0;i<7;i++)mgP(i%2?'star':'glow',i%3?'#ff5f9e':'#ffffff',sx,sy,sz,{path:[sx,sy,sz,P.x,.4,P.z,2.5],life:T*(.55+i*.075),s0:1.3-i*.08,s1:.5,op:1,ease:0,fin:.02,pow:6});
+  mgHit('circle',{x:P.x,z:P.z,r:1.7},T,{dmg:MGP.stomp.dmg,why:'orb',quiet:1,end:()=>{MGS.pop(P.x,P.z);mgGlowAt(P.x,.8,P.z,'#ffb3d6',4.5,.3);mgSpark(P.x,.6,P.z,['#ff5f9e','#ffffff','#ffd23a'],12,{spd:6,grav:9});mgRing(P.x,P.z,3,'#ff9ec7',.35)}});
+  return true}
+// 구슬 맞을 때 상대 화면에서 구슬 찾던 것은 이제 필요 없어요(줄기는 예고 원으로 같이 맞춰져요)
+
+// 곰 연속 돌진: 처음 쓰면 한 번 돌진. 돌진이 끝나면 3초 안에 곰 버튼을 다시 누를 때마다 한 번 더 (최대 3번). 방향은 끌어서 조준하거나 바라보는 쪽.
+MGWS.bear.d='돌진 · 끝나고 3초 안에 다시 누르면 또 돌진(최대 3번) · 하트 1개';
+function mgBearReady(){const mo=MG.mo;return mo.bearN>0&&MG.t<(mo.bearWin||0)&&!mo.charge&&!(mo.bearSegT>MG.t)}
+MGCAST.bear=function({mo,f,aim,P}){let dir=f;if(aim&&aim.drag)dir=Math.atan2(P.z-mo.z,P.x-mo.x);mo.bearN=2;mo.bearWin=0;mo.bearSegT=MG.t+1.2;mgBearSeg(mo.x,mo.z,dir)};
+{const f=mgCast;mgCast=function(k,aim){const mo=MG.mo;if(k==='bear'&&!MGN.remote&&mgBearReady()&&MG.role==='mon'&&!MG.both){
+    let dir=Math.atan2(-Math.cos(mo.yaw),-Math.sin(mo.yaw));if(aim){const P=aim.x!=null?aim:null;if(P&&Math.hypot(P.x-mo.x,P.z-mo.z)>1)dir=Math.atan2(P.z-mo.z,P.x-mo.x)}
+    mo.bearN--;mo.bearWin=0;mo.bearSegT=MG.t+1.2;const x=mo.x,z=mo.z;mgBearSeg(x,z,dir);if(MG.net)mgSend({k:'bseg',x:mgR2(x),z:mgR2(z),dir});return true}
+  return f.apply(this,arguments)}}
+// 돌진이 끝나면: 사람 마녀는 3초 기다림(버튼이 반짝), AI 마녀는 알아서 이어서
+{const mt=mgMoTick;mgMoTick=function(dt,mv){const mo=MG.mo,had=!!mo.charge;const human=MG.role==='mon'&&!MG.both;const n=mo.bearN;if(human)mo.bearN=0;const r=mt.apply(this,arguments);if(human)mo.bearN=n;
+  if(human&&had&&!mo.charge&&mo.bearN>0)mo.bearWin=MG.t+3;if(human&&mo.bearN>0&&mo.bearWin&&MG.t>mo.bearWin){mo.bearN=0;mo.bearWin=0}return r}}
+{const bd=mgBtnDown;mgBtnDown=function(e,b){const mo=MG.mo;if(b.dataset.a==='bear'&&MG.role==='mon'&&mgBearReady()){const c=mo.cd.bear;mo.cd.bear=0;try{return bd.apply(this,arguments)}finally{mo.cd.bear=c}}return bd.apply(this,arguments)}}
+{const am=mgAct;mgAct=function(a){const mo=MG.mo;if(a==='bear'&&MG.role==='mon'&&mgBearReady()){if(!MG.on||MG.over||MG.pause||MG.cdn>0)return;return mgCast('bear')}return am.apply(this,arguments)}}
+{const hs=mgHudSync;mgHudSync=function(){hs.apply(this,arguments);if(!MG.on||MG.role!=='mon')return;const b=document.querySelector('#mgBtns [data-a=bear]');if(!b)return;const on=mgBearReady();b.classList.toggle('recast',on);
+  if(on){b.classList.remove('wait');const s=b.querySelector('.sec');if(s)s.textContent='';const cd=b.querySelector('.cd');if(cd)cd.style.setProperty('--k',0);b.dataset.n=MG.mo.bearN}}}
+
+// 박쥐 회오리: 박쥐 떼가 3초 동안 마녀 둘레(4.5~9.5m)를 돌아요. 0.5초 뒤부터 닿으면 반 칸 + 바깥으로 튕겨요. 가까이 온 도둑을 쫓아내는 스킬.
+Object.assign(MGWS.bat,{n:'박쥐 회오리',d:'박쥐가 3초 동안 마녀 둘레를 돌아요 · 닿으면 반 칸 + 튕겨 나가요',cd:14,range:0});delete MGAIM.w.bat;MGSHORT.bat='박쥐';
+MG.bring=[];
+MGCAST.bat=function({mo}){const T=3.2,sp=[];for(let i=0;i<26;i++){const p=mgP('bat',i%4?'#3a1d50':'#7a5cc0',mo.x,3,mo.z,{life:T+.2,s0:1.5,s1:1.6,flap:18+Math.random()*8,rot:false,fin:.05,pow:8});if(p){p.vx=p.vy=p.vz=0;sp.push({p,a:i/26*6.28,r:4.8+Math.random()*4.4,y:.8+Math.random()*3})}}
+  const m=new THREE.Mesh(new THREE.RingGeometry(4.5,9.5,48),new THREE.MeshBasicMaterial({color:'#7a5cc0',transparent:true,opacity:.28,depthWrite:false,side:THREE.DoubleSide}));m.rotation.x=-Math.PI/2;m.position.set(mo.x,.14,mo.z);MG.g.add(m);
+  MG.bats.push({x:mo.x,z:mo.z,t:0,T,a0:0,sp,follow:mo});MG.bring.push({t:0,T,m,hit:0});MGS.bats(mo.x,mo.z)};
+{const sk=mgSkTick;mgSkTick=function(dt){const mo=MG.mo,th=MG.th,local=!(MG.net&&MG.role==='mon');for(const b of MG.bats)if(b.follow){b.x=b.follow.x;b.z=b.follow.z}sk.apply(this,arguments);
+  for(const r of MG.bring){r.t+=dt;r.m.position.set(mo.x,.14,mo.z);r.m.material.opacity=r.t<.5?.18+.3*Math.abs(Math.sin(r.t*12)):.3;r.m.rotation.z+=dt*2;
+    if(local&&r.t>.5&&!(th.dashT>0)){const dx=th.x-mo.x,dz=th.z-mo.z,d=Math.hypot(dx,dz)||1;if(d>4.2&&d<9.8&&mgHurt(mo,'bat',.5)){th.kx=dx/d*14;th.kz=dz/d*14}}
+    if(r.t>=r.T){r.dead=1;mgDrop(r.m)}}MG.bring=MG.bring.filter(r=>!r.dead)}}
+{const cl=mgClean;mgClean=function(){MG.bring=[];return cl.apply(this,arguments)}}
+{const dg=mgDangerAt;mgDangerAt=function(x,z){let d=dg(x,z);if(MG.bring.length){const q=Math.hypot(x-MG.mo.x,z-MG.mo.z);if(q>3.5&&q<10.5)d+=3}return d}}
+{const ok=mgAiOk;mgAiOk=function(k,d,aim,px,pz){if(k==='bat')return d<10;return ok.apply(this,arguments)}}
+{const st=document.createElement('style');st.textContent=`#mgHud .mg-btns.arc .mg-ab.recast{filter:none!important;opacity:1!important;box-shadow:0 4px 0 var(--choco),0 0 0 4px #ffd23a,0 0 18px #ffd23a!important;animation:mgRc .5s ease-in-out infinite alternate}
+@keyframes mgRc{to{transform:scale(1.08)}}#mgHud .mg-btns.arc .mg-ab.recast::after{content:attr(data-n);display:grid!important;place-items:center;position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:#ffd23a;border:2px solid var(--choco);font:13px var(--f-display);color:var(--choco);opacity:1!important;animation:none;box-shadow:none;inset:auto -6px auto auto}`;document.head.appendChild(st)}

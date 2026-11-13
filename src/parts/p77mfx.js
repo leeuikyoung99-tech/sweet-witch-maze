@@ -162,7 +162,7 @@ MGS.pop=(x,z)=>{const v=mgEar(x,z);mgOsc('sine',420,90,.22,.22*v);mgNoise(.18,26
 function mgOrbMesh(){const g=new THREE.Group();const b=new THREE.Mesh(new THREE.SphereGeometry(.8,16,12),new THREE.MeshLambertMaterial({color:'#ff5f9e',emissive:'#7a1040'}));g.add(b);
   const r=new THREE.Mesh(new THREE.TorusGeometry(.83,.12,6,20),new THREE.MeshBasicMaterial({color:'#ffffff'}));g.add(r);
   const gl=new THREE.Sprite(new THREE.SpriteMaterial({map:mgTex('glow'),color:'#ffb3d6',transparent:true,depthWrite:false,fog:false}));gl.scale.setScalar(3.4);g.add(gl);return g}
-mgStomp=function(aim){const mo=MG.mo;if(mo.cd.stomp>0||MG.over)return false;
+mgStomp=function(aim){const mo=MG.mo;if(mo.cd.stomp>0||MG.over)return false;if(typeof mgBolt==='function')return mgBolt(aim);
   const P=aim?{x:aim.x,z:aim.z}:mgAim();const fx=-Math.sin(mo.yaw),fz=-Math.cos(mo.yaw),H=MGP.moH/9.2;
   const sx=mo.x+fx*1.4+Math.cos(mo.yaw)*1.3,sz=mo.z+fz*1.4-Math.sin(mo.yaw)*1.3,sy=6.3*H;
   let dx=P.x-sx,dz=P.z-sz,L=Math.hypot(dx,dz);if(L<.5){dx=fx;dz=fz;L=1}
