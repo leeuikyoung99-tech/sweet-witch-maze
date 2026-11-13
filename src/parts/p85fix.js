@@ -94,3 +94,13 @@ p2BtnSync=function(){const b=$('p2Btn');if(b)b.hidden=true};
   if(want){if(!b){db.insertAdjacentHTML('beforeend','<button data-a="plan2"></button>');ab70Icons();ab70Pos()}db.hidden=false}else if(!want&&b){b.remove();if(!db.querySelector('button,span'))db.hidden=true}}catch(e){}return r}}
 setInterval(()=>{try{if(screen==='play'&&G.mode==='devil'&&AG().w_plan2)augHud()}catch(e){}},700);
 {const st=document.createElement("style");st.textContent="#p2Btn{display:none!important}";document.head.appendChild(st)}
+// ----- 거대 마녀: 시점 버튼을 글씨로(1인칭 | 3인칭, 지금 것이 칠해져요), 움직이는 중(다른 손가락이 조이스틱)에도 바로 눌리게 -----
+mgViewSync=function(){const b=$('mgViewB');if(!b)return;const v=MG.view===3?3:1;const k='v'+v;if(b.dataset.k===k)return;b.dataset.k=k;b.classList.add('mgv2');
+  b.innerHTML=`<i class="${v===1?'on':''}">1인칭</i><i class="${v===3?'on':''}">3인칭</i>`;b.setAttribute('aria-label',v===3?'지금 3인칭 · 눌러서 1인칭':'지금 1인칭 · 눌러서 3인칭')};
+{let last=0;
+  document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('#mgViewB');if(!b)return;e.preventDefault();e.stopPropagation();last=performance.now();try{mgViewToggle()}catch(er){}},true);
+  document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#mgViewB');if(!b)return;e.stopPropagation();e.preventDefault();if(performance.now()-last>700){last=performance.now();try{mgViewToggle()}catch(er){}}},true)}
+{const st=document.createElement('style');st.textContent=`
+#mgViewB.mgv2{width:auto!important;height:38px!important;padding:3px!important;border-radius:19px!important;display:flex!important;gap:2px;align-items:center;touch-action:none;background:#fff8ee}
+#mgViewB.mgv2 i{font:normal 13px var(--f-display);color:#9a7a60;padding:0 8px;height:28px;line-height:28px;border-radius:14px;white-space:nowrap;pointer-events:none}
+#mgViewB.mgv2 i.on{background:var(--choco);color:#fff}`;document.head.appendChild(st)}
