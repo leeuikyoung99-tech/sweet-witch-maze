@@ -11,7 +11,7 @@ const TTI={
   const bk=document.createElement('button');bk.id='bTBack';bk.className='bk31 abs';bk.setAttribute('aria-label','닫기');slab.appendChild(bk);
   // 게임 안 제목(로고 대신) + 맵 사진 그림판
   const hd=document.createElement('div');hd.id='ttHead';hd.innerHTML='<span class="ti"></span><b></b>';slab.insertBefore(hd,$('tRank'));
-  const art=document.createElement('div');art.id='ttArt';art.innerHTML='<div class="ta-in"><span class="ta-t"></span><i>VS</i><span class="ta-w"></span></div>';slab.insertBefore(art,row);
+  const art=document.createElement('div');art.id='ttArt';slab.insertBefore(art,row);
   row.insertBefore(bMain,$('bAI'));row.insertBefore($('bStage'),$('bAI'));row.insertBefore(bMini,$('bAI'));row.classList.add('tt');
   bMain.onclick=async()=>{try{await initAudio()}catch(e){}SFX.click();TT.mode='main';ttSync()};
   bMini.onclick=async()=>{try{await initAudio()}catch(e){}SFX.click();TT.mode='mini';ttSync()};
@@ -26,22 +26,20 @@ function ttSync(){const row=$('bAI').parentNode,slab=row.parentNode,m=TT.mode;ro
 const TTV={src:{main:'media/demo_main.mp4',mini:'media/demo_mini.mp4'},url:{},busy:{}};
 function ttVidUrl(m){if(TTV.url[m])return Promise.resolve(TTV.url[m]);if(TTV.busy[m])return TTV.busy[m];
   return TTV.busy[m]=fetch(TTV.src[m]).then(r=>{if(!r.ok)throw 0;return r.blob()}).then(b=>{if(!b.size)throw 0;return TTV.url[m]=URL.createObjectURL(b)}).catch(()=>{TTV.busy[m]=null;return null})}
-function ttArtDraw(){const a=$('ttArt');if(!a)return;let k=LOBBY.map;if(!k||!MAPIMG[k])k=(SAVE&&SAVE.lbMap&&MAPIMG[SAVE.lbMap])?SAVE.lbMap:'candy';
-  if(a.dataset.k!==k){a.dataset.k=k;a.style.backgroundImage=`url(${MAPIMG[k]})`}
-  const t=a.querySelector('.ta-t'),w=a.querySelector('.ta-w');if(!t.firstChild){t.innerHTML=MGI.thief||'';w.innerHTML=MGI.witch||''}
+function ttArtDraw(){const a=$('ttArt');if(!a)return;const k=TT.mode||'main';
+  if(a.dataset.k!==k){a.dataset.k=k;a.style.backgroundImage=`url(${TTPOST[k]})`}
   let v=a.querySelector('video');if(!v){v=document.createElement('video');v.muted=true;v.defaultMuted=true;v.loop=true;v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('muted','');v.setAttribute('aria-hidden','true');v.preload='auto';a.appendChild(v);
     v.addEventListener('playing',()=>a.classList.add('vid'));v.addEventListener('error',()=>a.classList.remove('vid'))}
   const m=TT.mode;if(!m){try{v.pause()}catch(e){}return}
   if(v.dataset.m!==m){v.dataset.m=m;a.classList.remove('vid');try{v.pause()}catch(e){}v.removeAttribute('src');
     ttVidUrl(m).then(u=>{if(!u||TT.mode!==m||v.dataset.m!==m)return;v.src=u;const p=v.play();if(p&&p.catch)p.catch(()=>{})})}
   else if(v.src&&v.paused){const p=v.play();if(p&&p.catch)p.catch(()=>{})}}
+// 켜고 조금 뒤 두 영상을 미리 받아 둬요(처음 들어갈 때 바로 나오게)
+setTimeout(()=>{ttVidUrl('main');ttVidUrl('mini')},1500);
 // 제목 화면을 떠나면 영상을 멈춰요
 setInterval(()=>{try{const v=$('ttArt')&&$('ttArt').querySelector('video');if(!v)return;const on=screen==='title'&&TT.mode&&!document.hidden;if(!on&&!v.paused)v.pause();else if(on&&v.paused&&v.src){const p=v.play();if(p&&p.catch)p.catch(()=>{})}}catch(e){}},700);
 // 창 크기는 첫 화면·메인·미니 모두 같게: 세 모양의 높이를 재서 가장 큰 값을 최소 높이로
-function ttFit(){const row=$('bAI').parentNode,slab=row.parentNode,z0=slab.style.zoom;slab.style.minHeight='';slab.style.zoom='';
-  const SC=['t-top','t-main','t-mini'],RC=['sub','mini'],cs=SC.filter(c=>slab.classList.contains(c)),rs=RC.filter(c=>row.classList.contains(c));let h=0;
-  for(const [sc,rc] of [['t-top',[]],['t-main',['sub']],['t-mini',['sub','mini']]]){slab.classList.remove(...SC);slab.classList.add(sc);row.classList.remove(...RC);row.classList.add(...rc);h=Math.max(h,slab.offsetHeight)}
-  slab.classList.remove(...SC);slab.classList.add(...cs);row.classList.remove(...RC);row.classList.add(...rs);if(h>0)slab.style.minHeight=h+'px';slab.style.zoom=z0;try{fitScr()}catch(e){}}
+function ttFit(){const slab=$('bAI').parentNode.parentNode;if(slab.style.minHeight)slab.style.minHeight='';try{fitScr()}catch(e){}}
 addEventListener('resize',()=>{try{ttFit()}catch(e){}});
 {const ts=titleScreen;titleScreen=function(){const r=ts.apply(this,arguments);try{ttSync()}catch(e){}return r}}
 {const st0=syncTitle;syncTitle=function(){const r=st0.apply(this,arguments);try{ttSync()}catch(e){}return r}}
@@ -56,8 +54,13 @@ function ttRoleTitle(){const g=LOBBY.game==='mini';return (g?'거대 마녀':'�
 .menu-row.tt.sub #bAI,.menu-row.tt.sub #bRandT,.menu-row.tt.sub #bOnline{display:flex}
 .menu-row.tt.sub #bMain,.menu-row.tt.sub #bMini,.menu-row.tt.sub #bStage{display:none}
 /* 창 크기는 세 화면 모두 같게. 첫 화면 = 로고·랭크·게임 3개·아래 메뉴, 게임 안 = 제목·맵 그림판·놀이 버튼 3개 */
-.title-slab.t-top,.title-slab.t-main,.title-slab.t-mini{box-sizing:border-box;width:min(680px,97vw)}.title-slab.t-top{justify-content:center}
-.menu-row.tt{width:100%}.menu-row.tt>.mbtn{flex:1 1 0;min-width:0;justify-content:center}
+/* 다른 큰 창(설정·스토리·카드)과 똑같은 크기: 화면 안쪽을 꽉 채워요 */
+#title{align-items:stretch!important}
+.title-slab.t-top,.title-slab.t-main,.title-slab.t-mini{box-sizing:border-box;width:min(820px,100%)!important;max-width:none!important;height:100%!important;max-height:none!important;margin:0 auto!important;border-radius:22px}
+.title-slab.t-top{justify-content:center;gap:clamp(6px,2.4vh,14px)!important}
+.title-slab.t-main,.title-slab.t-mini{justify-content:flex-start;gap:clamp(6px,2vh,12px)!important;padding-bottom:clamp(10px,3vh,18px)!important}
+@media (max-height:340px){.title-slab.t-top>.kicker{display:none}.title-slab.t-top .duo svg{width:clamp(40px,13vh,60px)!important;height:auto}}
+.menu-row.tt{width:100%;justify-content:center}.menu-row.tt>.mbtn{flex:0 1 auto;min-width:0;justify-content:center;padding-right:14px!important}
 .title-slab #bTBack,.title-slab #ttHead,.title-slab #ttArt{display:none}
 .title-slab.t-main #bTBack,.title-slab.t-mini #bTBack{display:block}
 .title-slab #bTBack.abs{right:13px;top:13px}
@@ -67,14 +70,7 @@ function ttRoleTitle(){const g=LOBBY.game==='mini';return (g?'거대 마녀':'�
 .title-slab.t-main #ttHead,.title-slab.t-mini #ttHead{display:flex;align-items:center;justify-content:center;gap:8px;margin:2px 0 0;min-height:44px}
 #ttHead .ti svg{width:38px;height:38px;display:block}#ttHead b{font:28px var(--f-display);color:var(--choco);letter-spacing:.5px;white-space:nowrap}
 .title-slab.t-mini #ttHead b{color:#6b3fc4}
-.title-slab.t-main #ttArt,.title-slab.t-mini #ttArt{display:block;flex:1 1 0;min-height:64px;width:100%;position:relative;border:3px solid var(--choco);border-radius:18px;overflow:hidden;background:#f6e2c8 50% 55%/cover no-repeat;box-shadow:0 4px 0 var(--choco)}
-#ttArt::before{content:"";position:absolute;inset:0;background:linear-gradient(#fff0 35%,#4a2a1a59)}
-.title-slab.t-mini #ttArt::before{background:linear-gradient(#7a4dd055,#4a1f9a99)}
-#ttArt .ta-in{position:absolute;inset:6% 0 4%;display:flex;align-items:flex-end;justify-content:center;gap:4%}
-#ttArt .ta-in>span{height:86%;aspect-ratio:1;display:block;filter:drop-shadow(0 3px 0 #4a2a1a99)}#ttArt .ta-in svg{width:100%;height:100%;display:block}
-#ttArt .ta-in>i{align-self:center;font:normal clamp(18px,6vh,30px) var(--f-display);color:#fff;-webkit-text-stroke:2px var(--choco);paint-order:stroke;text-shadow:0 3px 0 var(--choco)}
-#ttArt video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .35s}
-#ttArt.vid video{opacity:1}#ttArt.vid::before,#ttArt.vid .ta-in{display:none}
-.title-slab.t-mini #ttArt .ta-t{height:48%}.title-slab.t-mini #ttArt .ta-w{height:100%}.title-slab.t-mini #ttArt .ta-in{inset:4% 0 0}
+.title-slab.t-main #ttArt,.title-slab.t-mini #ttArt{display:block;flex:1 1 0;min-height:64px;width:100%;position:relative;border:3px solid var(--choco);border-radius:18px;overflow:hidden;background:#f6e2c8 50% 50%/cover no-repeat;box-shadow:0 4px 0 var(--choco)}
+#ttArt video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .35s}#ttArt.vid video{opacity:1}
 @media (max-height:340px){#ttHead b{font-size:24px}#ttHead .ti svg{width:30px;height:30px}.title-slab.t-main #ttHead,.title-slab.t-mini #ttHead{margin:0}}
 `;document.head.appendChild(st)}
