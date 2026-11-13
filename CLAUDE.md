@@ -12,7 +12,7 @@
 - 바다 속 젤리·초콜릿 공장·생일 케이크 성은 바닥과 벽 색을 확실히 다르게 했어요 (모래 바닥+젤리 벽, 캐러멜 바닥+다크 초코 벽, 딸기 크림 바닥+생크림 벽, 케이크 정답 길 선은 보라). parts/p71color.js. 맵 고르기 사진(p29k_img.js MAPIMG)도 새 색으로 다시 찍었어요.
 - 스토리 화면 (parts/p72story.js): 왼쪽 장 탭 + 큰 맵 그림(제목만) + 그림 위 별 버튼(누르면 별 얻는 법) + 그림 아래 보상 칩, 오른쪽 사탕 길 동그라미 1~10(1→3, 6←4, 7→9, 보스 10은 왕관) + 시작 버튼(아이콘). 보스 마녀 그림은 뺐어요.
 - 배경 음악: 맵마다 장르를 다르게 바꾸기로 했어요. 사용자가 AI 음악 도구로 만들어 올리면 `python3 -I src/tools/music_loop.py <원곡> music/m_<맵>.mp3 90` 으로 다듬어 넣어요 (곡 안에서 가장 닮은 두 지점 사이를 반복 구간으로, 파형 맞춤·0.12초 겹침, -12 LUFS, 128k). 주문 글은 프로젝트 문서 '마녀의 미로 음악 주문서'.
-  - 바꾼 곡(2026-11-12): m_xmas(Snowfall on Main Street), m_pumpkin(Cloak and Candied Apple), m_ice(Crown of Ice), m_candy(The Gumball Carousel). 남은 곡: m_choco, m_cloud, m_sea, m_cake
+  - 바꾼 곡(2026-11-12): m_xmas(Snowfall on Main Street), m_pumpkin(Cloak and Candied Apple), m_ice(Crown of Ice), m_candy(The Gumball Carousel). 2026-11-13: m_choco(Tick Tock Toffee), m_cake(The Pantry Prowler). 남은 곡: m_cloud, m_sea(느리게 나온 곡은 안 넣고 115 BPM 이상으로 다시 뽑기), m_giant(미니게임 거대 마녀 전용 웅장한 곡, 들어오면 미니게임은 맵과 상관없이 이 곡)
 - 덫 발판(미끄럼·거꾸로·젤리 덫)은 마녀 화면에서 진한 외곽선+하얀 테두리+밝은 색 판(미끄럼 노랑, 거꾸로 보라, 덫 초록)으로 그려요. 갈색 바닥에 묻히지 않게. parts/p73trap.js
 - 슈퍼 가짜 사탕(증강체 wp_fake): 사람 마녀는 칩 옆 사탕 아이콘 → 미로 한 칸을 눌러 한 판에 한 번 놓아요(출발점·출구·도둑 바로 옆 금지). 안 놓으면 안 놓여요. 마녀 화면에만 금색 고리·사탕 표시. AI 마녀는 예전처럼 저절로 놓아요. 온라인은 {t:'card',k:'fcandy'} 로 보내요. parts/p74fcandy.js
 - 첫 수(wn_first): 판마다 처음 쓰는 카드 3장 공짜 (예전 1장). parts/p30d.js
