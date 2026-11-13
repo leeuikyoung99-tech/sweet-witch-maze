@@ -58,9 +58,12 @@ setInterval(()=>{try{if(screen!=='misS')return;const b=document.querySelector('#
 #misList .ms-adr{background:linear-gradient(90deg,#ffe6f1,#fff 70%)}#misList .ms-adr.wait{background:#fff}
 #misList .ms-adi{display:grid;place-items:center;width:28px;height:28px;flex:none}#misList .ms-adi svg{width:100%;height:100%}
 #misList .ms-adr .ms-t{display:flex;align-items:baseline;gap:8px;white-space:nowrap;overflow:hidden}#misList .ms-adr .ms-adn{font:12px var(--f-ui);color:#8a6a50}
-#misList .ms-ad{min-width:92px}
-#misS .mis-pane{padding-bottom:12px!important}#misList{min-height:0;overflow-y:auto}
-@media (max-height:340px){#misList .ms-row{padding-top:0;padding-bottom:0;min-height:0}#misList .ms-t{font-size:14px}#misList .ms-b{min-height:26px;height:26px;padding-top:0;padding-bottom:0}#misList .ms-bar{height:6px;margin:1px 0 0}#misList{gap:4px!important}#misList .ms-adi{width:22px;height:22px}#misS .pane-top{margin-bottom:2px!important}}`;document.head.appendChild(st)}
+/* 버튼은 모두 같은 크기, 줄은 같은 높이 · 창 아래와 넉넉히 띄워요 */
+#misList .ms-b{flex:none;width:96px;min-width:0!important;height:34px;min-height:0!important;padding:0 6px!important;box-sizing:border-box;font-size:14px;white-space:nowrap;display:grid;place-items:center}
+#misList .ms-row{box-sizing:border-box;height:46px;min-height:0;padding:0 8px 0 10px!important}
+#misList{gap:6px!important;flex:0 1 auto;overflow-y:auto;padding-bottom:2px}
+#misS .mis-pane{padding-bottom:16px!important}
+@media (max-height:340px){#misList .ms-row{height:38px}#misList .ms-b{height:28px;width:88px;font-size:13px}#misList .ms-t{font-size:14px}#misList .ms-bar{height:6px;margin:2px 0 0}#misList{gap:5px!important}#misList .ms-adi{width:22px;height:22px}#misS .pane-top{margin-bottom:2px!important}#misS .mis-pane{padding-bottom:14px!important}}`;document.head.appendChild(st)}
 // 새 미션까지 남은 시간: 아래 줄 대신 제목 옆 작은 글씨(작은 화면에서 아래가 잘렸어요)
 {const t=$('misS').querySelector('.pane-top>b'),n=$('misNote');if(t&&n)t.after(n)}
 {const st=document.createElement('style');st.textContent=`#misS .pane-top #misNote{flex:1 1 auto;min-width:0;margin:0 0 0 10px!important;font:12px var(--f-ui)!important;color:#8a6a50;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0!important}`;document.head.appendChild(st)}
