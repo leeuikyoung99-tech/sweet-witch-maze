@@ -26,6 +26,6 @@ for d,_,fs in os.walk(R):
     if '/.git' in d or d.startswith(H):continue
     for f in fs:
         p=os.path.relpath(os.path.join(d,f),R)
-        if p.split('.')[-1] in('png','html','webmanifest','glb','mp3','js') and p!='sw.js':files.append(p)
+        if p.split('.')[-1] in('png','html','webmanifest','glb','mp3','js','mp4') and p!='sw.js':files.append(p)
 sw=open('sw_template.js').read().replace('__PFX__',PFX).replace('__PATCH__',PATCH).replace('__FILES__',json.dumps(sorted(files),ensure_ascii=False))
 open(os.path.join(R,'sw.js'),'w').write(sw);print('built',APP,'p'+PATCH,len(t))

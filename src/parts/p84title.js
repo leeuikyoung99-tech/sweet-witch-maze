@@ -19,12 +19,24 @@ const TTI={
 const TTSUB={main:{bAI:'AI와 대결',bRandT:'도둑 랭크 · 마녀 랭크',bOnline:'코드로 방 만들기'},mini:{bAI:'AI와 대결',bRandT:'판돈·등급 없이',bOnline:'코드로 방 만들기'}};
 function ttSync(){const row=$('bAI').parentNode,slab=row.parentNode,m=TT.mode;row.classList.toggle('sub',!!m);row.classList.toggle('mini',m==='mini');
   slab.classList.toggle('t-top',!m);slab.classList.toggle('t-main',m==='main');slab.classList.toggle('t-mini',m==='mini');
-  const hd=$('ttHead');if(m){hd.querySelector('b').textContent=m==='mini'?'거대 마녀':'마녀의 미로';hd.querySelector('.ti').innerHTML=TTI[m];ttArtDraw()}
+  const hd=$('ttHead');if(m){hd.querySelector('b').textContent=m==='mini'?'거대 마녀':'마녀의 미로';hd.querySelector('.ti').innerHTML=TTI[m]}ttArtDraw();
   if(m){for(const id in TTSUB[m]){const s=$(id)&&$(id).querySelector('small');if(s)s.textContent=TTSUB[m][id]}const t=$('bOnline').querySelector('b');if(t)t.textContent=m==='main'?'친구랑 대전하기':'친구랑 하기'}
   LOBBY.pick=m||'main';ttFit()}
+// 게임 안 그림판: 실제 게임 장면 영상(봇 대 봇 녹화)을 소리 없이 되풀이. 못 불러오면 맵 사진 + 도둑 VS 마녀 그림 그대로
+const TTV={src:{main:'media/demo_main.mp4',mini:'media/demo_mini.mp4'},url:{},busy:{}};
+function ttVidUrl(m){if(TTV.url[m])return Promise.resolve(TTV.url[m]);if(TTV.busy[m])return TTV.busy[m];
+  return TTV.busy[m]=fetch(TTV.src[m]).then(r=>{if(!r.ok)throw 0;return r.blob()}).then(b=>{if(!b.size)throw 0;return TTV.url[m]=URL.createObjectURL(b)}).catch(()=>{TTV.busy[m]=null;return null})}
 function ttArtDraw(){const a=$('ttArt');if(!a)return;let k=LOBBY.map;if(!k||!MAPIMG[k])k=(SAVE&&SAVE.lbMap&&MAPIMG[SAVE.lbMap])?SAVE.lbMap:'candy';
   if(a.dataset.k!==k){a.dataset.k=k;a.style.backgroundImage=`url(${MAPIMG[k]})`}
-  const t=a.querySelector('.ta-t'),w=a.querySelector('.ta-w');if(!t.firstChild){t.innerHTML=MGI.thief||'';w.innerHTML=MGI.witch||''}}
+  const t=a.querySelector('.ta-t'),w=a.querySelector('.ta-w');if(!t.firstChild){t.innerHTML=MGI.thief||'';w.innerHTML=MGI.witch||''}
+  let v=a.querySelector('video');if(!v){v=document.createElement('video');v.muted=true;v.defaultMuted=true;v.loop=true;v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('muted','');v.setAttribute('aria-hidden','true');v.preload='auto';a.appendChild(v);
+    v.addEventListener('playing',()=>a.classList.add('vid'));v.addEventListener('error',()=>a.classList.remove('vid'))}
+  const m=TT.mode;if(!m){try{v.pause()}catch(e){}return}
+  if(v.dataset.m!==m){v.dataset.m=m;a.classList.remove('vid');try{v.pause()}catch(e){}v.removeAttribute('src');
+    ttVidUrl(m).then(u=>{if(!u||TT.mode!==m||v.dataset.m!==m)return;v.src=u;const p=v.play();if(p&&p.catch)p.catch(()=>{})})}
+  else if(v.src&&v.paused){const p=v.play();if(p&&p.catch)p.catch(()=>{})}}
+// 제목 화면을 떠나면 영상을 멈춰요
+setInterval(()=>{try{const v=$('ttArt')&&$('ttArt').querySelector('video');if(!v)return;const on=screen==='title'&&TT.mode&&!document.hidden;if(!on&&!v.paused)v.pause();else if(on&&v.paused&&v.src){const p=v.play();if(p&&p.catch)p.catch(()=>{})}}catch(e){}},700);
 // 창 크기는 첫 화면·메인·미니 모두 같게: 세 모양의 높이를 재서 가장 큰 값을 최소 높이로
 function ttFit(){const row=$('bAI').parentNode,slab=row.parentNode,z0=slab.style.zoom;slab.style.minHeight='';slab.style.zoom='';
   const SC=['t-top','t-main','t-mini'],RC=['sub','mini'],cs=SC.filter(c=>slab.classList.contains(c)),rs=RC.filter(c=>row.classList.contains(c));let h=0;
@@ -61,6 +73,8 @@ function ttRoleTitle(){const g=LOBBY.game==='mini';return (g?'거대 마녀':'�
 #ttArt .ta-in{position:absolute;inset:6% 0 4%;display:flex;align-items:flex-end;justify-content:center;gap:4%}
 #ttArt .ta-in>span{height:86%;aspect-ratio:1;display:block;filter:drop-shadow(0 3px 0 #4a2a1a99)}#ttArt .ta-in svg{width:100%;height:100%;display:block}
 #ttArt .ta-in>i{align-self:center;font:normal clamp(18px,6vh,30px) var(--f-display);color:#fff;-webkit-text-stroke:2px var(--choco);paint-order:stroke;text-shadow:0 3px 0 var(--choco)}
+#ttArt video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .35s}
+#ttArt.vid video{opacity:1}#ttArt.vid::before,#ttArt.vid .ta-in{display:none}
 .title-slab.t-mini #ttArt .ta-t{height:48%}.title-slab.t-mini #ttArt .ta-w{height:100%}.title-slab.t-mini #ttArt .ta-in{inset:4% 0 0}
 @media (max-height:340px){#ttHead b{font-size:24px}#ttHead .ti svg{width:30px;height:30px}.title-slab.t-main #ttHead,.title-slab.t-mini #ttHead{margin:0}}
 `;document.head.appendChild(st)}
