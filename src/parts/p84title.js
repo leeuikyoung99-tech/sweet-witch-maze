@@ -20,7 +20,13 @@ function ttSync(){const row=$('bAI').parentNode,slab=row.parentNode,m=TT.mode;ro
   slab.classList.toggle('t-top',!m);slab.classList.toggle('t-main',m==='main');slab.classList.toggle('t-mini',m==='mini');
   const hd=$('ttHead');if(m){hd.querySelector('b').textContent=m==='mini'?'거대 마녀':'마녀의 미로';hd.querySelector('.ti').innerHTML=TTI[m]}
   if(m){for(const id in TTSUB[m]){const s=$(id)&&$(id).querySelector('small');if(s)s.textContent=TTSUB[m][id]}const t=$('bOnline').querySelector('b');if(t)t.textContent=m==='main'?'친구랑 대전하기':'친구랑 하기'}
-  LOBBY.pick=m||'main'}
+  LOBBY.pick=m||'main';ttFit()}
+// 창 크기는 첫 화면·메인·미니 모두 같게: 세 모양의 높이를 재서 가장 큰 값을 최소 높이로
+function ttFit(){const row=$('bAI').parentNode,slab=row.parentNode;slab.style.minHeight='';
+  const SC=['t-top','t-main','t-mini'],RC=['sub','mini'],cs=SC.filter(c=>slab.classList.contains(c)),rs=RC.filter(c=>row.classList.contains(c));let h=0;
+  for(const [sc,rc] of [['t-top',[]],['t-main',['sub']],['t-mini',['sub','mini']]]){slab.classList.remove(...SC);slab.classList.add(sc);row.classList.remove(...RC);row.classList.add(...rc);h=Math.max(h,slab.offsetHeight)}
+  slab.classList.remove(...SC);slab.classList.add(...cs);row.classList.remove(...RC);row.classList.add(...rs);if(h>0)slab.style.minHeight=h+'px'}
+addEventListener('resize',()=>{try{ttFit()}catch(e){}});
 {const ts=titleScreen;titleScreen=function(){const r=ts.apply(this,arguments);try{ttSync()}catch(e){}return r}}
 {const st0=syncTitle;syncTitle=function(){const r=st0.apply(this,arguments);try{ttSync()}catch(e){}return r}}
 // 설정 화면: 제목 화면에서 고른 게임으로만, 위쪽 탭은 숨기고 제목에 '게임 · 방식'
@@ -33,6 +39,16 @@ function ttRoleTitle(){const g=LOBBY.game==='mini';return (g?'거대 마녀':'�
 .menu-row.tt #bAI,.menu-row.tt #bRandT,.menu-row.tt #bOnline{display:none}
 .menu-row.tt.sub #bAI,.menu-row.tt.sub #bRandT,.menu-row.tt.sub #bOnline{display:flex}
 .menu-row.tt.sub #bMain,.menu-row.tt.sub #bMini,.menu-row.tt.sub #bStage{display:none}
+/* 창 크기는 세 화면 모두 같게, 게임 안은 큰 카드로 채워요 */
+.title-slab.t-top,.title-slab.t-main,.title-slab.t-mini{box-sizing:border-box;width:min(660px,94vw)}.title-slab.t-top{justify-content:center}
+.menu-row.tt{width:100%}.menu-row.tt>.mbtn{flex:1 1 0;min-width:0;justify-content:center}
+.menu-row.tt.sub{flex:1 1 auto;align-items:stretch;gap:10px;margin-bottom:2px}
+.menu-row.tt.sub>.mbtn{flex-direction:column;justify-content:center;gap:6px;padding:12px 8px 10px;border-radius:22px}
+.menu-row.tt.sub>.mbtn::after{left:18px;right:18px}
+.menu-row.tt.sub>.mbtn .mi{width:clamp(44px,13vh,72px);height:clamp(44px,13vh,72px);border-radius:18px}.menu-row.tt.sub>.mbtn .mi svg{width:82%;height:82%}
+.menu-row.tt.sub>.mbtn .mt{align-items:center;text-align:center}.menu-row.tt.sub>.mbtn b{font-size:clamp(17px,5vh,24px)}.menu-row.tt.sub>.mbtn small{font-size:clamp(11px,2.9vh,13px)}
+.title-slab.t-mini .menu-row.tt.sub{margin-bottom:6px}
+.title-slab.t-mini .menu-row.tt.sub>.mbtn{gap:10px}.title-slab.t-mini .menu-row.tt.sub>.mbtn .mi{width:clamp(50px,20vh,104px);height:clamp(50px,20vh,104px);border-radius:24px}.title-slab.t-mini .menu-row.tt.sub>.mbtn b{font-size:clamp(20px,6.4vh,30px)}.title-slab.t-mini .menu-row.tt.sub>.mbtn small{font-size:clamp(12px,3.4vh,15px)}
 /* 첫 화면: 로고 + 게임 3개 + 상점만. 게임 안: 로고 대신 제목, 위 왼쪽 돌아가기 */
 .title-slab #bTBack,.title-slab #ttHead{display:none}
 .title-slab.t-main #bTBack,.title-slab.t-mini #bTBack{display:grid;place-items:center}
@@ -48,5 +64,6 @@ function ttRoleTitle(){const g=LOBBY.game==='mini';return (g?'거대 마녀':'�
 .title-slab.t-main .sub-row #bShop{display:none!important}
 .title-slab.t-mini .sub-row{display:none!important}
 .title-slab.t-top .sub-row #bShop{padding-left:22px;padding-right:22px;min-width:150px;justify-content:center}
-@media (max-height:340px){#ttHead b{font-size:24px}#ttHead .ti svg{width:32px;height:32px}.title-slab.t-main #ttHead,.title-slab.t-mini #ttHead{margin:0 0 6px}}
+@media (max-height:340px){#ttHead b{font-size:24px}#ttHead .ti svg{width:30px;height:30px}.title-slab.t-main #ttHead,.title-slab.t-mini #ttHead{margin:0;min-height:44px}
+.title-slab.t-main .menu-row.tt.sub>.mbtn{padding:7px 6px 6px;gap:3px}.title-slab.t-main .menu-row.tt.sub>.mbtn .mi{width:36px;height:36px;border-radius:13px}}
 `;document.head.appendChild(st)}
