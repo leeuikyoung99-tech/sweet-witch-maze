@@ -42,3 +42,25 @@ $('frList').addEventListener('click',e=>{const d=e.target.closest('.fr-rm');if(!
 #frList .fr2 .fr-inv:disabled{background:#e6dcd3;filter:grayscale(1);opacity:.6;cursor:default;box-shadow:0 2px 0 #b9a99a;border-color:#b9a99a}
 #frList .fr2 .fr-rm{width:30px;height:30px}
 .fr-dq{display:flex;align-items:center;justify-content:center;gap:8px}.fr-dq .fr-av.sm{width:30px;height:30px}`;document.head.appendChild(st)}
+// ----- 매일 미션: 광고 보고 코인 받기 (2시간마다 한 번) -----
+const MAD={n:50,gap:2*3600*1000};
+function madLeft(){return Math.max(0,(SAVE.misAdT||0)+MAD.gap-Date.now())}
+function madTxt(ms){const m=Math.ceil(ms/60000),h=Math.floor(m/60);return h?`${h}시간 ${m%60}분 뒤`:`${m}분 뒤`}
+function madRow(){const L=madLeft();return`<div class="ms-row ms-adr${L?' wait':''}"><span class="ms-adi">${AD_IC}</span><div class="ms-t">광고 보고 코인 받기<small class="ms-adn">2시간마다 한 번</small></div><span class="ms-rw">${COIN_SVG}${MAD.n}</span><button class="sbtn ms-b ms-ad"${L?' disabled':''}>${L?madTxt(L):'광고 보기'}</button></div>`}
+{const rm=renderMis;renderMis=function(){const r=rm.apply(this,arguments);try{const l=$('misList');const old=l.querySelector('.ms-adr');if(old)old.remove();l.insertAdjacentHTML('afterbegin',madRow())}catch(e){}return r}}
+$('misList').addEventListener('click',async e=>{const b=e.target.closest('.ms-ad');if(!b)return;e.stopPropagation();if(b.disabled||madLeft())return;SFX.click();b.disabled=true;
+  let ok=false;try{ok=await ADS.show('mission')}catch(er){ok=false}
+  if(ok&&!madLeft()){SAVE.misAdT=Date.now();SAVE.coins=(SAVE.coins|0)+MAD.n;saveGame();try{SFX.win()}catch(er){}tMsg(`광고 보상 ${MAD.n}코인을 받았어요`);try{syncCoins()}catch(er){}}
+  if(screen==='misS')renderMis()},true);
+// 기다리는 시간 글씨는 1분마다 새로
+setInterval(()=>{try{if(screen!=='misS')return;const b=document.querySelector('#misList .ms-ad');if(!b)return;const L=madLeft();if(!!L!==b.disabled||(L&&b.textContent!==madTxt(L)))renderMis()}catch(e){}},5000);
+{const st=document.createElement('style');st.textContent=`
+#misList .ms-adr{background:linear-gradient(90deg,#ffe6f1,#fff 70%)}#misList .ms-adr.wait{background:#fff}
+#misList .ms-adi{display:grid;place-items:center;width:28px;height:28px;flex:none}#misList .ms-adi svg{width:100%;height:100%}
+#misList .ms-adr .ms-t{display:flex;align-items:baseline;gap:8px;white-space:nowrap;overflow:hidden}#misList .ms-adr .ms-adn{font:12px var(--f-ui);color:#8a6a50}
+#misList .ms-ad{min-width:92px}
+#misS .mis-pane{padding-bottom:12px!important}#misList{min-height:0;overflow-y:auto}
+@media (max-height:340px){#misList .ms-row{padding-top:0;padding-bottom:0;min-height:0}#misList .ms-t{font-size:14px}#misList .ms-b{min-height:26px;height:26px;padding-top:0;padding-bottom:0}#misList .ms-bar{height:6px;margin:1px 0 0}#misList{gap:4px!important}#misList .ms-adi{width:22px;height:22px}#misS .pane-top{margin-bottom:2px!important}}`;document.head.appendChild(st)}
+// 새 미션까지 남은 시간: 아래 줄 대신 제목 옆 작은 글씨(작은 화면에서 아래가 잘렸어요)
+{const t=$('misS').querySelector('.pane-top>b'),n=$('misNote');if(t&&n)t.after(n)}
+{const st=document.createElement('style');st.textContent=`#misS .pane-top #misNote{flex:1 1 auto;min-width:0;margin:0 0 0 10px!important;font:12px var(--f-ui)!important;color:#8a6a50;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0!important}`;document.head.appendChild(st)}
