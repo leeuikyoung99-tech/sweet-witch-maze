@@ -59,7 +59,9 @@ function ttRoleTitle(){const g=LOBBY.game==='mini';return (g?'거대 마녀':'�
 .title-slab.t-top,.title-slab.t-main,.title-slab.t-mini{box-sizing:border-box;width:min(820px,100%)!important;max-width:none!important;height:100%!important;max-height:none!important;margin:0 auto!important;border-radius:22px}
 .title-slab.t-top{justify-content:center;gap:clamp(6px,2.4vh,14px)!important}
 .title-slab.t-main,.title-slab.t-mini{justify-content:flex-start;gap:clamp(6px,2vh,12px)!important;padding-bottom:clamp(10px,3vh,18px)!important}
-@media (max-height:340px){.title-slab.t-top>.kicker{display:none}.title-slab.t-top .duo svg{width:clamp(40px,13vh,60px)!important;height:auto}}
+@media (max-height:340px){.title-slab.t-top>.kicker{display:none}.title-slab.t-top>.duo svg{width:clamp(38px,13vh,52px)!important;height:auto!important}.title-slab.t-top>h1{font-size:clamp(28px,10vh,40px)!important;margin:0!important}.title-slab.t-top{gap:clamp(5px,1.8vh,8px)!important}}
+.title-slab.t-top .sub-row{flex-wrap:nowrap!important;max-width:100%}
+@media (max-width:720px){.title-slab.t-top .sub-row{gap:5px!important}.title-slab.t-top .sub-row .sbtn{padding-left:7px!important;padding-right:7px!important}}
 .menu-row.tt{width:100%;justify-content:center}.menu-row.tt>.mbtn{flex:0 1 auto;min-width:0;justify-content:center;padding-right:14px!important}
 .title-slab #bTBack,.title-slab #ttHead,.title-slab #ttArt{display:none}
 .title-slab.t-main #bTBack,.title-slab.t-mini #bTBack{display:block}
