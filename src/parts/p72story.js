@@ -16,9 +16,9 @@ renderStages=function(){const ch=STORY[STV.c-1],S=STV.s,st=stDef(ch.n,S),bits=sb
   const goals=stGoals3(st);
   const pop=SV72.pop?`<div class="sv-pop" role="dialog"><b>별 얻는 법</b><ul>${goals.map((g,i)=>`<li class="${(bits>>i)&1?'ok':''}"><i>${PS_STAR}</i><span>${g}</span></li>`).join('')}</ul></div>`:'';
   const key=ch.n+'-'+S,bonus=(typeof STBON!=='undefined'&&STBON[key])|0;
-  const gift=ty==='gboss'&&BOSS_BOX[ch.n]!=null?`<span class="sv-chip">${SV72_GIFT}${boxName(BOSS_BOX[ch.n])}</span><span class="sv-chip">${SV72_CARD}+1</span>`:'';
+  const gift=(ty==='gboss'||ty==='boss')&&BOSS_BOX[ch.n]!=null?`<span class="sv-chip">${SV72_GIFT}${boxName(BOSS_BOX[ch.n])}</span>`:'';
   const rw=`<span class="sv-rl">보상</span><span class="sv-chip">${COIN_SVG}${stFirst(ch.n)+bonus}</span><span class="sv-chip">${PS_STAR}마다 ${COIN_SVG}5</span>${gift}`;
-  const nodes=Array.from({length:STN},(_,i)=>{const s=i+1,o=stOpen2(ch.n,s),b=sb2(ch.n,s),t=stType(ch.n,s),boss=t==='gboss',[r,c]=SV72_SLOT[s];
+  const nodes=Array.from({length:STN},(_,i)=>{const s=i+1,o=stOpen2(ch.n,s),b=sb2(ch.n,s),t=stType(ch.n,s),boss=t==='gboss'||t==='boss',[r,c]=SV72_SLOT[s];
     return`<button class="sv-n${s===S?' sel':''}${o?'':' lock'}${boss?' boss':''}${b&1?' done':''}" data-s="${s}" style="grid-row:${r};grid-column:${c};--c:${STT_COL[t]||THC[ch.th]}" aria-label="${s}단계"><span class="sv-dot">${o?(boss?`<span class="sv-cr">${PS_CROWN}</span>`:`<b>${s}</b>`):LOCK_SVG}</span>${o?sv72Stars(b,'sv-ss'):''}</button>`}).join('');
   R.innerHTML=`<div class="sv-left"><div class="sv-tabs">${tabs}</div>`+
     `<div class="sv-map" style="background-image:url(${MAPIMG[ch.th]||''})"><b class="sv-ttl">${ch.n}장 ${S}단계 · ${STT_N[ty]||''}</b>`+

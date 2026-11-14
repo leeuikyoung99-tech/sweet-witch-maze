@@ -25,8 +25,8 @@ function st6Goal(st){const T=st.type,R=ST6[st.c];
   if(T==='witch')return`마녀가 돼서 ${Math.round(ROUND0/60)}분 동안 도둑 막기`;if(T==='gate')return R.hz;if(T==='puzzle')return'벽을 밀어 출구까지 길 열기';
   if(T==='gboss')return'사탕 6개 먹고 반대편으로 넘어가기';return''}
 const st6Name=(c,s)=>(ST6[c]&&ST6[c].N[s-1])||'';
-const st6Rule=st=>{if(st.type==='puzzle'||st.type==='gboss')return'';const R=ST6[st.c];return st.type==='witch'?R.rw:R.rn};
-const st6RuleOn=st=>!!st6Rule(st);
+let st6Rule=st=>{if(st.type==='puzzle'||st.type==='gboss')return'';const R=ST6[st.c];return st.type==='witch'?R.rw:R.rn};
+let st6RuleOn=st=>!!st6Rule(st);
 // 판 시작 카드: 3·2·1 아래에 [단계 이름][목표][이 장 규칙], 5초쯤 보였다 사라져요
 const ST6C={id:0};
 function st6Card(st){let el=$('st6Card');if(!el){el=document.createElement('div');el.id='st6Card';el.hidden=true;document.body.appendChild(el)}const my=++ST6C.id;

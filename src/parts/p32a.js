@@ -47,7 +47,7 @@ document.addEventListener('click',e=>{const st=G.stage;if(!st||!st.story||!G.duo
     else{const g=st.g3;if((g==='candy'&&h.manaGot>=5)||(g==='nohit'&&!hits)||(g==='hp'&&h.hp>60)||(g==='noskill'&&!h.skills))b|=2;if(t<=st.fast)b|=4}}
   const key=st.c+'-'+st.s,old=SAVE.st2[key]|0,nb=b&~old,news=(nb&1)+((nb>>1)&1)+((nb>>2)&1);SAVE.st2[key]=old|b;
   let coins=news*5+((nb&1)?stFirst(st.c):0);const gift={};
-  if((nb&1)&&st.type==='boss'&&BOSS_BOX[st.c]!=null){SAVE.boxes=SAVE.boxes||[];SAVE.boxes.push(BOSS_BOX[st.c]);gift.box=BOSS_BOX[st.c];gift.pick=1;SAVE.cardPick=(SAVE.cardPick|0)+1}
+  if((nb&1)&&st.type==='boss'&&BOSS_BOX[st.c]!=null){SAVE.boxes=SAVE.boxes||[];SAVE.boxes.push(BOSS_BOX[st.c]);gift.box=BOSS_BOX[st.c]}
   if(coins){SAVE.coins+=coins;syncCoins()}saveGame();if(news)misAdd('stage',news);return{b,news,coins,unl:[],gift}}}
 function stGoals3(st){const T=st.type;
   if(T==='surv')return[`${st.secs}초 버티기`,'체력 절반 넘게 남기기','한 대도 안 맞기'];
@@ -58,7 +58,7 @@ function stGoals3(st){const T=st.type;
 // ----- 결과 화면 -----
 {const re=resExtra;resExtra=function(win,why,t){re.apply(this,arguments);const st=G.stage;if(!st||!st.story||!st.type)return;const x=G.extra&&G.extra.stage||{b:0,news:0,coins:0,gift:{}},all=sb2(st.c,st.s);
   let html=`<span class="rs-stars">${starRow(all,'big')}</span>`+(x.news?`새 별 ${x.news}개 · ${COIN_SVG}+${x.coins}`:(x.b?'이미 받은 별이에요':'별을 못 받았어요'));
-  if(x.gift&&x.gift.box!=null)html+=`<div class="rc-got">보상: ${boxName(x.gift.box)} · 카드 1장 고르기</div>`;
+  if(x.gift&&x.gift.box!=null)html+=`<div class="rc-got">보상: ${boxName(x.gift.box)}</div>`;
   $('resCoin').innerHTML=html;$('bHome').textContent='목록';const nx=st.s<STN?[st.c,st.s+1]:st.c<8?[st.c+1,1]:null;const nxOk=!!(nx&&stOpen2(nx[0],nx[1]));$('bNext').hidden=!nxOk;setTimeout(()=>{if(G.stage===st){$('bNext').hidden=!nxOk;$('bAgain').hidden=false;$('bHome').textContent='목록'}},0);$('bAgain').hidden=false;$('bAgain').disabled=false;$('bAgain').querySelector('b').textContent='다시 하기';
   const iWon=st.type==='witch'?!win:win;
   if(st.type==='surv'){$('resKick').textContent=win?'버텼어요!':'붙잡혔어요';$('resBig').textContent=win?st.secs+'초':Math.floor(t)+'초';$('resLede').textContent=`${st.c}장 ${st.s}단계 · 버티기`}
