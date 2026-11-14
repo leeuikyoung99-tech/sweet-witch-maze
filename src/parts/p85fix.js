@@ -320,3 +320,7 @@ setInterval(()=>{try{const h=G&&G.hero;if(!h||screen!=='play'||G.mode!=='hero'||
  const t1=inv75Tick;inv75Tick=function(){t1.apply(this,arguments);try{if(typeof scene==='undefined')return;if(!disk||disk.parent!==scene)disk=mk();const h=G&&G.hero;
   const on=!!(h&&h.m&&h.m.g&&h.m.g.visible&&screen==='play'&&!G.over&&!G.cdn&&Math.max(h.inv||0,h.dashT||0)>.02&&!(h.cloak>0&&G.mode==='devil'));disk.visible=on;
   if(on){const s=G.mode==='devil'?3.4:2.4;disk.scale.set(s,s,1);disk.position.set(h.m.g.position.x,.06,h.m.g.position.z)}}catch(e){}}}
+// 결과 창 다듬기 6: '다음 판엔 …' 은 3판 표 바로 아래 작은 한 줄(설명 줄과 같은 자리), 노란 칸 높이를 줄여요
+{const st=document.createElement('style');st.textContent=`
+#result .rs-ser #resCoin>.ser-next{grid-column:1!important;grid-row:2!important;justify-self:center!important;font:11.5px var(--f-display)!important;margin:2px 0 0!important;max-width:100%}
+#result .rs-ser #resCoin>.rs-note~.ser-next{grid-row:3!important}`;document.head.appendChild(st)}
