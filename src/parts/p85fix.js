@@ -187,3 +187,17 @@ const RSI_MAP='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5 8.5 4
 {const NS='http://www.w3.org/2000/svg';const g=document.createElementNS(NS,'svg');g.id='gDefs';g.setAttribute('width','0');g.setAttribute('height','0');g.setAttribute('aria-hidden','true');g.style.cssText='position:absolute;width:0;height:0;overflow:hidden;pointer-events:none';
   const d=document.createElementNS(NS,'defs');g.appendChild(d);document.body.prepend(g);
   for(const id of ['tf','wf']){const src=document.querySelector('#bHero #'+id+',#bDevil #'+id)||document.getElementById(id);if(src)d.appendChild(src.cloneNode(true))}}
+// 결과 창 다듬기 3: 지도 보기는 보통 버튼 크기(노란 칸과 같은 색·테두리) · 광고 보기는 아래 버튼 줄 '그만하기' 옆
+{const lay=rsLayout;rsLayout=function(){lay.apply(this,arguments);try{const a=$('bAdCoin'),h=$('bHome');if(a&&h&&a.previousElementSibling!==h)h.after(a);
+  const sd=$('rsSide');if(sd)sd.hidden=![...sd.children].some(b=>!b.hidden&&getComputedStyle(b).display!=='none')}catch(e){}}}
+{const st=document.createElement('style');st.textContent=`
+#rsMid{align-items:center!important}
+#rsSide{width:auto!important}
+#rsSide>button{flex:none!important;height:42px!important;min-height:0!important;padding:0 14px!important;border:3px solid var(--choco)!important;border-radius:14px!important;box-shadow:0 3px 0 var(--choco)!important;background:rgb(255,243,196)!important}
+#result .row #bAdCoin{flex:none;height:auto;align-self:stretch;margin:0!important;display:flex;align-items:center;gap:4px;padding:0 12px!important;border:3px solid var(--choco);border-radius:16px;box-shadow:0 4px 0 var(--choco);background:#fff;white-space:nowrap;font:15px var(--f-display);color:var(--choco)}
+#result .row #bAdCoin svg{width:20px;height:20px;flex:none}#result .row #bAdCoin small{font-size:11px}
+#result .row #bAdCoin:disabled{opacity:.6}`;document.head.appendChild(st)}
+// 모든 그림의 색 정의(그라디언트·패턴)를 #gDefs 에 모아 둬요. 숨은 화면 안에 정의된 색도 어디서나 칠해지게(새로 생기는 것도 2초마다 모음).
+function gDefsSync(){const d=document.querySelector('#gDefs defs');if(!d)return;const have=new Set([...d.children].map(e=>e.id));
+  for(const e of document.querySelectorAll('svg:not(#gDefs) linearGradient[id],svg:not(#gDefs) radialGradient[id],svg:not(#gDefs) pattern[id]')){if(have.has(e.id))continue;have.add(e.id);d.appendChild(e.cloneNode(true))}}
+gDefsSync();setInterval(gDefsSync,2000);
