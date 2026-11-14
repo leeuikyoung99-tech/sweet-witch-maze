@@ -98,9 +98,18 @@ function mgWitchModel(){const g=new THREE.Group(),body=new THREE.Group();g.add(b
   const belt=new THREE.Mesh(new THREE.CylinderGeometry(1.02,1.02,.35,20),M('#ffd23a'));belt.position.y=4.55;body.add(belt);
   const chest=new THREE.Mesh(new THREE.CylinderGeometry(.85,1.05,1.3,20),M('#7a3ff0'));chest.position.y=5.25;body.add(chest);
   const head=new THREE.Mesh(new THREE.SphereGeometry(1.05,24,18),M('#ffe6d6'));head.position.y=6.55;body.add(head);
-  const hair=new THREE.Mesh(new THREE.SphereGeometry(1.12,20,14,0,Math.PI*2,0,Math.PI*.62),M('#b98cff'));hair.position.y=6.62;hair.rotation.x=-.25;body.add(hair);
-  for(const sx of[-1,1]){const eye=new THREE.Mesh(new THREE.SphereGeometry(.14,10,8),M('#3a1d50'));eye.position.set(sx*.38,6.62,.93);body.add(eye);
-    const ck=new THREE.Mesh(new THREE.CircleGeometry(.2,12),new THREE.MeshBasicMaterial({color:'#ff9ec7',transparent:true,opacity:.8}));mats.push(ck.material);ck.position.set(sx*.62,6.35,.88);ck.rotation.y=sx*.5;body.add(ck)}
+  // 머리카락: 앞쪽(얼굴)은 비워 두고 옆·뒤를 덮어요 + 위쪽 앞머리
+  const hairM=M('#b98cff');const FG=1.1;
+  const hair=new THREE.Mesh(new THREE.SphereGeometry(1.13,24,14,Math.PI/2+FG,Math.PI*2-FG*2,0,Math.PI*.66),hairM);hair.position.y=6.55;body.add(hair);
+  const bang=new THREE.Mesh(new THREE.SphereGeometry(1.14,24,10,0,Math.PI*2,0,Math.PI*.3),hairM);bang.position.y=6.55;body.add(bang);
+  // 얼굴: 큰 눈(하이라이트) · 볼 · 웃는 입 · 눈썹
+  const faceZ=(x,y)=>Math.sqrt(Math.max(0,1.05*1.05-x*x-(y-6.55)*(y-6.55)));
+  for(const sx of[-1,1]){const ex=sx*.36,ey=6.6;const eye=new THREE.Mesh(new THREE.SphereGeometry(.17,12,10),M('#3a1d50'));eye.scale.set(1,1.25,.6);eye.position.set(ex,ey,faceZ(ex,ey)-.02);body.add(eye);
+    const hi=new THREE.Mesh(new THREE.SphereGeometry(.055,8,6),new THREE.MeshBasicMaterial({color:'#ffffff'}));mats.push(hi.material);hi.position.set(ex+sx*.04+.03,ey+.07,faceZ(ex,ey)+.09);body.add(hi);
+    const brow=new THREE.Mesh(new THREE.TorusGeometry(.16,.035,6,12,Math.PI*.8),M('#5a2d80'));brow.position.set(ex,ey+.3,faceZ(ex,ey+.3)+.01);brow.rotation.z=Math.PI*.1;body.add(brow);
+    const ck=new THREE.Mesh(new THREE.CircleGeometry(.19,14),new THREE.MeshBasicMaterial({color:'#ff9ec7',transparent:true,opacity:.85}));mats.push(ck.material);const cx=sx*.6,cy=6.32;ck.position.set(cx,cy,faceZ(cx,cy)+.02);ck.lookAt(cx*3,cy,faceZ(cx,cy)*3+0);body.add(ck)}
+  const mouth=new THREE.Mesh(new THREE.TorusGeometry(.2,.045,6,14,Math.PI),M('#c2306a'));mouth.rotation.z=Math.PI;mouth.position.set(0,6.3,faceZ(0,6.3)+.01);body.add(mouth);
+  const nose=new THREE.Mesh(new THREE.SphereGeometry(.07,8,6),M('#ffc9b0'));nose.position.set(0,6.45,faceZ(0,6.45)+.03);body.add(nose);
   const brim=new THREE.Mesh(new THREE.CylinderGeometry(2.1,2.1,.16,28),M('#5a2db0'));brim.position.y=7.35;body.add(brim);
   const hat=new THREE.Mesh(new THREE.ConeGeometry(1.15,2.3,22),M('#6a35d0'));hat.position.set(0,8.55,-.15);hat.rotation.x=-.18;body.add(hat);
   const band=new THREE.Mesh(new THREE.CylinderGeometry(1.08,1.12,.3,22),M('#ff5f9e'));band.position.y=7.6;body.add(band);

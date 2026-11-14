@@ -58,7 +58,7 @@ function ttRoleTitle(){const g=LOBBY.game==='mini';return (g?'거대 마녀':'�
 #title{align-items:stretch!important}
 .title-slab.t-top,.title-slab.t-main,.title-slab.t-mini{box-sizing:border-box;width:min(820px,100%)!important;max-width:none!important;height:100%!important;max-height:none!important;margin:0 auto!important;border-radius:22px}
 .title-slab.t-top{justify-content:center;gap:clamp(6px,2.4vh,14px)!important}
-.title-slab.t-main,.title-slab.t-mini{justify-content:flex-start;gap:clamp(6px,2vh,12px)!important;padding-bottom:clamp(10px,3vh,18px)!important}
+.title-slab.t-main,.title-slab.t-mini{justify-content:flex-start;gap:clamp(6px,2vh,12px)!important;padding-bottom:clamp(18px,5vh,26px)!important}
 @media (max-height:340px){.title-slab.t-top>.kicker{display:none}.title-slab.t-top>.duo svg{width:clamp(38px,13vh,52px)!important;height:auto!important}.title-slab.t-top>h1{font-size:clamp(28px,10vh,40px)!important;margin:0!important}.title-slab.t-top{gap:clamp(5px,1.8vh,8px)!important}}
 .title-slab.t-top .sub-row{flex-wrap:nowrap!important;max-width:100%}
 @media (max-width:720px){.title-slab.t-top .sub-row{gap:5px!important}.title-slab.t-top .sub-row .sbtn{padding-left:7px!important;padding-right:7px!important}}
@@ -76,3 +76,11 @@ function ttRoleTitle(){const g=LOBBY.game==='mini';return (g?'거대 마녀':'�
 #ttArt video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .35s}#ttArt.vid video{opacity:1}
 @media (max-height:340px){#ttHead b{font-size:24px}#ttHead .ti svg{width:30px;height:30px}.title-slab.t-main #ttHead,.title-slab.t-mini #ttHead{margin:0}}
 `;document.head.appendChild(st)}
+// 게임 안 배치: 위에 게임 이름, 아래 왼쪽 영상 · 오른쪽 세로 버튼 3개(모두 같은 크기)
+{const st=document.createElement('style');st.textContent=`
+.title-slab.t-main,.title-slab.t-mini{display:grid!important;grid-template-columns:minmax(0,1fr) clamp(170px,30%,250px);grid-template-rows:auto minmax(0,1fr);column-gap:clamp(18px,3.4vw,28px)!important;row-gap:clamp(6px,2vh,12px)!important;align-content:stretch}
+.title-slab.t-main #ttHead,.title-slab.t-mini #ttHead{grid-column:1/3;grid-row:1}
+.title-slab.t-main #ttArt,.title-slab.t-mini #ttArt{grid-column:1;grid-row:2;min-height:0;height:auto;max-height:100%;aspect-ratio:16/10;align-self:center;flex:none}
+.title-slab.t-main .menu-row.tt.sub,.title-slab.t-mini .menu-row.tt.sub{grid-column:2;grid-row:2;flex-direction:column!important;flex-wrap:nowrap!important;justify-content:center;align-items:stretch;width:auto!important;gap:clamp(6px,2.2vh,12px)!important;margin:0!important;min-height:0}
+.title-slab.t-main .menu-row.tt.sub>.mbtn,.title-slab.t-mini .menu-row.tt.sub>.mbtn{flex:0 0 auto!important;width:100%;justify-content:flex-start;padding-right:10px!important;min-height:0}
+@media (max-height:340px){.title-slab.t-main .menu-row.tt.sub>.mbtn,.title-slab.t-mini .menu-row.tt.sub>.mbtn{height:52px}}`;document.head.appendChild(st)}

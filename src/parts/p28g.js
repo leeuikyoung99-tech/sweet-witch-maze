@@ -8,15 +8,16 @@ const frHi=()=>({t:'hi',id:SAVE.me.id,nick:myNick(),rank:Math.max(SAVE.rankT.p|0
 async function frStart(){if(FR.peer||FR.starting)return;FR.starting=true;try{await peerLib()}catch(e){FR.starting=false;return}
   const p=new Peer(frId(SAVE.me.id),peerOpts());FR.peer=p;FR.starting=false;FR.ready=new Promise(res=>{p.on('open',()=>res(true));setTimeout(()=>res(false),8000)});
   p.on('connection',conn=>{conn.on('open',()=>{try{conn.send(frHi())}catch(e){}});conn.on('data',d=>frData(d,conn))});
-  p.on('error',e=>{if(e.type==='peer-unavailable'){const m=String(e.message||'').match(/u-([A-Z0-9]{6})/);if(m){FR.on[m[1]]=false;frRender()}}else if(e.type==='unavailable-id'){/* 다른 탭에서 켜져 있거나 방금 다시 켰어요: 잠시 뒤 다시 */try{p.destroy()}catch(x){}if(FR.peer===p){FR.peer=null;FR.tries=(FR.tries|0)+1;if(FR.tries<4)setTimeout(frStart,6000)}}});
+  p.on('error',e=>{if(e.type==='peer-unavailable'){const m=String(e.message||'').match(/u-([A-Z0-9]{6})/);if(m){FR.unav=FR.unav||{};FR.unav[m[1]]=Date.now();FR.on[m[1]]=false;frRender()}}else if(e.type==='unavailable-id'){/* 다른 탭에서 켜져 있거나 방금 다시 켰어요: 서버가 예전 연결을 놓을 때까지 계속 다시 */try{p.destroy()}catch(x){}if(FR.peer===p){FR.peer=null;FR.tries=(FR.tries|0)+1;setTimeout(frStart,Math.min(30000,5000+FR.tries*3000))}}
+    else if(['network','server-error','socket-error','socket-closed'].includes(e.type)){/* 서버 연결이 끊김: 새로 */try{p.destroy()}catch(x){}if(FR.peer===p){FR.peer=null;setTimeout(frStart,5000)}}});
   p.on('disconnected',()=>{try{p.reconnect()}catch(e){}})}
 function frData(d,conn){if(!d||typeof d!=='object')return;
   if(d.t==='hi'&&/^[A-Z0-9]{6}$/.test(d.id||'')){if(!d.re&&conn&&conn.open){try{conn.send(Object.assign(frHi(),{re:1}))}catch(e){}}FR.on[d.id]=true;FR.info[d.id]={nick:String(d.nick||'').slice(0,10),rank:d.rank|0};let f=SAVE.friends.find(q=>q.id===d.id);
     if(!f){SAVE.friends.push({id:d.id,nick:FR.info[d.id].nick});saveGame();tMsg(`👫 ${FR.info[d.id].nick}님과 친구가 됐어요`)}else if(f.nick!==FR.info[d.id].nick){f.nick=FR.info[d.id].nick;saveGame()}frRender();return}
   if(d.t==='inv'&&/^[A-Z0-9]{5}$/.test(d.code||'')){const f=SAVE.friends.find(q=>q.id===d.id);if(!f)return;FR.inv={id:d.id,nick:f.nick||d.nick,code:d.code,conn};frInvShow();return}
   if(d.t==='invNo'){if(screen==='lobby')$('lobL').textContent=`${(SAVE.friends.find(q=>q.id===d.id)||{}).nick||'친구'}님이 지금은 어렵대요`;return}}
-async function frSend(fid,msg,cb){if(!FR.peer)await frStart();if(!FR.peer||!(await FR.ready)){cb&&cb(false);return}const c=FR.peer.connect(frId(fid),{reliable:true,serialization:'json'});let ok=false;
-  c.on('open',()=>{ok=true;try{c.send(frHi());if(msg)c.send(msg)}catch(e){}cb&&cb(true)});c.on('data',d=>frData(d,c));setTimeout(()=>{if(!ok){FR.on[fid]=false;frRender();cb&&cb(false)}try{if(!msg)c.close()}catch(e){}},msg?20000:5000)}
+async function frSend(fid,msg,cb){if(!FR.peer)await frStart();if(!FR.peer||!(await FR.ready)){cb&&cb(false);return}const t0=Date.now();const c=FR.peer.connect(frId(fid),{reliable:true,serialization:'json'});let ok=false;
+  c.on('open',()=>{ok=true;try{c.send(frHi());if(msg)c.send(msg)}catch(e){}cb&&cb(true)});c.on('data',d=>frData(d,c));setTimeout(()=>{if(!ok){/* 접속 확인: 서버가 '없는 친구'라고 안 하면 켜져 있는 거예요(직접 연결이 느린 휴대폰 망이어도) */if(!msg)FR.on[fid]=!(FR.unav&&FR.unav[fid]>=t0);else FR.on[fid]=false;frRender();cb&&cb(false)}try{if(!msg)c.close()}catch(e){}},msg?20000:5000)}
 function frProbeAll(){for(const f of SAVE.friends)frSend(f.id,null)}
 /* ----- 친구 화면 ----- */
 function openFriends(){show('friendS');frStart();if(!SAVE.me.nick){frNickAsk();return}frRender();frProbeAll();clearInterval(FR.timer);FR.timer=setInterval(()=>{if(screen!=='friendS'){clearInterval(FR.timer);return}frProbeAll()},15000)}
@@ -52,5 +53,8 @@ function frInvShow(){const I=FR.inv;if(!I)return;if(['play','design'].includes(s
 $('bFrX').onclick=()=>titleScreen();$('bFrAdd').onclick=()=>frAdd();
 for(const ev of['keydown','keyup','pointerdown'])$('frAddIn').addEventListener(ev,e=>{e.stopPropagation();if(ev==='keydown'&&e.key==='Enter')frAdd()});
 $('frList').addEventListener('click',e=>{const iv=e.target.closest('.fr-inv');if(iv&&!iv.disabled){SFX.card();frInvite(iv.dataset.id);return}const dl=e.target.closest('.fr-del');if(dl){const f=SAVE.friends.find(q=>q.id===dl.dataset.id);if(dl.dataset.sure){SAVE.friends=SAVE.friends.filter(q=>q.id!==dl.dataset.id);saveGame();frRender()}else{dl.dataset.sure=1;dl.textContent='삭제?';setTimeout(()=>{if(dl.isConnected){delete dl.dataset.sure;dl.textContent='✕'}},2500)}}});
-{const ts3=titleScreen;titleScreen=function(){ts3();if(SAVE.friends.length)frStart()}}
+{const ts3=titleScreen;titleScreen=function(){ts3();frStart()}}
+/* 친구 연결 지키기: 앱을 다시 보거나 15초마다, 끊겼으면 다시 잇고 없어졌으면 새로 */
+function frKeep(){try{FR.tries=0;const p=FR.peer;if(!p){if(!FR.starting)frStart();return}if(p.destroyed){FR.peer=null;frStart();return}if(p.disconnected){try{p.reconnect()}catch(e){}}}catch(e){}}
+setInterval(frKeep,15000);document.addEventListener('visibilitychange',()=>{if(!document.hidden){frKeep();if(screen==='friendS')setTimeout(frProbeAll,1500)}});
 {const sh8=show;show=function(id){sh8(id);$('friendS').hidden=id!=='friendS';if(id!=='friendS')$('frM').hidden=true}}
