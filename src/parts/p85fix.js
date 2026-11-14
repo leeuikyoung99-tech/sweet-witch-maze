@@ -154,3 +154,17 @@ setInterval(()=>{try{if(screen==='result')rsLayout()}catch(e){}},400);
 #result .rs-ser #resCoin>.ag-foot>.ag-have .ag-chip{width:22px!important;height:22px!important;min-width:0!important;padding:0!important;border-width:2px!important}
 #result .rs-ser #resCoin>.ag-foot>.ag-have .ag-chip svg{width:14px!important;height:14px!important}`;document.head.appendChild(st)}
 {const st=document.createElement("style");st.textContent="#rsCoinLine svg,#rsCoinLine img{width:16px!important;height:16px!important;vertical-align:-3px;flex:none}#rsCoinLine *{font-size:inherit}#rsCoinLine small{font-size:11px!important;color:#8a6a50}";document.head.appendChild(st)}
+// ----- 온라인(친구·아무나) 3판 중간: 판이 끝나면 둘 다 '준비'를 눌러야 다음 판 (예전엔 9초 뒤 저절로) -----
+serHostAuto=function(){};
+function srS(){const S=NET.on&&!NET.duo?NET.ser:null;return S&&S.on&&!S.done?S:null}
+function srSync(){const S=srS();if(!S||screen!=='result')return;const b=$('bAgain');if(!b)return;const r=S.r,me=NET.srdyMe===r,pe=NET.srdyPeer===r;
+  b.hidden=false;b.disabled=me;const t=b.querySelector('b');if(t)t.textContent=me?'준비 완료':'준비';b.classList.toggle('sr-done',me);
+  let st=$('srStat');const box=$('resCoin');if(!st&&box){st=document.createElement('div');st.id='srStat';st.className='ser-next'}
+  if(st&&box){if(st.parentElement!==box)box.appendChild(st);for(const e of box.querySelectorAll('.ser-next'))if(e!==st&&/곧 .판을 시작/.test(e.textContent))e.remove();
+    st.textContent=me?(pe?`${r+1}판을 시작해요`:'상대가 준비하기를 기다리는 중…'):(pe?`상대는 준비 완료 · 준비를 누르면 ${r+1}판 시작`:`둘 다 준비를 누르면 ${r+1}판을 시작해요`)}}
+function srTry(){const S=srS();if(!S||!NET.host)return;const r=S.r;if(NET.srdyMe===r&&NET.srdyPeer===r&&NET.srGo!==r){NET.srGo=r;setTimeout(()=>{if(srS()!==S||S.r!==r)return;NET.nextRound=r+1;NET.peerReady=true;try{hostNext(roleAt(S.first,r+1))}finally{NET.nextRound=1}},600)}}
+$('bAgain').addEventListener('click',e=>{const S=srS();if(!S||screen!=='result')return;e.stopImmediatePropagation();e.preventDefault();if(NET.srdyMe===S.r)return;SFX.click();NET.srdyMe=S.r;try{netSend({t:'srdy',r:S.r})}catch(er){}srSync();srTry()},true);
+{const nm=netMsg;netMsg=function(d){if(d&&d.t==='srdy'){NET.srdyPeer=d.r|0;srSync();srTry();return}return nm.apply(this,arguments)}}
+{const sr=serResult;serResult=function(){const r=sr.apply(this,arguments);try{srSync()}catch(e){}return r}}
+setInterval(()=>{try{if(screen==='result'&&srS())srSync()}catch(e){}},500);
+{const st=document.createElement('style');st.textContent=`#bAgain.sr-done{filter:saturate(.5);opacity:.8}`;document.head.appendChild(st)}
