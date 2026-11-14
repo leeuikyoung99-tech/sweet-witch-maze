@@ -109,3 +109,19 @@ setInterval(()=>{try{tcPlace()}catch(e){}},300);addEventListener('resize',()=>{t
 // ----- (5) 관문 바닥 표시가 안 보이던 것: 얼음·바다처럼 바닥 타일이 도톰한 맵에선 높이 0.09 판이 타일 속에 묻혔어요 → 모든 관문 바닥 표시를 0.22 올려요 -----
 gRect=function(x0,z0,x1,z1,col,op,y){const m=new THREE.Mesh(new THREE.PlaneGeometry(Math.max(.1,x1-x0),Math.max(.1,z1-z0)),gMat(col,op));m.rotation.x=-Math.PI/2;m.position.set((x0+x1)/2,(y||.09)+.22,(z0+z1)/2);m.renderOrder=3;return bAdd(m)};
 gCirc=function(x,z,r,col,op,y){const m=new THREE.Mesh(new THREE.CircleGeometry(r,40),gMat(col,op));m.rotation.x=-Math.PI/2;m.position.set(x,(y||.1)+.22,z);m.renderOrder=3;return bAdd(m)};
+
+// ----- (6) 거대 마녀 '창 울타리': 창과 창 사이로 도둑이 빠져나갈 수 있었어요 → 이웃한 창 사이를 사탕 막대 가로대로 잇고, 가로대도 막아요 -----
+// 같은 울타리(아이디 앞부분이 같은 기둥)에서 차례로 꽂힌 이웃 창(2.6m 안) 사이가 막혀요. 대시로 부딪히면 가까운 창 하나가 깨져 그 옆 칸이 열려요(길은 늘 남게).
+function mgFencePairs(){const by={},out=[];for(const p of MG.posts){if(p.dead)continue;const g=p.id.split(':')[0];if(!/^fe/.test(g))continue;(by[g]||(by[g]=[])).push(p)}
+  for(const g in by){const L=by[g];for(let i=0;i+1<L.length;i++){const a=L[i],b=L[i+1];if(Math.hypot(a.x-b.x,a.z-b.z)<=2.6)out.push([a,b])}}return out}
+function mgRailMesh(a,b){const g=new THREE.Group(),L=Math.hypot(b.x-a.x,b.z-a.z);for(const[y,c]of[[1.0,'#ff7eb6'],[2.0,'#fff8ee']]){const m=new THREE.Mesh(new THREE.CylinderGeometry(.13,.13,L,8),new THREE.MeshLambertMaterial({color:c}));m.rotation.z=Math.PI/2;m.position.y=y;g.add(m)}
+  g.position.set((a.x+b.x)/2,0,(a.z+b.z)/2);g.rotation.y=-Math.atan2(b.z-a.z,b.x-a.x);return g}
+function mgRailSync(){MG.rails=MG.rails||{};const want={};for(const[a,b]of mgFencePairs()){const k=a.id+'|'+b.id;want[k]=1;if(!MG.rails[k]&&MG.g){const m=mgRailMesh(a,b);MG.g.add(m);MG.rails[k]=m}}
+  for(const k in MG.rails)if(!want[k]){try{mgDrop(MG.rails[k])}catch(e){try{MG.g.remove(MG.rails[k])}catch(_){}}delete MG.rails[k]}}
+{const pc=mgPostCollide;mgPostCollide=function(o,dash,isTh){pc.apply(this,arguments);const R=.35+MGP.thR;
+  for(const[a,b]of mgFencePairs()){if(a.dead||b.dead)continue;const ex=b.x-a.x,ez=b.z-a.z,L2=ex*ex+ez*ez||1;let t=((o.x-a.x)*ex+(o.z-a.z)*ez)/L2;t=Math.max(0,Math.min(1,t));
+    const cx=a.x+ex*t,cz=a.z+ez*t,dx=o.x-cx,dz=o.z-cz,d=Math.hypot(dx,dz);if(d>=R)continue;
+    if(dash&&isTh){mgPostBreak(t<.5?a:b,true);mgMsg(MG.role==='thief'?'쾅! 깨고 나왔어요':'도둑이 기둥을 깼어요!',1);continue}
+    let nx,nz;if(d>.01){nx=dx/d;nz=dz/d}else{nx=-ez/Math.sqrt(L2);nz=ex/Math.sqrt(L2)}o.x=cx+nx*R;o.z=cz+nz*R}}}
+{const st=mgSkTick;mgSkTick=function(){const r=st.apply(this,arguments);try{mgRailSync()}catch(e){}return r}}
+{const cl=mgClean;mgClean=function(){try{for(const k in MG.rails||{})try{MG.g.remove(MG.rails[k])}catch(e){}}catch(e){}MG.rails={};return cl.apply(this,arguments)}}
