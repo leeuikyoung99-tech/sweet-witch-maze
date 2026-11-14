@@ -324,3 +324,10 @@ setInterval(()=>{try{const h=G&&G.hero;if(!h||screen!=='play'||G.mode!=='hero'||
 {const st=document.createElement('style');st.textContent=`
 #result .rs-ser #resCoin>.ser-next{grid-column:1!important;grid-row:2!important;justify-self:center!important;font:11.5px var(--f-display)!important;margin:2px 0 0!important;max-width:100%}
 #result .rs-ser #resCoin>.rs-note~.ser-next{grid-row:3!important}`;document.head.appendChild(st)}
+// 미션 버튼: 그림자까지 줄 안에 여유 있게(아래 테두리에 안 닿게)
+{const st=document.createElement('style');st.textContent=`
+#misList .ms-row{height:50px!important}
+#misList .ms-b{height:30px!important;box-shadow:0 3px 0 var(--choco)!important;margin-top:-3px!important}
+#misList .ms-b:disabled,#misList .ms-b.dim{box-shadow:none!important;margin-top:0!important}
+@media (max-height:340px){#misList .ms-row{height:40px!important}#misList .ms-b{height:24px!important;font-size:12.5px!important}}`;document.head.appendChild(st)}
+{const st=document.createElement("style");st.textContent="#misList .ms-b{padding:1px 6px 0!important;line-height:1!important;display:flex!important;align-items:center!important;justify-content:center!important}#misList .ms-b *{line-height:1}";document.head.appendChild(st)}
