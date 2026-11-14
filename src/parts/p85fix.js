@@ -211,3 +211,9 @@ gDefsSync();setInterval(gDefsSync,2000);
 #result .rs-ser #rsSide>#bMap svg{width:26px;height:26px}
 #result .rs-ser #resCoin>.rs-note{margin-top:2px}`;document.head.appendChild(st)}
 {const st=document.createElement("style");st.textContent="#rsCoinLine svg{margin-right:3px}";document.head.appendChild(st)}
+// 결과 창 다듬기 5: 노란 칸 아래 글씨는 가운데, 증강체 칸은 같은 너비·글씨 왼쪽·칩 오른쪽, 칩이 없으면 '없음'
+{const lay=rsLayout;rsLayout=function(){lay.apply(this,arguments);try{for(const h of document.querySelectorAll('#resCoin .ag-foot>.ag-have')){const has=h.querySelector('.ag-chip');let n=h.querySelector('.ag-none');if(!has&&!n){h.insertAdjacentHTML('beforeend','<em class="ag-none">없음</em>')}else if(has&&n)n.remove()}}catch(e){}}}
+{const st=document.createElement('style');st.textContent=`
+#result .rs-ser #resCoin>.ser-next{justify-self:center!important;text-align:center}
+#result .rs-ser #resCoin>.ag-foot>.ag-have{justify-content:space-between;min-width:132px}
+#result .rs-ser #resCoin .ag-none{font:normal 11px var(--f-ui);color:#b9a9ff;margin-right:6px}`;document.head.appendChild(st)}
