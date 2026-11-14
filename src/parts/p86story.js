@@ -43,7 +43,7 @@ stType=function(c,s){const L=ST6[c]&&ST6[c].L;return(L&&L[s-1])||'esc'};
 {const sd=stDef;stDef=function(c,s){const st=sd(c,s),R=ST6[c];st.rule=R.rule;const T=st.type;
   st.aug=(T==='puzzle'||T==='gboss')?[]:(ST6AUG[R.rule]||[]).slice();
   if(T==='gate'){st.hz=c;st.ai=c<=2?1:2;st.g3='hp';st.walls=Math.min(60,st.walls+2);st.deck=STORY[c-1].cards.slice(0,8)}
-  if(T==='gboss'){st.ai=c<=2?0:c<=5?1:2;st.sk=R.sk.slice();st.fastB=c<=4?150:140}
+  if(T==='gboss'){st.ai=c<=2?0:c<=5?1:2;st.sk=R.sk.slice();st.fastB=c<=4?165:155}
   return st}}
 {const g=stGoals3;stGoals3=function(st){if(st.type==='gate')return['관문을 지나 탈출',G3S.hp,`${st.fast}초 안에 탈출`];
   if(st.type==='gboss')return['거대 마녀 이기기','하트 2개 넘게 남기기',`${st.fastB}초 안에 이기기`];return g(st)}}

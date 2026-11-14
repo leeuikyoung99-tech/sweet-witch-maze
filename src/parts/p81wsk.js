@@ -249,12 +249,13 @@ MGCAST.bat=function({mo}){const T=3.2,sp=[];for(let i=0;i<26;i++){const p=mgP('b
 
 // ===== 83: 사탕 자리 = 도둑과 마녀가 '같은 시간'에 닿는 곳 =====
 // 도둑은 벽을 돌아가는 실제 길(BFS) ÷ 도둑 속도, 마녀는 벽을 부수며 곧장 가니 직선 거리 ÷ 마녀 속도.
-// 두 시간이 가장 비슷한 칸들 중에서(도둑이 3초 넘게 걸리는 곳만) 하나를 골라요. 너무 뻔하지 않게 비슷한 후보 몇 개 중 무작위.
+// 두 시간이 비슷한 칸들 중에서(도둑이 3초 넘게 걸리는 곳만) 도둑에게서 가장 먼 칸을 골라요.
 function mgThiefDist(){const th=MG.th,[sx,sz]=cellOf(th.x,th.z),D=new Float32Array(N*N).fill(-1);if(!mgOpen(sx,sz))return D;const q=[idx(sx,sz)];D[idx(sx,sz)]=Math.hypot(th.x-cx2x(sx),th.z-cx2x(sz));
   for(let h=0;h<q.length;h++){const i=q[h],x=i%N,z=(i/N)|0;for(const[dx,dz]of DIRS){const nx=x+dx,nz=z+dz;if(!mgOpen(nx,nz)||D[idx(nx,nz)]>=0||!canStep(x,z,dx,dz))continue;D[idx(nx,nz)]=D[i]+C;q.push(idx(nx,nz))}}return D}
 function mgEqualCell(minWitch){const mo=MG.mo,D=mgThiefDist(),c=[];const vT=MGP.thSpd,vW=MGP.moSpd;
   for(let z=0;z<N;z++)for(let x=0;x<N;x++){const d=D[idx(x,z)];if(d<0||(x===EXIT[0]&&z===EXIT[1]))continue;const px=cx2x(x),pz=cx2x(z),tT=d/vT,dW=Math.hypot(px-mo.x,pz-mo.z),tW=Math.max(0,dW-MGP.moR)/vW;
     if(tT<3||(minWitch&&dW<minWitch))continue;c.push({x:px,z:pz,sc:Math.abs(tT-tW),tT})}
-  if(!c.length)return null;c.sort((a,b)=>a.sc-b.sc);const top=c.filter(q=>q.sc<=c[0].sc+.6).slice(0,6);return top[(Math.random()*top.length)|0]}
+  // (2026-11-15) 같은 시간 규칙을 지키는 칸들(차이 1초 안, 없으면 가장 비슷한 것 +0.6초 안) 중에서 도둑에게서 가장 먼 칸(도둑이 걸리는 시간이 가장 긴 칸)
+  if(!c.length)return null;c.sort((a,b)=>a.sc-b.sc);const tol=Math.max(1,c[0].sc+.6),ok=c.filter(q=>q.sc<=tol);ok.sort((a,b)=>b.tT-a.tT);const far=ok.filter(q=>q.tT>=ok[0].tT-.01);return far[(Math.random()*far.length)|0]}
 mgSpawnCandy=function(){const c=mgEqualCell()||mgFarCell(20);const g=mgCandyMesh();g.position.set(c.x,0,c.z);MG.g.add(g);MG.cand={x:c.x,z:c.z,g}};
 {const ff=mgFleeCell;mgFleeCell=function(){return mgEqualCell(20)||ff.apply(this,arguments)}}
