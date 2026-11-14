@@ -9,7 +9,7 @@ function storyTick(dt){const st=G.stage;if(!st||!st.story||G.over||G.mode!=='her
   if(st.type==='candy'){G.cT=(G.cT||0)-dt;if(G.cT<=0){G.cT=2.2;if(G.candies.filter(c=>!c.fake).length<10)spawnCandy()}
     if(h.manaGot>=st.need){endMatch(true,'candy');return}}
   if(st.type==='boss')bossTick(st.c,dt)}
-setInterval(stGoalSync,200);
+setInterval(()=>stGoalSync(),200);
 // ----- 1장 보스: 거대 막대사탕 (미로 가운데에서 한 바퀴씩 휩쓸고, 사탕 대포 3갈래) -----
 function lollyBuild(){const W=N*C,R=W*.40;const g=new THREE.Group();const cx=W/2,cz=W/2;g.position.set(cx,0,cz);
   const mStick=new THREE.MeshPhongMaterial({color:'#fff6ee',shininess:60}),mHead=new THREE.MeshPhongMaterial({color:'#ff6fae',shininess:80,emissive:new THREE.Color('#ff3f8e'),emissiveIntensity:.15}),mSw=new THREE.MeshPhongMaterial({color:'#ffffff',shininess:80});

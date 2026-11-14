@@ -68,7 +68,7 @@ function st6Boss(st,sk){AIL=st.ai;try{MAPPICK=st.th;applyTheme(st.th,true)}catch
 // ----- 거대 마녀 결과: 별 · 코인 · 상자 -----
 function st6Save(st,b){const key=st.c+'-'+st.s,old=SAVE.st2[key]|0,nb=b&~old,news=(nb&1)+((nb>>1)&1)+((nb>>2)&1);SAVE.st2[key]=old|b;
   let coins=news*5+((nb&1)?stFirst(st.c):0);const gift={};
-  if((nb&1)&&BOSS_BOX[st.c]!=null){SAVE.boxes=SAVE.boxes||[];SAVE.boxes.push(BOSS_BOX[st.c]);gift.box=BOSS_BOX[st.c];SAVE.cardPick=(SAVE.cardPick|0)+1}
+  if((nb&1)&&BOSS_BOX[st.c]!=null){SAVE.boxes=SAVE.boxes||[];SAVE.boxes.push(BOSS_BOX[st.c]);gift.box=BOSS_BOX[st.c]}
   if(coins){SAVE.coins+=coins;syncCoins()}saveGame();if(news)try{misAdd('stage',news)}catch(e){}return{b,news,coins,gift,first:!!(nb&1)}}
 const ST6_NEXT='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5 L15 12 L5 19 Z" fill="#fff" stroke="#4a2a1a" stroke-width="2.2" stroke-linejoin="round"/><rect x="16" y="5" width="3.6" height="14" rx="1.2" fill="#fff" stroke="#4a2a1a" stroke-width="2"/></svg>';
 {const f=mgEnd;mgEnd=function(win,why){const st=MGST.st,was=MG.over;const r=f.apply(this,arguments);if(!st||was||!MG.over)return r;
@@ -81,7 +81,8 @@ const ST6_NEXT='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5 L15 12
     if(!nb){nb=document.createElement('button');nb.id='mgResNext';nb.className='mg-big go';nb.setAttribute('aria-label','다음 장');nb.innerHTML=ST6_NEXT;row.appendChild(nb);
       nb.onclick=()=>{SFX.click();const s=MGST.st;if(!s)return;const n2=[s.c+1,1];MGST.st=null;const ts=titleScreen;titleScreen=function(){titleScreen=ts};try{mgExit()}finally{titleScreen=ts}startStage(n2[0]*100+n2[1])}}
     nb.hidden=!ok;R.querySelector('#mgResHome').setAttribute('aria-label','목록');
-    if(won&&x.first)setTimeout(()=>{if(MG.on)storyOutro(st.c)},700)},960);return r}}
+    // 처음 이기면: 장 끝 대사 → 대사가 끝나면 바로 상자 열기 (예전엔 제목 화면에 가서야 열리고, 카드 고르기가 또 나왔어요)
+    if(won&&x.first)setTimeout(()=>{if(!MG.on)return;storyOutro(st.c);if(x.gift.box!=null){const w=setInterval(()=>{if(!$('storyM').hidden)return;clearInterval(w);if(SAVE.boxes&&SAVE.boxes.length)try{pgBoxes()}catch(e){}},300)}},700)},960);return r}}
 {const f=mgExit;mgExit=function(){const r=f.apply(this,arguments);const ln=document.querySelector('#mgRes .mg-st6');if(ln)ln.remove();const nb=$('mgResNext');if(nb)nb.hidden=true;return r}}
 {const f=mgStart;mgStart=function(){const r=f.apply(this,arguments);const ln=document.querySelector('#mgRes .mg-st6');if(ln)ln.remove();const nb=$('mgResNext');if(nb)nb.hidden=true;return r}}
 // ----- 대사 (장마다 6단계): 앞 판에서 이어지고, 마지막 줄은 늘 이번 판에 할 일 -----
@@ -94,7 +95,7 @@ const ST6_NEXT='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5 L15 12
     6:[['b','롤리, 내 쓴 가루를 받아라!'],['w','힘이 넘쳐! 이제 난 거인이야!'],['t','사탕 6개를 먹으면 반대편 출구가 열려. 붙잡히지 말자!']]},
  2:{1:[['t','첫 번째 별 조각을 찾았어! 다음 조각은 얼음 동굴에 있대'],['w','어서 와~ 내 얼음벽은 30초마다 자리를 바꾼단다'],['t','길이 바뀌어도 당황하지 말고 출구를 찾자!']],
     2:[['w','길을 꽁꽁 얼려 버렸지!'],['t','얼음벽을 몇 개 밀어서 출구까지 길을 열자!']],
-    3:[['w','눈보라야, 다 덮어 버려!'],['t','파란 줄이 깔리면 그 줄 밖으로 피하면서 출구로 가자!']],
+    3:[['w','눈보라야, 다 덮어 버려!'],['t','진한 파란 띠가 깔리면 그 띠 밖으로 피하면서 출구로 가자!']],
     4:[['p','쿠키야! 바삭의 그림자 쿠키들이 내 마을로 몰려가!'],['p','내 마녀 카드를 빌려줄게. 미로로 막아 줘!'],['t','좋아, 그림자 쿠키가 출구에 못 가게 막자!']],
     5:[['r','서리가 조각을 부숴서 동굴에 뿌렸대'],['t','바삭, 넌 왜 별 조각을 모으는 거야?'],['r','…비밀이야. 아무튼 부스러기부터 줍자']],
     6:[['b','서리, 실망시키지 마라'],['w','추워… 그런데 화가 멈추질 않아…!'],['t','서리를 구하자! 사탕 6개를 먹고 반대편으로 넘어가면 돼!']]},
