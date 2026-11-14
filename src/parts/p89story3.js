@@ -108,3 +108,14 @@ if(SAVE.st7!==1){SAVE.st7=1;SAVE.st3Seen={};try{saveGame()}catch(e){}}
 #sv72 .sv-ttl .s6l i.n,#st6Card i.n{background:#2fae84}
 #sv72 .sv-ttl .s7c,#st6Card .s7c{display:inline-block;width:1.25em;height:1.25em;vertical-align:-.3em;margin-right:3px}
 #sv72 .sv-ttl .s7c svg,#st6Card .s7c svg{width:100%;height:100%}`;document.head.appendChild(st)}
+// ----- 출구가 잠긴 판(버티기·사탕 모으기처럼 출구로 나가는 게 아닌 판): 출구 칸 앞을 사탕 창살 + 자물쇠로 막아요. 지나갈 수도 없어요 -----
+// (지금 스토리엔 이런 판이 없지만, 다시 쓰거나 다른 모드에서 쓸 때를 위해)
+const stLockedExit=()=>{const st=G.stage;return!!(st&&st.story&&(st.type==='surv'||st.type==='candy')&&G.mode==='hero')};
+function stLockGate(){const g=new THREE.Group(),x0=EXIT[0]*C,z=(EXIT[1]+1)*C,bar=new THREE.CylinderGeometry(.16,.16,3.6,8),m1=new THREE.MeshLambertMaterial({color:'#ff6fae'}),m2=new THREE.MeshLambertMaterial({color:'#fff8ee'});
+  for(let i=0;i<7;i++){const b=new THREE.Mesh(bar,i%2?m2:m1);b.position.set(x0+.5+i*(C-1)/6,1.8,z);g.add(b)}
+  for(const y of[.6,3.3]){const h=new THREE.Mesh(new THREE.BoxGeometry(C,.32,.32),m1);h.position.set(x0+C/2,y,z);g.add(h)}
+  const lk=new THREE.Group(),body=new THREE.Mesh(new THREE.BoxGeometry(1.1,.9,.35),new THREE.MeshLambertMaterial({color:'#ffd23a'})),sh=new THREE.Mesh(new THREE.TorusGeometry(.36,.09,8,16,Math.PI),new THREE.MeshLambertMaterial({color:'#b98a2a'}));
+  sh.position.y=.45;lk.add(body,sh);lk.position.set(x0+C/2,2.2,z+.3);g.add(lk);g.userData.lock=lk;scene.add(g);try{x28add(g)}catch(e){}G.lockGate=g;return g}
+{const ss=startStory;startStory=function(c,s){const r=ss.apply(this,arguments);try{if(stLockedExit())stLockGate()}catch(e){}return r}}
+{const t0=storyTick;storyTick=function(dt){t0.apply(this,arguments);if(!stLockedExit()||G.over)return;const h=G.hero,x0=EXIT[0]*C,z=(EXIT[1]+1)*C;
+  if(h.x>x0-.2&&h.x<x0+C+.2&&h.z<z+.7)h.z=z+.7;if(G.lockGate&&G.lockGate.userData.lock)G.lockGate.userData.lock.rotation.y=Math.sin(G.t*2)*.25}}
