@@ -273,3 +273,35 @@ tuShop=function(){G.tutor=null;titleScreen();const card=Object.keys(GRADE.c).fil
   let gift=0;if(!SAVE.tutGift){gift=card?unlPrice('c',card):0;SAVE.tutGift=1;if(gift){SAVE.coins+=gift;saveGame();syncCoins()}}
   if(gift)tuModal('선물','튜토리얼 선물 '+gift+'코인','카드 하나를 열 수 있어요','받기',tuDeck);else tuDeck()};
 {const tm=tuModal;tuModal=function(a,b,c){const args=[...arguments];if(typeof c==='string')args[2]=c.replace('이제 꾸미기 상점과 카드를 알아봐요','이제 카드를 알아봐요');return tm.apply(this,args)}}
+// (8) 무적 표시 바꾸기: 크게 감싸던 금빛 방울막·발밑 고리·깜빡임은 없애고, 무적인 동안만 깔끔하게 켜졌다 꺼져요.
+//   - 도둑 머리 위 작은 금빛 방패(3인칭·마녀 화면에서 보여요, 마녀 화면은 크게)
+//   - 내가 도둑이면 체력 바가 금빛으로 바뀌고 하트 자리에 방패, 체력 바 옆에 남은 시간 고리
+const INV85={sp:null};
+function inv85Sprite(){if(INV85.sp&&INV85.sp.parent===scene)return INV85.sp;const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');
+  const p=new Path2D('M64 10 L106 26 V60 C106 88 88 108 64 118 C40 108 22 88 22 60 V26 Z');x.lineJoin='round';x.fillStyle='#ffd35f';x.fill(p);x.lineWidth=9;x.strokeStyle='#4a2a1a';x.stroke(p);
+  const st=new Path2D('M64 36 L71 52 L88 54 L75 65 L79 82 L64 73 L49 82 L53 65 L40 54 L57 52 Z');x.fillStyle='#fff';x.fill(st);
+  const tx=new THREE.CanvasTexture(cv);const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,depthTest:false,transparent:true,sizeAttenuation:false}));sp.renderOrder=9;sp.visible=false;scene.add(sp);INV85.sp=sp;return sp}
+inv75Tick=function(){requestAnimationFrame(inv75Tick);try{const h=G&&G.hero;const [hb,hv]=inv75Hud();if(INV75.g)INV75.g.visible=false;hv.style.display='none';
+  const hp=document.querySelector('#hudH .hpw');
+  const off=()=>{hb.style.display='none';if(INV85.sp)INV85.sp.visible=false;if(hp)hp.classList.remove('inv85')};
+  if(!h||!h.m||!h.m.g||G.over||G.cdn||screen!=='play'||typeof scene==='undefined'){off();INV75.tot=0;INV75.last=0;return}
+  const rem=Math.max(h.inv||0,h.dashT||0);if(rem<=0.02){off();INV75.tot=0;INV75.last=0;return}
+  if(rem>INV75.last+.03||INV75.tot<=0)INV75.tot=rem;INV75.last=rem;const f=Math.max(0,Math.min(1,rem/INV75.tot));
+  const sp=inv85Sprite(),body=h.m.g.visible&&!(h.cloak>0&&G.mode==='devil')&&G.mode==='devil';sp.visible=body;
+  if(body){const dv=G.mode==='devil';const s=dv?.075:.06;sp.scale.set(s,s,1);sp.position.set(h.m.g.position.x,(dv?3.4:2.6),h.m.g.position.z)}
+  if(G.mode==='hero'&&!h.remote&&!h.isRival){if(hp)hp.classList.add('inv85');const r=hp&&hp.getClientRects().length?hp.getBoundingClientRect():null;
+    if(r){hb.style.display='block';hb.style.left=Math.round(r.right+6)+'px';hb.style.top=Math.round(r.top+r.height/2-15)+'px';hb.style.setProperty('--f',f.toFixed(3));hb.style.opacity=1}else hb.style.display='none'}
+  else{hb.style.display='none';if(hp)hp.classList.remove('inv85')}}catch(e){INV75.err=String(e)}};
+{const st=document.createElement('style');st.textContent=`
+#hudH .hpw.inv85 #hp{background:linear-gradient(#fff3b0,#ffd35f)!important;border-color:#c98a00!important}
+#hudH .hpw.inv85 #hp>*{background:repeating-linear-gradient(-45deg,#ffc23a 0 8px,#ffe27a 8px 16px)!important}
+#hudH .hpw.inv85>svg{filter:hue-rotate(-40deg) saturate(1.6) brightness(1.15)}
+#inv75b{width:32px!important;height:32px!important}`;document.head.appendChild(st)}
+{const u="data:image/svg+xml,"+encodeURIComponent(INV75_SH.replace('<svg ','<svg xmlns="http://www.w3.org/2000/svg" '));const st=document.createElement('style');st.textContent=`#hudH .hpw{position:relative}
+#hudH .hpw.inv85>svg{opacity:0;filter:none}
+#hudH .hpw.inv85::before{content:"";position:absolute;left:0;top:50%;width:30px;height:30px;transform:translate(-2px,-50%);background:url("${u}") center/contain no-repeat;z-index:2}`;document.head.appendChild(st)}
+// 안내: 튜토리얼 대시 단계 글씨 + 처음 무적이 됐을 때(처음 3번) 한 줄 알림
+try{tuSteps&&0}catch(e){}
+{const ts=tuSteps;tuSteps=function(ph,steps){try{for(const s of steps||[])if(s&&s.t==='대시를 눌러요')s.s='잠깐 빠르게 달려요 · 체력 바가 금빛인 동안은 다치지 않아요'}catch(e){}return ts.apply(this,arguments)}}
+setInterval(()=>{try{const h=G&&G.hero;if(!h||screen!=='play'||G.mode!=='hero'||G.over||G.cdn||h.remote||h.isRival)return;const on=Math.max(h.inv||0,h.dashT||0)>.05;
+  if(on&&!INV85.was&&(SAVE.invTip|0)<3){SAVE.invTip=(SAVE.invTip|0)+1;saveGame();say('체력 바가 금빛이면 무적이에요',false,1.4)}INV85.was=on}catch(e){}},120);
