@@ -268,3 +268,8 @@ setInterval(()=>{try{if(screen==='mini')mgCandyPaint()}catch(e){}},200);
 {const sv=setView;setView=function(v){const r=sv.apply(this,arguments);try{SAVE.mgView=v===3?3:1}catch(e){}return r}}
 {const mt=mgViewToggle;mgViewToggle=function(){const r=mt.apply(this,arguments);try{VIEW=MG.view;SAVE.view=MG.view;saveGame()}catch(e){}return r}}
 try{if(SAVE.view)SAVE.mgView=SAVE.view===3?3:1}catch(e){}
+// (7) 처음 튜토리얼에서 꾸미기 상점 단계는 빼요: 마녀 연습이 끝나면 바로 카드 고르기로
+tuShop=function(){G.tutor=null;titleScreen();const card=Object.keys(GRADE.c).filter(k=>!cardOpen(k)).sort((a,b)=>grOf('c',a)-grOf('c',b))[0]||null;TU.card=card;
+  let gift=0;if(!SAVE.tutGift){gift=card?unlPrice('c',card):0;SAVE.tutGift=1;if(gift){SAVE.coins+=gift;saveGame();syncCoins()}}
+  if(gift)tuModal('선물','튜토리얼 선물 '+gift+'코인','카드 하나를 열 수 있어요','받기',tuDeck);else tuDeck()};
+{const tm=tuModal;tuModal=function(a,b,c){const args=[...arguments];if(typeof c==='string')args[2]=c.replace('이제 꾸미기 상점과 카드를 알아봐요','이제 카드를 알아봐요');return tm.apply(this,args)}}
