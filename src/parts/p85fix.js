@@ -104,3 +104,53 @@ mgViewSync=function(){const b=$('mgViewB');if(!b)return;const v=MG.view===3?3:1;
 #mgViewB.mgv2{width:auto!important;height:38px!important;padding:3px!important;border-radius:19px!important;display:flex!important;gap:2px;align-items:center;touch-action:none;background:#fff8ee}
 #mgViewB.mgv2 i{font:normal 13px var(--f-display);color:#9a7a60;padding:0 8px;height:28px;line-height:28px;border-radius:14px;white-space:nowrap;pointer-events:none}
 #mgViewB.mgv2 i.on{background:var(--choco);color:#fff}`;document.head.appendChild(st)}
+// 스토리 창도 다른 큰 창(첫 화면·메인·미니·설정)과 똑같은 자리·크기
+{const st=document.createElement('style');st.textContent=`#stages>.pane{box-sizing:border-box!important;height:100%!important;max-height:100%!important;margin:0 auto!important;width:min(820px,100%)!important;max-width:none!important;transform:none!important}`;document.head.appendChild(st)}
+// ----- 결과 창 정리: 최종 승리 리본 · 가운데 큰 글씨 · 바로 밑 경험치·패스 / 가운데 줄 [표+작은 설명][내·상대 증강체 위아래][지도 보기·광고] / 받은 코인 / 그만하기·새 대결 -----
+function rsLayout(){const sl=document.querySelector('#result .res-slab');if(!sl)return;
+  const who=sl.querySelector('.res-who'),xp=$('resXP'),box=$('resCoin'),row=$('bHome')&&$('bHome').parentElement;if(!who||!box||!row)return;
+  // 큰 글씨는 가운데, 그림은 글씨 왼쪽에 붙여요
+  const tx=who.querySelector('div');if(tx&&$('resArt')&&$('resArt').parentElement!==tx){tx.classList.add('rs-tx');tx.prepend($('resArt'))}
+  if(xp&&xp.previousElementSibling!==who)who.after(xp);
+  let mid=$('rsMid');if(!mid){mid=document.createElement('div');mid.id='rsMid';box.before(mid);mid.appendChild(box);const sd=document.createElement('div');sd.id='rsSide';mid.appendChild(sd)}
+  const sd=$('rsSide');if($('bMap')&&$('bMap').parentElement!==sd)sd.appendChild($('bMap'));if($('bAdCoin')&&$('bAdCoin').parentElement!==sd)sd.appendChild($('bAdCoin'));
+  sd.hidden=![...sd.children].some(b=>!b.hidden&&getComputedStyle(b).display!=='none');
+  let cl=$('rsCoinLine');if(!cl){cl=document.createElement('div');cl.id='rsCoinLine';row.before(cl)}
+  // 받은 코인 글씨는 버튼 줄 바로 위로 (표·증강체 칸 안의 코인 줄을 옮겨요)
+  const coinEls=[...box.children].filter(e=>e.classList.contains('ser-coin')||(!e.matches('table,.ag-foot,.ser-next,.rs-note')&&/코인/.test(e.textContent)));if(coinEls.length){cl.innerHTML='';for(const e of coinEls)cl.appendChild(e)}cl.hidden=!cl.textContent.trim();
+  // '3판 결승 결과로 승패가 정해져요' 는 표 아래 작은 한 줄
+  const L=$('resLede');if(L&&/결승 결과로/.test(L.textContent)&&box.querySelector('table.ser-t')){L.hidden=true;if(!box.querySelector('.rs-note'))box.querySelector('table.ser-t').insertAdjacentHTML('afterend','<div class="rs-note">3판 결승 결과로 승패가 정해져요</div>')}else if(L)L.hidden=false;
+  sl.classList.toggle('rs-ser',!!box.querySelector('table.ser-t'))}
+{const sr=serResult;serResult=function(){const r=sr.apply(this,arguments);try{const cl=$('rsCoinLine');if(cl)cl.innerHTML='';rsLayout()}catch(e){console.warn(e)}return r}}
+setInterval(()=>{try{if(screen==='result')rsLayout()}catch(e){}},400);
+{const st=document.createElement('style');st.textContent=`
+#result{padding-top:26px!important;padding-bottom:12px!important}
+#result .res-slab{display:flex;flex-direction:column;align-items:center}
+#result .res-who{justify-content:center;width:100%}#result .res-who .rs-tx{position:relative;text-align:center}
+#result .res-who .rs-tx>#resArt{position:absolute;right:calc(100% + 10px);top:50%;transform:translateY(-50%)}
+#result .res-who .rs-tx .res-big,#result .res-who .rs-tx .res-lede{text-align:center}
+#result #resXP{margin:2px auto 6px!important}
+#rsMid{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;margin:0 0 6px}
+#rsMid #resCoin{margin:0!important;flex:0 1 auto;min-width:0}
+#result .rs-ser #resCoin{display:grid!important;grid-template-columns:auto auto;grid-template-rows:auto auto;column-gap:10px;row-gap:3px;align-items:center;justify-items:start}
+#result .rs-ser #resCoin>table.ser-t{grid-column:1;grid-row:1;margin:0!important}
+#result .rs-ser #resCoin>.rs-note{grid-column:1;grid-row:2;font:11px var(--f-ui);color:#8a6a50;white-space:nowrap;justify-self:center}
+#result .rs-ser #resCoin>.ag-foot{grid-column:2;grid-row:1/3;display:flex!important;flex-direction:column;align-items:stretch;gap:6px;margin:0!important;width:auto}
+#result .rs-ser #resCoin>.ag-foot>.ag-have{display:flex;align-items:center;gap:4px;min-height:34px;margin:0!important;white-space:nowrap}
+#result .rs-ser #resCoin>.ser-next{grid-column:1/3}
+#rsSide{display:flex;flex-direction:column;gap:8px;flex:none;align-items:stretch;width:150px}
+#rsSide>button{width:100%!important;height:40px!important;min-height:0!important;margin:0!important;display:flex;align-items:center;justify-content:center;gap:4px;padding:0 6px!important;box-sizing:border-box;white-space:nowrap}
+#rsCoinLine{display:flex;justify-content:center;align-items:center;gap:8px;font:13px var(--f-ui);margin:0 0 6px;white-space:nowrap}
+#rsCoinLine .ser-coin{margin:0!important;padding:0!important;border:0!important;background:none!important}
+#result .row{margin-top:0!important}
+@media (max-height:340px){#result .res-who{min-height:0}#result #resXP{margin:0 auto 4px!important}#rsMid{margin-bottom:4px}#rsSide>button{height:34px!important}#rsCoinLine{margin-bottom:4px;font-size:12px}}`;document.head.appendChild(st)}
+// 광고 보고 코인은 3판이 다 끝났을 때만 (중간 판 결과에는 없어요)
+{const ac=adCoinBtn;adCoinBtn=function(){const S=(G.chal||G.duo||G.stage)?null:curSer();if(S&&S.on&&!S.done){const b=$('bAdCoin');if(b)b.remove();try{rsLayout()}catch(e){}return}return ac.apply(this,arguments)}}
+// 결과 창 증강체 칸: 얇게(높이 26px, 칩 20px)
+{const st=document.createElement('style');st.textContent=`
+#result .rs-ser #resCoin>.ag-foot{gap:5px!important}
+#result .rs-ser #resCoin>.ag-foot>.ag-have{min-height:0!important;height:28px;padding:0 4px 0 10px!important;border-radius:14px!important;gap:3px!important;box-sizing:border-box}
+#result .rs-ser #resCoin>.ag-foot>.ag-have>span{font-size:11.5px!important;margin-right:4px}
+#result .rs-ser #resCoin>.ag-foot>.ag-have .ag-chip{width:22px!important;height:22px!important;min-width:0!important;padding:0!important;border-width:2px!important}
+#result .rs-ser #resCoin>.ag-foot>.ag-have .ag-chip svg{width:14px!important;height:14px!important}`;document.head.appendChild(st)}
+{const st=document.createElement("style");st.textContent="#rsCoinLine svg,#rsCoinLine img{width:16px!important;height:16px!important;vertical-align:-3px;flex:none}#rsCoinLine *{font-size:inherit}#rsCoinLine small{font-size:11px!important;color:#8a6a50}";document.head.appendChild(st)}

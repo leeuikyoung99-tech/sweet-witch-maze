@@ -84,3 +84,7 @@ function ttRoleTitle(){const g=LOBBY.game==='mini';return (g?'거대 마녀':'�
 .title-slab.t-main .menu-row.tt.sub,.title-slab.t-mini .menu-row.tt.sub{grid-column:2;grid-row:2;flex-direction:column!important;flex-wrap:nowrap!important;justify-content:center;align-items:stretch;width:auto!important;gap:clamp(6px,2.2vh,12px)!important;margin:0!important;min-height:0}
 .title-slab.t-main .menu-row.tt.sub>.mbtn,.title-slab.t-mini .menu-row.tt.sub>.mbtn{flex:0 0 auto!important;width:100%;justify-content:flex-start;padding-right:10px!important;min-height:0}
 @media (max-height:340px){.title-slab.t-main .menu-row.tt.sub>.mbtn,.title-slab.t-mini .menu-row.tt.sub>.mbtn{height:52px}}`;document.head.appendChild(st)}
+// 게임 이름도 다른 창(스토리·설정)처럼 왼쪽 위 22px 제목
+{const st=document.createElement('style');st.textContent=`
+.title-slab.t-main #ttHead,.title-slab.t-mini #ttHead{justify-content:flex-start!important;min-height:44px;margin:0 0 0 -11px!important;padding-left:0}
+#ttHead .ti{display:none}#ttHead b{font-size:22px!important;letter-spacing:0!important}`;document.head.appendChild(st)}
