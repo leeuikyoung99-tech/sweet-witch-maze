@@ -168,3 +168,22 @@ $('bAgain').addEventListener('click',e=>{const S=srS();if(!S||screen!=='result')
 {const sr=serResult;serResult=function(){const r=sr.apply(this,arguments);try{srSync()}catch(e){}return r}}
 setInterval(()=>{try{if(screen==='result'&&srS())srSync()}catch(e){}},500);
 {const st=document.createElement('style');st.textContent=`#bAgain.sr-done{filter:saturate(.5);opacity:.8}`;document.head.appendChild(st)}
+// 결과 창 다듬기 2: 리본과 큰 글씨 사이 띄우기 · 노란 칸 글씨는 한 줄 · 준비 상태는 버튼 줄 위 · 지도 보기/광고는 노란 칸과 같은 모양(같은 높이)
+const RSI_MAP='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5 8.5 4l7 2.5L21 4v13.5L15.5 20l-7-2.5L3 20z" fill="#fff" stroke="#4a2a1a" stroke-width="1.8" stroke-linejoin="round"/><path d="M8.5 4v13.5M15.5 6.5V20" stroke="#4a2a1a" stroke-width="1.6"/><circle cx="12" cy="11" r="2" fill="#ff5f9e" stroke="#4a2a1a" stroke-width="1.2"/></svg>';
+{const lay=rsLayout;rsLayout=function(){lay.apply(this,arguments);try{const m=$('bMap');if(m&&!m.querySelector('svg')){m.innerHTML=`${RSI_MAP}<span>${m.textContent.trim()||'지도 보기'}</span>`}
+  const st=$('srStat'),cl=$('rsCoinLine');if(st&&cl&&st.parentElement!==cl){cl.prepend(st);cl.hidden=false}}catch(e){}}}
+{const ss=srSync;srSync=function(){ss.apply(this,arguments);try{const st=$('srStat'),cl=$('rsCoinLine');if(st&&cl&&st.parentElement!==cl){cl.prepend(st)}if(cl)cl.hidden=!cl.textContent.trim()}catch(e){}}}
+{const st=document.createElement('style');st.textContent=`
+#result .res-who{margin-top:clamp(8px,3vh,14px)!important}
+#resCoin .ser-next,#rsCoinLine #srStat{white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis;max-width:100%;font-size:12px!important;line-height:1.3;margin:0!important}
+#rsCoinLine #srStat{color:#e8457e;font:12.5px var(--f-display)}
+#rsMid{align-items:stretch!important}
+#rsSide{justify-content:stretch;gap:6px!important}
+#rsSide>button{flex:1 1 0;height:auto!important;min-height:34px!important;background:rgb(255,243,196)!important;border:2px solid var(--choco)!important;border-radius:12px!important;box-shadow:none!important;color:var(--choco);font:14px var(--f-display)}
+#rsSide>button svg{width:20px;height:20px;flex:none}#rsSide>button:active{transform:translateY(1px);filter:brightness(.97)}
+#rsSide>#bAdCoin small{margin-left:2px}`;document.head.appendChild(st)}
+// 도둑·마녀 그림의 얼굴 색(그라디언트 tf·wf)이 숨긴 역할 카드 안에 있어서 다른 곳에 복사한 그림은 얼굴이 하얗게 비었어요.
+// 그라디언트를 화면 맨 앞의 보이는(크기 0) 정의 칸으로 옮겨서 어디서나 칠해지게 해요.
+{const NS='http://www.w3.org/2000/svg';const g=document.createElementNS(NS,'svg');g.id='gDefs';g.setAttribute('width','0');g.setAttribute('height','0');g.setAttribute('aria-hidden','true');g.style.cssText='position:absolute;width:0;height:0;overflow:hidden;pointer-events:none';
+  const d=document.createElementNS(NS,'defs');g.appendChild(d);document.body.prepend(g);
+  for(const id of ['tf','wf']){const src=document.querySelector('#bHero #'+id+',#bDevil #'+id)||document.getElementById(id);if(src)d.appendChild(src.cloneNode(true))}}
