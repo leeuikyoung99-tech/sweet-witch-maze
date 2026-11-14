@@ -100,7 +100,7 @@ function startTele(e,tx,tz){const T={t:0,d:TELE_T[e.type]*(G.aug&&G.aug.slowTele
   else if(e.type==='bear'){const a=angTo(e.x,e.z,tx,tz);Object.assign(T,e.roar?{kind:'circle',x:e.x,z:e.z,r:5.2}:{kind:'cone',x:e.x,z:e.z,ang:a,r:5,half:.9})}
   e.tele=T;e.ph='tele';T.mesh=teleMesh(T);e.face=T.ang!=null?T.ang:e.face;e.m.state='atk';e.m.t=0;
   if(e.type==='bat'||e.type==='spider')SFX.clack();if(e.type==='ghost'&&meLoud())tone(300,.5,'sine',.08,0,200)}
-function resolveTele(e){const h=G.hero,T=e.tele;const hitHero=!(h.dashT>0)&&inTele(T,h.x,h.z,.2)&&!(G.mirror);
+function resolveTele(e){const h=G.hero,T=e.tele;const hitHero=inTele(T,h.x,h.z,.2)&&!(G.mirror);
   const dec=G.decoy&&inTele(T,G.decoy.x,G.decoy.z,.2);
   if(e.type==='skel'){e.x=T.x;e.z=T.z;e.g.position.set(e.x,0,e.z);G.shake=Math.max(G.shake,.2);SFX.squish();
     if(hitHero&&hurt(e,DMG2.skel,'슬라임에게 철퍼덕 깔렸어요!')){}else if(dec)popDecoy(true);vanish(e);return}

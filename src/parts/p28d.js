@@ -253,7 +253,7 @@ function allyTick(e,dt,i){e.m.mixer.update(dt);if(e.life<=0){vanish(e);return 0}
   if(e.type==='bat'&&!e.extra)for(const b of G.ents)if(b.lead===e&&!b.dead&&b.ph!=='tele'&&b.ph!=='dash'){b.x=e.x-Math.sin(e.tele.ang)*1.8*(G.ents.filter(q=>q.lead===e).indexOf(b)+1);b.z=e.z-Math.cos(e.tele.ang)*1.8*(G.ents.filter(q=>q.lead===e).indexOf(b)+1);st2(b,b.x+Math.sin(e.tele.ang)*10,b.z+Math.cos(e.tele.ang)*10);b.tele.d=e.tele.d+.12*(G.ents.filter(q=>q.lead===e).indexOf(b)+1)}
   if(e.type==='soldier'&&(G.aug||{}).horn){G.hasteT=4;for(const q of G.ents)if(isMon(q)&&!q.dead&&q.type!=='soldier'&&q.type!=='spider')q.target='hero';SFX.bell();if(meLoud())say('📯 쿠키 병정의 나팔! 몬스터가 빨라져요',true,1.4)}}}
 {const rt0=resolveTele;resolveTele=function(e){const h=G.hero,A=G.aug||{},T=e.tele;
-  if(e.type==='bear'&&e.roar){const hit=!(h.dashT>0)&&inTele(T,h.x,h.z,.2)&&los(e.x,e.z,h.x,h.z)&&!G.mirror;if(hit&&hurt(e,DMG2.bear,'곰의 고함 파동에 맞았어요!')){h.kx*=2;h.kz*=2}vanish(e);return}
+  if(e.type==='bear'&&e.roar){const hit=inTele(T,h.x,h.z,.2)&&los(e.x,e.z,h.x,h.z)&&!G.mirror;if(hit&&hurt(e,DMG2.bear,'곰의 고함 파동에 맞았어요!')){h.kx*=2;h.kz*=2}vanish(e);return}
   const hp=h.hp,inv=h.inv;rt0(e);const hit=h.hp<hp||(e.type==='ghost'&&h.root>0&&h.inv!==inv);
   if(e.type==='skel'&&A.twinslime&&!e.mini&&!G.mirror){for(const s of[-1,1]){const m=spawnSkel(T.x+s*1.5,T.z);m.mini=true;m.g.scale.multiplyScalar(.6);m.r=.8;m.life=8;startTele(m,h.x+s*1.2,h.z+s*.6);m.tele.d=.9}}
   if(A.rewind&&!hit&&!e.extra&&!e.mini&&(e.type==='skel'||MONK.includes(e.type))&&e.type!=='bat'&&!G.mirror){const D=G.devil,k=e.type,j=D.deck.indexOf(k);if(j>0){D.deck.splice(j,1);D.deck.unshift(k)}}}}
