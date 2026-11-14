@@ -8,7 +8,7 @@ const RIVAL='크래커 도둑 바삭',VILLAIN='쓴맛 마법사 비터';
 const MINI3={1:['surv','candy'],2:['candy','surv'],3:['surv','candy'],4:['candy','surv'],5:['surv','candy'],6:['candy','surv'],7:['surv','candy'],8:['candy','surv']};
 const STT_N={esc:'탈출',surv:'버티기',candy:'사탕 모으기',puzzle:'벽 퍼즐',race:'경주',witch:'마녀로 막기',boss:'보스'};
 function stType(c,s){if(s===10)return'boss';if(s===5)return'race';if(s===6)return c>=2?'witch':'esc';if(s===3)return MINI3[c][0];if(s===7)return MINI3[c][1];return'esc'}
-const stDiff=(c,s)=>((c-1)*10+(s-1))/79;
+const stDiff=(c,s)=>((c-1)*STN+(s-1))/(8*STN-1);
 {const sd=stDef;stDef=function(c,s){const st=sd(c,s),d=stDiff(c,s),ty=stType(c,s);st.type=ty;st.d=d;
   st.ai=ty==='boss'?(c<=2?1:2):d<.15?0:d<.5?1:2;
   st.walls=Math.min(60,Math.round(34+d*24)+(ty==='boss'?2:0));
@@ -59,7 +59,7 @@ function stGoals3(st){const T=st.type;
 {const re=resExtra;resExtra=function(win,why,t){re.apply(this,arguments);const st=G.stage;if(!st||!st.story||!st.type)return;const x=G.extra&&G.extra.stage||{b:0,news:0,coins:0,gift:{}},all=sb2(st.c,st.s);
   let html=`<span class="rs-stars">${starRow(all,'big')}</span>`+(x.news?`새 별 ${x.news}개 · ${COIN_SVG}+${x.coins}`:(x.b?'이미 받은 별이에요':'별을 못 받았어요'));
   if(x.gift&&x.gift.box!=null)html+=`<div class="rc-got">보상: ${boxName(x.gift.box)} · 카드 1장 고르기</div>`;
-  $('resCoin').innerHTML=html;$('bHome').textContent='목록';const nx=st.s<10?[st.c,st.s+1]:st.c<8?[st.c+1,1]:null;const nxOk=!!(nx&&stOpen2(nx[0],nx[1]));$('bNext').hidden=!nxOk;setTimeout(()=>{if(G.stage===st){$('bNext').hidden=!nxOk;$('bAgain').hidden=false;$('bHome').textContent='목록'}},0);$('bAgain').hidden=false;$('bAgain').disabled=false;$('bAgain').querySelector('b').textContent='다시 하기';
+  $('resCoin').innerHTML=html;$('bHome').textContent='목록';const nx=st.s<STN?[st.c,st.s+1]:st.c<8?[st.c+1,1]:null;const nxOk=!!(nx&&stOpen2(nx[0],nx[1]));$('bNext').hidden=!nxOk;setTimeout(()=>{if(G.stage===st){$('bNext').hidden=!nxOk;$('bAgain').hidden=false;$('bHome').textContent='목록'}},0);$('bAgain').hidden=false;$('bAgain').disabled=false;$('bAgain').querySelector('b').textContent='다시 하기';
   const iWon=st.type==='witch'?!win:win;
   if(st.type==='surv'){$('resKick').textContent=win?'버텼어요!':'붙잡혔어요';$('resBig').textContent=win?st.secs+'초':Math.floor(t)+'초';$('resLede').textContent=`${st.c}장 ${st.s}단계 · 버티기`}
   if(st.type==='candy'){$('resKick').textContent=win?'다 모았어요!':(why==='time'?'시간 초과':'붙잡혔어요');$('resBig').textContent=`${G.hero.manaGot}/${st.need}`;$('resLede').textContent=`${st.c}장 ${st.s}단계 · 사탕 모으기`}

@@ -88,7 +88,7 @@ const unlName=(kind,k)=>kind==='c'?CARDS[k].n:kind==='s'?SKN[k][0]:SHOP.cloth.it
 
 /* ----- 개발자 모드 ----- */
 function devMode(){SAVE.dev=1;for(const cat in SHOP)for(const id in SHOP[cat].items)SAVE.own[cat+':'+id]=1;for(const k of CPOOL)SAVE.unl['c:'+k]=1;for(const k of SKP)SAVE.unl['s:'+k]=1;
-  if(typeof STORY!=='undefined')for(const ch of STORY)for(let s=1;s<=10;s++)SAVE.st2[ch.n+'-'+s]=7;saveGame();syncCoins()}
+  if(typeof STORY!=='undefined')for(const ch of STORY)for(let s=1;s<=STN;s++)SAVE.st2[ch.n+'-'+s]=7;saveGame();syncCoins()}
 {const rd0=redeem;redeem=function(){const v=($('codeBox').value||'').trim().toUpperCase();if(fnv(v)===824743949){devMode();SFX.win();$('codeBox').value='';$('shopCode').hidden=true;if(SHOPV.prev)renderShop();$('shopSel').textContent='🛠️ 개발자 모드! 상점·스토리·카드·스킬이 모두 열렸어요';return}rd0()}}
 setTimeout(()=>{$('bCodeGo').onclick=()=>redeem()},0);
 if(SAVE.refundMsg){setTimeout(()=>{try{tMsg(`🎁 색만 바뀌는 상품이 없어져서 ${SAVE.refundMsg}코인을 돌려드렸어요`)}catch(e){}delete SAVE.refundMsg;saveGame()},2500)}

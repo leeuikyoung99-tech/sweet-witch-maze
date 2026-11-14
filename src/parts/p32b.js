@@ -44,7 +44,7 @@ const STT_IC={surv:'<svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8" fill=
   puzzle:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="#fff" stroke="#4a2a1a" stroke-width="2.2"/><path d="M3 12 H13 M12 3 V8" stroke="#4a2a1a" stroke-width="2.4"/></svg>'};
 function witchFace(c){const sv=$('bDevil').querySelector('svg').outerHTML.replace(/id="wf"/g,'id="wfB'+c+'"').replace(/url\(#wf\)/g,`url(#wfB${c})`);return sv}
 {const rs=renderStages;renderStages=function(){rs.apply(this,arguments);const ch=STORY[STV.c-1];
-  try{$('stages').querySelector('.pane-top b').textContent='스토리 · 달콤 별 조각';$('stgTot').innerHTML=`${recipes()} / 80 · ★ ${stars2()} / 240`}catch(e){}
+  try{$('stages').querySelector('.pane-top b').textContent='스토리 · 달콤 별 조각';$('stgTot').innerHTML=`${recipes()} / ${8*STN} · ★ ${stars2()} / ${24*STN}`}catch(e){}
   for(const b of $('stgGrid').querySelectorAll('.st')){const n=+b.dataset.n,s=n%100,ty=stType(ch.n,s);
     if(ty==='boss'){b.classList.add('boss31');b.innerHTML=`<span class="bf ww${ch.n}">${witchFace(ch.n)}</span><span class="ss">${starRow(sb2(ch.n,s))}</span>`}
     else if(STT_IC[ty]&&!b.querySelector('.ty'))b.insertAdjacentHTML('beforeend',`<span class="ty">${STT_IC[ty]}</span>`)}

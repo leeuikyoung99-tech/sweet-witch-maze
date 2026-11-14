@@ -69,9 +69,13 @@ const STORY=[
  {n:8,th:'cake',w:'케이크 여왕',rc:'할머니의 생일 케이크',cards:['bear','soldier','spider','spin','eye','whirl','move','choco'],unl:[[5,['s','heal']],[10,['s','tele']]]}];
 const G3S={candy:'사탕 5개 넘게 줍기',nohit:'한 대도 안 맞기',hp:'체력 60 넘게 남기기',noskill:'스킬 없이 탈출 (대시는 돼요)'};
 SAVE.st2=SAVE.st2&&typeof SAVE.st2==='object'?SAVE.st2:{};
+// 86차: 장마다 6단계. 예전 10단계 기록은 장 단위로 옮겨요 (깬 장 = 6단계 모두 별 1개, 하다 만 장 = 간 만큼 열기)
+const STN=6;
+if(SAVE.stV!==6){const o=SAVE.st2,n={};for(let c=1;c<=8;c++){if((o[c+'-10']|0)&1){for(let s=1;s<=STN;s++)n[c+'-'+s]=1}else{let k=0;for(let s=1;s<=9;s++)if((o[c+'-'+s]|0)&1)k=s;const m=Math.floor(k*5/9);for(let s=1;s<=m;s++)n[c+'-'+s]=1}}
+  if(Object.keys(o).length)SAVE.st2old=o;SAVE.st2=n;SAVE.stV=6;SAVE.st3Seen={};SAVE.stSeen={}}
 const sb2=(c,s)=>SAVE.st2[c+'-'+s]|0,ss2=(c,s)=>{const b=sb2(c,s);return(b&1)+((b>>1)&1)+((b>>2)&1)};
-const chOpen=c=>c===1||(sb2(c-1,10)&1)===1||SAVE.dev,stOpen2=(c,s)=>chOpen(c)&&(s===1||(sb2(c,s-1)&1)===1||SAVE.dev);
-const recipes=()=>{let n=0;for(const ch of STORY)for(let s=1;s<=10;s++)if(sb2(ch.n,s)&1)n++;return n},stars2=()=>{let n=0;for(const ch of STORY)for(let s=1;s<=10;s++)n+=ss2(ch.n,s);return n};
+const chOpen=c=>c===1||(sb2(c-1,STN)&1)===1||SAVE.dev,stOpen2=(c,s)=>chOpen(c)&&(s===1||(sb2(c,s-1)&1)===1||SAVE.dev);
+const recipes=()=>{let n=0;for(const ch of STORY)for(let s=1;s<=STN;s++)if(sb2(ch.n,s)&1)n++;return n},stars2=()=>{let n=0;for(const ch of STORY)for(let s=1;s<=STN;s++)n+=ss2(ch.n,s);return n};
 function stDef(c,s){const ch=STORY[c-1],i=(c-1)*10+s-1,boss=s===10;const ai=boss?2:c<=2?(s<=5?0:1):c<=5?1:(s<=4?1:2);
   const k=Math.min(ch.cards.length,boss?ch.cards.length:3+Math.ceil(s/2));const deck=ch.cards.slice(0,k);for(const q of['skel','tower','slip','trap','fake','move','ghost'])if(deck.length<6&&!deck.includes(q))deck.push(q);
   return{story:true,c,s,n:c*100+s,witch:false,boss,th:ch.th,ai,walls:Math.min(60,32+c*3+s),g3:['candy','nohit','hp','noskill'][i%4],fast:Math.max(70,140-c*6-s*2),seed:5000+c*131+s*7919,deck:deck.slice(0,boss?8:6),aug:boss?[['moving','fakeexit','party','reuse','tax','nomap','castle','burnearly'][c-1]]:[]}}
@@ -88,12 +92,12 @@ function startStory(c,s){if(!stOpen2(c,s))return;const st=stDef(c,s);SER.on=fals
   let html=`<span class="rs-stars">${starRow(all,'big')}</span>`+(x.news?`새 별 ${x.news}개 · ${COIN_SVG}+${x.coins}`:(x.b?'이미 받은 별이에요':'별을 못 받았어요'));
   if(win&&(x.b&1))html+=`<div class="rc-got">📜 레시피 '${STORY[st.c-1].rc}' ${st.s}/10쪽</div>`;
   for(const[kind,k]of x.unl||[])html+=`<div class="unl-got">🎉 새로 열렸어요! ${kind==='c'?'마녀 카드':kind==='s'?'도둑 스킬':'특별 옷'} <b>${unlName(kind,k)}</b></div>`;
-  $('resCoin').innerHTML=html;$('bHome').textContent='목록';const nx=st.s<10?[st.c,st.s+1]:st.c<8?[st.c+1,1]:null;$('bNext').hidden=!(nx&&stOpen2(nx[0],nx[1]));$('resLede').textContent=`${st.c}장 ${st.s}단계 · `+$('resLede').textContent.replace(/^.*단계 · /,'');
+  $('resCoin').innerHTML=html;$('bHome').textContent='목록';const nx=st.s<STN?[st.c,st.s+1]:st.c<8?[st.c+1,1]:null;$('bNext').hidden=!(nx&&stOpen2(nx[0],nx[1]));$('resLede').textContent=`${st.c}장 ${st.s}단계 · `+$('resLede').textContent.replace(/^.*단계 · /,'');
   if(win&&st.boss&&(x.b&1)&&x.news)setTimeout(()=>storyOutro(st.c),900)}}
-setTimeout(()=>{$('bNext').onclick=()=>{const st=G.stage;if(st&&st.story){const nx=st.s<10?[st.c,st.s+1]:[st.c+1,1];if(nx[0]<=8&&stOpen2(nx[0],nx[1]))startStage(nx[0]*100+nx[1]);return}if(G.stage){const n=G.stage.n+1;if(STG[n-1]&&stOpen(n))startStage(n)}}},0);
+setTimeout(()=>{$('bNext').onclick=()=>{const st=G.stage;if(st&&st.story){const nx=st.s<STN?[st.c,st.s+1]:[st.c+1,1];if(nx[0]<=8&&stOpen2(nx[0],nx[1]))startStage(nx[0]*100+nx[1]);return}if(G.stage){const n=G.stage.n+1;if(STG[n-1]&&stOpen(n))startStage(n)}}},0);
 // 목록 화면
 const STV={c:1,s:1};
-openStages=function(){restoreStage();G.stage=null;G.chal=null;SER.on=false;titleBoardIfNeeded();show('stages');let c=1;for(const ch of STORY)if(chOpen(ch.n))c=ch.n;STV.c=c;let s=1;for(let i=1;i<=10;i++)if(stOpen2(c,i))s=i;STV.s=s;applyTheme(STORY[c-1].th);renderStages()};
+openStages=function(){restoreStage();G.stage=null;G.chal=null;SER.on=false;titleBoardIfNeeded();show('stages');let c=1;for(const ch of STORY)if(chOpen(ch.n))c=ch.n;STV.c=c;let s=1;for(let i=1;i<=STN;i++)if(stOpen2(c,i))s=i;STV.s=s;applyTheme(STORY[c-1].th);renderStages()};
 renderStages=function(){const ch=STORY[STV.c-1];$('stages').querySelector('.pane-top b').textContent='스토리 · 레시피 되찾기';$('stgTot').innerHTML=`📜 ${recipes()} / 80 · ★ ${stars2()} / 240`;
   const tabs=STORY.map(q=>`<button class="ch-t${q.n===STV.c?' on':''}${chOpen(q.n)?'':' lock'}" data-c="${q.n}" style="--tc:${THC[q.th]}">${chOpen(q.n)?q.n+'장':'🔒'}</button>`).join('');
   const sts=Array.from({length:10},(_,i)=>{const s=i+1,open=stOpen2(ch.n,s),boss=s===10;return`<button class="st${open?'':' lock'}${s===STV.s?' sel':''}${boss?' boss':''}" data-n="${ch.n*100+s}" style="background:${THC[ch.th]}" aria-label="${s}단계">${boss?'<span class="wh">'+HAT_SVG+'</span>':''}<b>${s}</b><span class="ss">${starRow(sb2(ch.n,s))}</span></button>`}).join('');
@@ -104,7 +108,7 @@ renderStages=function(){const ch=STORY[STV.c-1];$('stages').querySelector('.pane
     `<ul class="si-g">${goals.map((g,i)=>`<li class="${(b>>i)&1?'ok':''}"><i>★</i>${g}</li>`).join('')}</ul>${uTxt}<div class="si-rw">${COIN_SVG}처음 깨면 20 · 새 별마다 10코인</div>`+
     `<button class="mbtn berry small" id="bStgGo"${open?'':' disabled'}><span class="mt"><b>${open?'시작!':'앞 단계를 깨요'}</b></span></button>`;
   const go=$('bStgGo');if(go)go.onclick=async()=>{await initAudio();startStage(ch.n*100+STV.s)}};
-$('stgGrid').addEventListener('click',e=>{const t=e.target.closest('.ch-t');if(t){e.stopImmediatePropagation();const c=+t.dataset.c;if(!chOpen(c)){SFX.deny();tMsg('앞 장의 보스를 이기면 열려요');return}STV.c=c;STV.s=1;for(let i=1;i<=10;i++)if(stOpen2(c,i))STV.s=i;applyTheme(STORY[c-1].th);SFX.card();renderStages();return}
+$('stgGrid').addEventListener('click',e=>{const t=e.target.closest('.ch-t');if(t){e.stopImmediatePropagation();const c=+t.dataset.c;if(!chOpen(c)){SFX.deny();tMsg('앞 장의 보스를 이기면 열려요');return}STV.c=c;STV.s=1;for(let i=1;i<=STN;i++)if(stOpen2(c,i))STV.s=i;applyTheme(STORY[c-1].th);SFX.card();renderStages();return}
   const b=e.target.closest('.st');if(b&&+b.dataset.n>=100){e.stopImmediatePropagation();STV.s=(+b.dataset.n)%100;SFX.card();renderStages()}},true);
 // 말풍선 이야기
 const STLINE={
@@ -127,5 +131,5 @@ function storyIntro(c,s,go){if(!SAVE.stSeen)SAVE.stSeen={};const key=c+'-'+s;let
 function storyOutro(c){storyTalk([['t',STEND[c]]].concat(c===8?[['g','고맙다 쿠키야! 우리 다 같이 케이크 먹자꾸나 🎂']]:[]),c,()=>{})}
 // 처음 화면: 스토리 버튼 · 할머니 케이크
 {const b=$('bStage');const t=b.querySelector('b'),sm=b.querySelector('small');if(t)t.textContent='스토리';if(sm)sm.textContent='레시피 되찾기'}
-{const ts2=titleScreen;titleScreen=function(){ts2();const c=$('gmCake');if(c)c.hidden=recipes()<80}}
+{const ts2=titleScreen;titleScreen=function(){ts2();const c=$('gmCake');if(c)c.hidden=recipes()<8*STN}}
 {const sl=document.querySelector('#title .title-slab');if(sl){const c=document.createElement('div');c.id='gmCake';c.hidden=true;c.title='할머니의 생일 케이크';c.textContent='🎂';sl.appendChild(c)}}
