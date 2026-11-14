@@ -217,3 +217,54 @@ gDefsSync();setInterval(gDefsSync,2000);
 #result .rs-ser #resCoin>.ser-next{justify-self:center!important;text-align:center}
 #result .rs-ser #resCoin>.ag-foot>.ag-have{justify-content:space-between;min-width:132px}
 #result .rs-ser #resCoin .ag-none{font:normal 11px var(--f-ui);color:#b9a9ff;margin-right:6px}`;document.head.appendChild(st)}
+// ===== 화면 맞추기 묶음 (2026-11-14 저녁) =====
+// (1) 메인 게임 도둑 시점 버튼도 미니게임처럼 '1인칭 | 3인칭' 두 칸 글씨 (지금 것이 칠해짐)
+function bViewPaint(){const b=$('bView');if(!b)return;const v=VIEW===3?3:1;const k='v'+v;if(b.dataset.k===k)return;b.dataset.k=k;b.classList.add('mgv2');b.innerHTML=`<i class="${v===1?'on':''}">1인칭</i><i class="${v===3?'on':''}">3인칭</i>`}
+{const sv=setView;setView=function(){const r=sv.apply(this,arguments);try{$('bView').dataset.k='';bViewPaint()}catch(e){}return r}}
+bViewPaint();setInterval(()=>{try{bViewPaint()}catch(e){}},1000);
+{const st=document.createElement('style');st.textContent=`
+#bView.mgv2{width:auto!important;height:42px!important;padding:3px!important;border-radius:21px!important;display:flex!important;gap:2px;align-items:center;background:#fff8ee!important;border:3px solid var(--choco)!important;box-shadow:0 3px 0 var(--choco)!important}
+#bView.mgv2 i{font:normal 13px var(--f-display);color:#9a7a60;padding:0 8px;height:30px;line-height:30px;border-radius:15px;white-space:nowrap;pointer-events:none}
+#bView.mgv2 i.on{background:var(--choco);color:#fff}
+/* 미니게임 위 오른쪽도 메인과 똑같이: [시점][일시정지][지도] 한 줄, 지도는 오른쪽 위 모서리 */
+#mgViewB.mgv2{height:42px!important;border-width:3px!important;box-shadow:0 3px 0 var(--choco)!important}#mgViewB.mgv2 i{height:30px;line-height:30px;border-radius:15px}
+.mg-top{top:calc(10px + env(safe-area-inset-top,0px))!important;right:max(12px,env(safe-area-inset-right,0px))!important}
+.mg-top .mg-tr{margin-right:140px}
+.mg-map{top:calc(10px + env(safe-area-inset-top,0px))!important;right:max(12px,env(safe-area-inset-right,0px))!important;width:124px!important;height:124px!important;border:4px solid #8a5530!important;border-radius:16px!important;box-shadow:0 3px 0 var(--choco),inset 0 0 0 2px #fff!important}`;document.head.appendChild(st)}
+// (2) 마녀 화면 위 안내 글씨: 맵을 처음 맞춘 자리의 맵 가운데(가로)에 고정, 맵을 옮겨도 그대로
+function dhintPlace(){try{if(G.mode!=='devil')return;const c=new THREE.Vector3(N*C/2,0,N*C/2).project(camera);const x=(c.x+1)/2*innerWidth;for(const id of ['dhint','dtoast']){const e=$(id);if(!e)continue;e.style.setProperty('left',Math.round(x)+'px','important');e.style.setProperty('transform','translateX(-50%)','important')}}catch(e){}}
+{const f=devilCamFit;devilCamFit=function(){const r=f.apply(this,arguments);try{if(typeof renderer!=='undefined')setTimeout(dhintPlace,60)}catch(e){}return r}}
+{const bm=beginMatch;beginMatch=function(mode){const r=bm.apply(this,arguments);if(mode==='devil')setTimeout(dhintPlace,120);return r}}
+// (3) 친구·아무나 온라인 판에선 일시정지에 나가기 버튼이 없어요
+setInterval(()=>{try{const on=!!NET.on;const q=$('bQuit');if(q)q.hidden=on;const h=$('mgHome');if(h)h.hidden=on}catch(e){}},300);
+// (4) 스토리 사탕 길: 숫자 사이 선을 사탕 막대처럼(테두리 + 줄무늬 + 스프링클), 깬 길은 분홍, 안 깬 길은 연한 베이지
+{const ff=sv72Fit;sv72Fit=function(){const r=ff.apply(this,arguments);try{const svg=document.querySelector('#stages .sv-ln');if(!svg)return r;const ls=[...svg.querySelectorAll('line')];if(!ls.length||svg.dataset.deco===svg.innerHTML.length+'')return r;
+  const SPC=['#ff5f9e','#5fcf9f','#ffd35f','#7cc6ff','#b98cff'];let h='';ls.forEach((l,i)=>{const a=['x1','y1','x2','y2'].map(k=>+l.getAttribute(k));const dn=l.classList.contains('dn');const at=`x1="${a[0]}" y1="${a[1]}" x2="${a[2]}" y2="${a[3]}"`;
+    h+=`<g class="cr${dn?' dn':''}"><line class="o" ${at}/><line class="b" ${at}/><line class="s" ${at}/></g>`;
+    const dx=a[2]-a[0],dy=a[3]-a[1],L=Math.hypot(dx,dy)||1,nx=-dy/L,ny=dx/L;for(const t of [.33,.66]){const px=a[0]+dx*t+nx*9*(t<.5?1:-1),py=a[1]+dy*t+ny*9*(t<.5?1:-1);h+=`<circle class="sp" cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="2.2" fill="${SPC[(i*2+(t<.5?0:1))%SPC.length]}"/>`}});
+  svg.innerHTML=h;svg.dataset.deco=svg.innerHTML.length+''}catch(e){}return r}}
+{const st=document.createElement('style');st.textContent=`
+#stages .sv-ln .cr line{stroke-linecap:round;stroke-dasharray:none}
+#stages .sv-ln .cr .o{stroke:#4a2a1a;stroke-width:13}
+#stages .sv-ln .cr .b{stroke:#fff3d6;stroke-width:8}
+#stages .sv-ln .cr .s{stroke:#e8cfae;stroke-width:8;stroke-dasharray:5 6;stroke-linecap:butt}
+#stages .sv-ln .cr.dn .b{stroke:#fff}
+#stages .sv-ln .cr.dn .s{stroke:#ff6fa8}
+#stages .sv-ln .sp{opacity:.9}
+#stages .sv-ln .cr:not(.dn)~.sp{opacity:.55}`;document.head.appendChild(st)}
+// (5) 미니게임 사탕 칸도 메인 도둑처럼: 하트 바로 아래 큰 사탕 줄(안 먹은 건 연한 색, 먹은 건 분홍·하늘·노랑), 출구가 열리면 문
+function mgCandyPaint(){const se=$('mgStars'),hp=$('mgHp');if(!se||!hp||typeof MG==='undefined')return;let w=hp.parentElement;if(!w.classList.contains('mg-left')){const d=document.createElement('div');d.className='mg-left';w.insertBefore(d,hp);d.appendChild(hp);w=d}if(se.parentElement!==w)w.appendChild(se);
+  const k=MG.got+'|'+(MG.exitOpen?1:0)+'|'+MGP.candies;if(se.dataset.k2===k)return;se.dataset.k2=k;se.dataset.k=MG.got+(MG.exitOpen?'x':'');se.classList.add('candies','mgc');
+  se.innerHTML=Array.from({length:MGP.candies},(_,i)=>`<i class="${i<MG.got?'on':''}">${CANDY_SVG}</i>`).join('')+(MG.exitOpen?`<i class="on door">${MGI.door}</i>`:'')}
+setInterval(()=>{try{if(screen==='mini')mgCandyPaint()}catch(e){}},200);
+{const st=document.createElement('style');st.textContent=`
+.mg-top .mg-left{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+#mgStars.mgc{background:none!important;padding:0!important;gap:2px!important;margin:0!important;display:flex}
+#mgStars.mgc i{width:28px!important;height:18px!important;filter:none!important;color:#e9dccf;display:block}
+#mgStars.mgc i svg{width:100%;height:100%;display:block}
+#mgStars.mgc i.on{color:#ff7eb6}#mgStars.mgc i.on:nth-child(2n){color:#7cc6ff}#mgStars.mgc i.on:nth-child(3n){color:#ffd35f}
+#mgStars.mgc i.door{width:22px!important;height:22px!important}`;document.head.appendChild(st)}
+// (6) 시점은 메인·미니 하나로: 한쪽에서 바꾸면 다른 쪽도 같은 시점으로 시작
+{const sv=setView;setView=function(v){const r=sv.apply(this,arguments);try{SAVE.mgView=v===3?3:1}catch(e){}return r}}
+{const mt=mgViewToggle;mgViewToggle=function(){const r=mt.apply(this,arguments);try{VIEW=MG.view;SAVE.view=MG.view;saveGame()}catch(e){}return r}}
+try{if(SAVE.view)SAVE.mgView=SAVE.view===3?3:1}catch(e){}
