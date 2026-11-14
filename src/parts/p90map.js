@@ -123,18 +123,30 @@ addEventListener('resize',()=>setTimeout(()=>{if(!$('stages').hidden)wmFit()},60
 #sv72.wm .wb-av{flex:0 0 auto;width:34px;height:34px;border-radius:50%;overflow:hidden;background:#fff;border:2px solid var(--choco);display:grid;place-items:center}#sv72.wm .wb-av svg{width:120%;height:120%}
 #sv72.wm .wb-t{display:flex;flex-direction:column;min-width:0}#sv72.wm .wb-t b{font:11px var(--f-display);color:#a0705a}#sv72.wm .wb-t span{font:13px/1.3 var(--f-display);color:var(--choco)}
 #sv72.wm .wb-skip{flex:0 0 auto;align-self:flex-start;border:2px solid var(--choco);background:#fff;border-radius:9px;font:10px var(--f-display);color:var(--choco);padding:2px 6px;cursor:pointer}
-#sv72.wm .wm-info{display:flex;flex-direction:column;gap:6px;min-height:0;min-width:0}
+#sv72.wm .wm-info{display:flex;flex-direction:column;justify-content:space-between;gap:6px;min-height:0;min-width:0}
+#sv72.wm .wm-info>*{flex:0 0 auto}
 #sv72.wm .wm-info .sv-ttl{position:static!important;display:flex!important;flex-direction:column;gap:3px;max-width:none!important;background:#4a2a1a;border-radius:12px;padding:7px 10px 8px!important;color:#fff;font:clamp(14px,4.4vh,18px) var(--f-display)}
 #sv72.wm .wm-goals{list-style:none;margin:0;padding:6px 8px;display:flex;flex-direction:column;gap:3px;background:#fff8ee;border:2.5px solid var(--choco);border-radius:12px}
 #sv72.wm .wm-goals li{display:flex;align-items:center;gap:5px;font:12px/1.2 var(--f-display);color:var(--choco);min-width:0}
 #sv72.wm .wm-goals li span{white-space:nowrap;overflow:hidden;min-width:0}
 #sv72.wm .wm-goals li i{flex:0 0 auto;width:16px;height:16px;filter:grayscale(1) opacity(.35)}#sv72.wm .wm-goals li.ok i{filter:none}#sv72.wm .wm-goals li i svg{width:100%;height:100%}
-#sv72.wm .sv-go{grid-row:auto;grid-column:auto;width:100%;height:clamp(36px,11vh,52px);margin:auto 0 0}
+#sv72.wm .sv-go{grid-row:auto;grid-column:auto;width:100%;height:clamp(38px,10vh,50px)!important;min-height:0!important;margin:0}
 #sv72.wm .wm-cards{display:flex;flex-wrap:wrap;align-items:center;gap:4px;background:#fff8ee;border:2.5px solid var(--choco);border-radius:12px;padding:6px 8px}
 #sv72.wm .wm-cl{flex:0 0 100%;font:12px var(--f-display);color:#a0705a}
 #sv72.wm .wm-cd{width:30px;height:30px;border-radius:8px;background:#fff1dc;display:grid;place-items:center}#sv72.wm .wm-cd svg{width:88%;height:88%}
-@media (max-height:420px){#sv72.wm .wm-cards{display:none}}
+@media (max-height:345px){#sv72.wm .wm-cards{display:none}}
+@media (max-height:420px){#sv72.wm .wm-cards{padding:4px 7px;gap:3px}#sv72.wm .wm-cl{font-size:11px}#sv72.wm .wm-cd{width:24px;height:24px}}
 @media (min-height:480px){#sv72.wm .wm-info{gap:10px}#sv72.wm .wm-info .sv-ttl{font-size:22px;padding:10px 14px 12px!important;gap:6px}#sv72.wm .wm-info .sv-ttl .s6l{font-size:15px}
   #sv72.wm .wm-goals{padding:10px 12px;gap:7px}#sv72.wm .wm-goals li{font-size:15px;gap:8px}#sv72.wm .wm-goals li i{width:22px;height:22px}#sv72.wm .sv-rw{font-size:15px}#sv72.wm .sv-rw svg{width:20px;height:20px}
   #sv72.wm .wb-t span{font-size:16px}#sv72.wm .wb-t b{font-size:13px}#sv72.wm .wb-av{width:44px;height:44px}}
 @media (max-height:360px){#sv72.wm .wm-info{gap:4px}#sv72.wm .wm-info .sv-ttl{padding:5px 8px 6px!important}#sv72.wm .wm-goals{padding:4px 7px;gap:1px}#sv72.wm .wm-goals li{font-size:11px}#sv72.wm .sv-rw{font-size:12px}}`;document.head.appendChild(st)}
+// ----- 매일 미션: '세 미션 모두 받기' 줄을 없애고 대신 보통 미션 하나 더 (하루 4개) -----
+{const em=ensureMis;ensureMis=function(){const M=em.apply(this,arguments);if(M.list.length<4){const have=M.list.map(e=>e.k);let s=0;for(const ch of M.day+'x')s=(Math.imul(s,31)+ch.charCodeAt(0))>>>0;
+    let keys=Object.keys(MPOOL).filter(k=>!have.includes(k));withSeed(s,()=>{keys=shuffle(keys)});if(keys.length){M.list.push({k:keys[0],p:0,c:0});saveGame()}}M.b=1;return M}}
+misClaimable=function(){const M=ensureMis();let n=0;for(const e of M.list){const goal=e.k==='fast'?1:MPOOL[e.k].n;if(e.p>=goal&&!e.c)n++}return n};
+{const rm=renderMis;renderMis=function(){const r=rm.apply(this,arguments);try{const b=document.querySelector('#misList .ms-row.bonus');if(b)b.remove()}catch(e){}return r}}
+// ----- 마녀 화면에서 도둑(과 분신) 발밑 청록 고리가 '예전 무적 보호막'처럼 보였어요 → 머리 위 작은 청록 표시(아래를 가리키는 세모)로 바꿔요. 몬스터 보라 고리는 그대로 -----
+{const ar=addRing;addRing=function(m,col){if(col&&col!=='#3fbf9f')return ar.apply(this,arguments);if(G.mode!=='devil'||!m||!m.g)return;
+  const g=new THREE.Group(),mat=new THREE.MeshBasicMaterial({color:'#3fbf9f',fog:false}),out=new THREE.MeshBasicMaterial({color:'#ffffff',fog:false});
+  const c1=new THREE.Mesh(new THREE.ConeGeometry(.62,1.05,4),out);c1.rotation.x=Math.PI;c1.rotation.y=Math.PI/4;const c2=new THREE.Mesh(new THREE.ConeGeometry(.46,.82,4),mat);c2.rotation.x=Math.PI;c2.rotation.y=Math.PI/4;c2.position.y=.1;c1.position.y=-.2;
+  g.add(c1,c2);g.position.y=3.3;g.userData.thMark=1;m.g.add(g)}}
