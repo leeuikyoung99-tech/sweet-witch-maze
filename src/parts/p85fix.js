@@ -201,3 +201,13 @@ const RSI_MAP='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5 8.5 4
 function gDefsSync(){const d=document.querySelector('#gDefs defs');if(!d)return;const have=new Set([...d.children].map(e=>e.id));
   for(const e of document.querySelectorAll('svg:not(#gDefs) linearGradient[id],svg:not(#gDefs) radialGradient[id],svg:not(#gDefs) pattern[id]')){if(have.has(e.id))continue;have.add(e.id);d.appendChild(e.cloneNode(true))}}
 gDefsSync();setInterval(gDefsSync,2000);
+// 결과 창 다듬기 4: 노란 칸 하나 안에 [3판 표 + 작은 설명][내·상대 증강체][지도 보기 타일], 안쪽 여백을 둬서 아무것도 테두리에 안 붙게
+{const st=document.createElement('style');st.textContent=`
+#result .rs-ser #rsMid{width:auto!important;max-width:100%;margin:0 auto 6px!important;padding:8px 10px!important;gap:12px!important;align-items:center!important;background:rgb(255,243,196);border:2px solid var(--choco);border-radius:14px;box-sizing:border-box}
+#result .rs-ser #resCoin{background:none!important;border:0!important;padding:0!important;box-shadow:none!important}
+#result .rs-ser #resCoin>.ag-foot{align-self:center;justify-content:center}
+#result .rs-ser #rsSide{align-self:stretch;justify-content:center;width:auto!important}
+#result .rs-ser #rsSide>#bMap{flex:none!important;flex-direction:column;gap:2px!important;width:72px!important;height:auto!important;min-height:62px!important;align-self:center;padding:6px 4px!important;background:#fff!important;border:2px solid var(--choco)!important;border-radius:12px!important;box-shadow:0 3px 0 var(--choco)!important;font:12px var(--f-display)!important;line-height:1.1}
+#result .rs-ser #rsSide>#bMap svg{width:26px;height:26px}
+#result .rs-ser #resCoin>.rs-note{margin-top:2px}`;document.head.appendChild(st)}
+{const st=document.createElement("style");st.textContent="#rsCoinLine svg{margin-right:3px}";document.head.appendChild(st)}
