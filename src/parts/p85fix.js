@@ -305,3 +305,18 @@ try{tuSteps&&0}catch(e){}
 {const ts=tuSteps;tuSteps=function(ph,steps){try{for(const s of steps||[])if(s&&s.t==='대시를 눌러요')s.s='잠깐 빠르게 달려요 · 체력 바가 금빛인 동안은 다치지 않아요'}catch(e){}return ts.apply(this,arguments)}}
 setInterval(()=>{try{const h=G&&G.hero;if(!h||screen!=='play'||G.mode!=='hero'||G.over||G.cdn||h.remote||h.isRival)return;const on=Math.max(h.inv||0,h.dashT||0)>.05;
   if(on&&!INV85.was&&(SAVE.invTip|0)<3){SAVE.invTip=(SAVE.invTip|0)+1;saveGame();say('체력 바가 금빛이면 무적이에요',false,1.4)}INV85.was=on}catch(e){}},120);
+// (9) 무적 표시 다시: 머리 위 방패는 없애고, 도둑 몸이 은은한 금빛으로 물들어요(켜졌다 꺼졌다, 깜빡임 없음). 몸을 가리지 않아요.
+{const sh=()=>{try{if(INV85.sp)INV85.sp.visible=false}catch(e){}};
+ const GOLD=new THREE.Color('#ffb81f');
+ function invGlow(h,on){if(!h||!h.m||!h.m.g)return;if(!!h.m.__gl===on)return;h.m.__gl=on;h.m.g.traverse(o=>{if(!o.material)return;for(const m of [].concat(o.material)){if(!m.emissive)continue;
+   if(on){if(!m.userData.__e0)m.userData.__e0=m.emissive.clone();m.userData.__ei0=m.emissiveIntensity;m.emissive.copy(GOLD);m.emissiveIntensity=.62}
+   else if(m.userData.__e0){m.emissive.copy(m.userData.__e0);m.emissiveIntensity=m.userData.__ei0!=null?m.userData.__ei0:1}}})}
+ const t0=inv75Tick;inv75Tick=function(){t0.apply(this,arguments);sh();try{const h=G&&G.hero;const on=!!(h&&screen==='play'&&!G.over&&!G.cdn&&Math.max(h.inv||0,h.dashT||0)>.02);invGlow(h,on)}catch(e){}};
+ const bm=beginMatch;beginMatch=function(){try{if(G.hero&&G.hero.m)invGlow(G.hero,false)}catch(e){}return bm.apply(this,arguments)}}
+
+// 발밑에 은은한 금빛 빛무리(작게, 몸을 가리지 않게 바닥에 납작하게)
+{let disk=null;const mk=()=>{const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');const g=x.createRadialGradient(64,64,6,64,64,62);g.addColorStop(0,'rgba(255,214,90,.75)');g.addColorStop(.55,'rgba(255,196,50,.35)');g.addColorStop(1,'rgba(255,196,50,0)');x.fillStyle=g;x.fillRect(0,0,128,128);
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthWrite:false,toneMapped:false}));m.rotation.x=-Math.PI/2;m.renderOrder=2;m.visible=false;scene.add(m);return m};
+ const t1=inv75Tick;inv75Tick=function(){t1.apply(this,arguments);try{if(typeof scene==='undefined')return;if(!disk||disk.parent!==scene)disk=mk();const h=G&&G.hero;
+  const on=!!(h&&h.m&&h.m.g&&h.m.g.visible&&screen==='play'&&!G.over&&!G.cdn&&Math.max(h.inv||0,h.dashT||0)>.02&&!(h.cloak>0&&G.mode==='devil'));disk.visible=on;
+  if(on){const s=G.mode==='devil'?3.4:2.4;disk.scale.set(s,s,1);disk.position.set(h.m.g.position.x,.06,h.m.g.position.z)}}catch(e){}}}
