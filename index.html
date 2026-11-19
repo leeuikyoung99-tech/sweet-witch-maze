@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>쿠쿠드: 마녀의 미로</title>
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{--bg:#ffe6f0;--card:#ffffff;--ink:#3b2416;--sub:#7a5a46;--line:#f6cfe0;--accent:#e2557f}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d1512;--card:#2a201b;--ink:#f6e8dc;--sub:#cdb3a1;--line:#4a3a31;--accent:#ff7fa3}}
+:root[data-theme="dark"]{--bg:#1d1512;--card:#2a201b;--ink:#f6e8dc;--sub:#cdb3a1;--line:#4a3a31;--accent:#ff7fa3}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif}
+main{width:100%;max-width:520px;padding:24px 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:28px 22px;text-align:center}
+img{width:96px;height:96px;border-radius:22px}
+h1{font-size:22px;margin:14px 0 4px}
+p{margin:6px 0;color:var(--sub)}
+.go{display:inline-flex;align-items:center;gap:8px;margin:18px 0 6px;padding:12px 22px;border-radius:999px;background:var(--accent);color:#fff;text-decoration:none;font-weight:700}
+.go svg{width:20px;height:20px}
+.links{margin-top:18px;font-size:14px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.links a{color:var(--accent)}
+.en{margin-top:16px;font-size:14px}
+@media (max-height:500px){main{padding:12px 16px}.card{padding:16px 18px}img{width:64px;height:64px}h1{margin:8px 0 2px}.go{margin:10px 0 4px;padding:9px 20px}.en{margin-top:8px}.links{margin-top:10px}}
+</style>
+</head>
+<body>
+<main>
+<div class="card">
+<img src="icon-512.png" alt="">
+<h1>쿠쿠드: 마녀의 미로</h1>
+<p>이제 웹에서는 할 수 없어요. 앱으로 해 주세요.</p>
+<a class="go" href="https://play.google.com/store/apps/details?id=com.cookoodgames.witchmaze"><svg viewBox="0 0 24 24" fill="#fff"><path d="M4 2.5v19l10-9.5z"/><path d="M14 12l3.2-3 3.6 2c.9.5.9 1.5 0 2l-3.6 2z" opacity=".8"/></svg>Google Play</a>
+<p class="en">Cookood: Witch's Maze is now app-only. Please play it on the app.</p>
+<div class="links"><a href="privacy.html">개인정보처리방침 · Privacy</a><a href="terms.html">약관 · Terms</a><a href="delete.html">계정 삭제 · Delete account</a></div>
+</div>
+</main>
+<script>
+if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister()})}).catch(function(){})}
+if(window.caches){caches.keys().then(function(ks){ks.forEach(function(k){if(/^sweet-witch-v/.test(k))caches.delete(k)})}).catch(function(){})}
+</script>
+</body>
+</html>
